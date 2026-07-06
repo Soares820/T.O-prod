@@ -65,6 +65,9 @@
   --sw:260px;--r:16px;--rsm:10px;--rxs:7px;
   --grd:linear-gradient(135deg,#0EA5E9 0%,#8B5CF6 100%);
 }
+.trial-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#D97706,#F59E0B);color:#fff;padding:8px 16px;text-align:center;font-size:13px;font-weight:600;gap:12px;align-items:center;justify-content:center}
+.trial-banner.vis{display:flex}
+.trial-banner a{color:#fff;text-decoration:underline;cursor:pointer;font-weight:700}
 [data-theme="dark"]{
   --bg:#0D1117;--sf:#161B27;--sf2:#1C2335;--sf3:#212840;--bdr:rgba(255,255,255,.08);--bdr2:rgba(255,255,255,.13);
   --t1:#E2E8F8;--t2:#7E8FA8;--t3:#334155;
@@ -3025,7 +3028,7 @@ function nowT(){var d=new Date();return d.getHours().toString().padStart(2,'0')+
 // ══════════════════════════════
 // SUPABASE
 // ══════════════════════════════
-var _sb=supabase.createClient('https://ktnqsskvflqppujovvyi.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0bnFzc2t2ZmxxcHB1am92dnlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MDMzODEsImV4cCI6MjA5ODQ3OTM4MX0.a0vOnSskUNLww1SYPa7uoRpuXa8FmKRapDBRj-JTtFY');
+var _sb=supabase.createClient('https://sceqtztqdmflabdvrzwt.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjZXF0enRxZG1mbGFiZHZyend0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ1MTIsImV4cCI6MjA5ODA1MDUxMn0.6yfv8M5c347FLdJ6Sxvd8813vV-axeeGWNrUtzSErLE');
 function loadSupabaseData(){
   return Promise.all([
     _sb.from('pacientes').select('*').order('id'),
@@ -3058,6 +3061,8 @@ function loadSupabaseData(){
     if(sess.data&&sess.data.length){
       db.sessoes=sess.data.map(function(r){return{id:r.id,childId:r.child_id,funcionarioId:r.funcionario_id,data:r.data,hora:r.hora,tipo:r.tipo,status:r.status,duracaoMin:r.duracao_min,notas:r.notas,pacienteNome:r.paciente_nome};});
     }
+    // Se a clínica está ativa no Supabase mas não tem dados ainda, limpa os mocks
+    if(_clinicId&&(!pac.data||!pac.data.length)){db.children=[];db.evaluations=[];db.contracts=[];db.pagamentos=[];}
   }).catch(function(e){console.warn('Supabase indisponível, usando dados de demonstração',e);});
 }
 
@@ -3085,7 +3090,11 @@ function doLogin(){
   document.getElementById('l-btn-txt').textContent='Entrando…';
   _sb.auth.signInWithPassword({email:email,password:pw}).then(function(res){
     if(res.error){
-      var msg=(res.error.message||'').toLowerCase().indexOf('invalid')>=0?'E-mail ou senha incorretos.':'Erro ao entrar. Tente novamente.';
+      var raw=(res.error.message||'').toLowerCase();
+      var msg=raw.indexOf('invalid')>=0?'E-mail ou senha incorretos.'
+             :raw.indexOf('confirmed')>=0?'E-mail não confirmado. Verifique sua caixa de entrada.'
+             :raw.indexOf('rate')>=0?'Muitas tentativas. Aguarde 1 minuto.'
+             :'Erro: '+res.error.message;
       er.textContent=msg;er.classList.add('vis');
       btn.disabled=false;document.getElementById('l-btn-txt').textContent='Entrar';
       return;
@@ -3167,7 +3176,21 @@ function setupRole(){
   document.getElementById('tb-av').textContent=initiais;
   document.getElementById('pname').textContent=_userName||(isCl?'Equipe Clínica':'Família');
   document.getElementById('prole').textContent=isCl?'Acesso clínica':'Acesso família';
-  chkMob();
+
+  // Trial banner
+  if(_clinicId){
+    _sb.from('clinics').select('trial_ends,plano,status').eq('id',_clinicId).single().then(function(r){
+      if(!r.data)return;
+      var pl=r.data.plano,st=r.data.status,te=r.data.trial_ends;
+      if((pl==='trial'||st==='trial')&&te){
+        var diff=Math.ceil((new Date(te)-new Date())/(1000*60*60*24));
+        var banner=document.getElementById('trial-banner');
+        var daysEl=document.getElementById('trial-days');
+        if(diff>0&&banner){daysEl.textContent=diff;banner.classList.add('vis');document.getElementById('app').style.paddingTop='38px';}
+      }
+    });
+  }
+    chkMob();
   if(isCl){
     renderChildrenTable('');
     var dashFuncSub=document.getElementById('dash-func-sub');
@@ -3191,6 +3214,11 @@ function logout(){
     document.getElementById('l-btn-txt').textContent='Entrar';
     toast('Até logo!','check');
   });
+}
+
+function _auditLog(action,tbl,recId,det){
+  if(!_clinicId||!_currentUser)return;
+  _sb.from('audit_logs').insert({clinic_id:_clinicId,action:action,table_name:tbl,record_id:String(recId||''),details:det||{}}).then(function(r){if(r.error)console.warn('audit',r.error);});
 }
 
 // ══════════════════════════════
@@ -3575,7 +3603,7 @@ function saveChild(){
   var child={id:editingChildId||db.nextChildId++,name:name,dob:dob,sex:document.getElementById('c-sex').value,responsible:document.getElementById('c-resp').value.trim(),diagnosis:document.getElementById('c-diag').value.trim(),notes:document.getElementById('c-notes').value.trim()};
   if(editingChildId){db.children=db.children.map(function(c){return c.id===editingChildId?child:c;});}
   else db.children.push(child);
-  _sb.from('pacientes').upsert({id:child.id,name:child.name,dob:child.dob,sex:child.sex,responsible:child.responsible,diagnosis:child.diagnosis,notes:child.notes}).then(function(r){if(r.error)console.warn('saveChild sb',r.error);});
+  _sb.from('pacientes').upsert({clinic_id:_clinicId,id:child.id,name:child.name,dob:child.dob,sex:child.sex,responsible:child.responsible,diagnosis:child.diagnosis,notes:child.notes,status:child.status||'ativo'}).then(function(r){if(r.error)console.warn('saveChild sb',r.error);});
   document.getElementById('modal-child').classList.remove('open');
   renderChildrenTable(document.getElementById('criancas-search').value);
   toast(editingChildId?'Criança atualizada com sucesso':'Criança cadastrada com sucesso','check');
@@ -3673,7 +3701,7 @@ function saveEval(){
   }
   var newEval={id:db.nextEvalId++,childId:currentChildId,type:selectedEvalType,date:date,scores:scores,notes:document.getElementById('eval-notes').value.trim()};
   db.evaluations.push(newEval);
-  _sb.from('avaliacoes').insert({id:newEval.id,child_id:newEval.childId,type:newEval.type,date:newEval.date,scores:newEval.scores,notes:newEval.notes}).then(function(r){if(r.error)console.warn('saveEval sb',r.error);});
+  _sb.from('avaliacoes').insert({clinic_id:_clinicId,child_id:newEval.childId,type:newEval.type,date:newEval.date,scores:newEval.scores,notes:newEval.notes}).then(function(r){if(r.error)console.warn('saveEval sb',r.error);});
   document.getElementById('modal-eval').classList.remove('open');
   renderEvalList(currentChildId);
   if(selectedEvalType==='PEDI'){var pedi=db.evaluations.filter(function(e){return e.childId===currentChildId&&e.type==='PEDI';}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});if(pedi.length)setTimeout(function(){drawRadar([{l:'Autocuidado',v:pedi[0].scores.autocuidado/100},{l:'Mobilidade',v:pedi[0].scores.mobilidade/100},{l:'F. Social',v:pedi[0].scores.funcaoSocial/100}],'child-radar');},80);}
@@ -4374,7 +4402,7 @@ function saveContrato(){
   if(existing>=0){db.contracts[existing].tipo=tipo;db.contracts[existing].convenio=document.getElementById('ct-convenio').value;db.contracts[existing].valorSessao=valor;db.contracts[existing].sessoesSemanais=sess;db.contracts[existing].duracaoMin=parseInt(document.getElementById('ct-duracao').value)||50;db.contracts[existing].diaVencimento=parseInt(document.getElementById('ct-venc').value)||10;}
   else{db.contracts.push({id:db.nextContractId++,childId:childId,tipo:tipo,convenio:document.getElementById('ct-convenio').value,valorSessao:valor,sessoesSemanais:sess,duracaoMin:parseInt(document.getElementById('ct-duracao').value)||50,diaVencimento:parseInt(document.getElementById('ct-venc').value)||10,status:'ativo'});}
   var ct=existing>=0?db.contracts[existing]:db.contracts[db.contracts.length-1];
-  _sb.from('contratos').upsert({id:ct.id,child_id:ct.childId,tipo:ct.tipo,convenio:ct.convenio||'',valor_sessao:ct.valorSessao,sessoes_semanais:ct.sessoesSemanais,duracao_min:ct.duracaoMin,dia_vencimento:ct.diaVencimento,status:ct.status||'ativo'}).then(function(r){if(r.error)console.warn('saveContrato sb',r.error);});
+  _sb.from('contratos').upsert({clinic_id:_clinicId,child_id:ct.childId,tipo:ct.tipo,convenio:ct.convenio||'',valor_sessao:ct.valorSessao,sessoes_semanais:ct.sessoesSemanais,duracao_min:ct.duracaoMin,dia_vencimento:ct.diaVencimento,status:ct.status||'ativo'}).then(function(r){if(r.error)console.warn('saveContrato sb',r.error);});
   document.getElementById('modal-contrato').classList.remove('open');
   renderFinanceiro();
   var child=db.children.find(function(x){return x.id===childId;})||{name:'Paciente'};
@@ -4572,6 +4600,7 @@ function salvarFuncionario(){
     db.funcionarios.push({id:newId,nome:nome,email:email,cargo:cargo,nivel:nivel,status:status,tel:tel});
     toast('Funcionário cadastrado','check');
   }
+  _sb.from('funcionarios').upsert({clinic_id:_clinicId,id:_mfEditId||newId,nome:nome,email:email,cargo:cargo,nivel:nivel,status:status,telefone:tel}).then(function(r){if(r.error)console.warn('salvarFuncionario sb',r.error);});
   fecharModalFuncionario();
   renderFuncionariosView();
 }
@@ -4579,6 +4608,7 @@ function salvarFuncionario(){
 function excluirFuncionario(id){
   if(!confirm('Excluir este funcionário?'))return;
   db.funcionarios=(db.funcionarios||[]).filter(function(x){return x.id!==id;});
+  _sb.from('funcionarios').delete().eq('id',id).then(function(r){if(r.error)console.warn('excluirFuncionario sb',r.error);});
   renderFuncionariosView();
   toast('Funcionário removido','info');
 }
@@ -5198,10 +5228,11 @@ function salvarSessaoAgendada(){
     createGCalEvent(appt).then(function(ev){
       if(ev&&ev.id){appt.gcalEventId=ev.id;toast('Sessão agendada e sincronizada com Google Calendar!','check');}
       else toast('Sessão salva (Google Calendar não retornou evento)','info');
-      if(_sb){_sb.from('sessoes').insert([{paciente_id:pacId,terapeuta:terapeuta,data_hora:data+'T'+hora+':00',duracao_min:parseInt(duracao),tipo:tipo,email_familia:emailFamilia,observacoes:obs,gcal_event_id:appt.gcalEventId||null}]).then(function(){});}
+      _sb.from('sessoes').insert([{clinic_id:_clinicId,child_id:pacId,paciente_nome:document.getElementById('ag-nome')?document.getElementById('ag-nome').value.trim():null,data:data,hora:hora,tipo:tipo,status:'agendado',duracao_min:parseInt(duracao),notas:obs}]).then(function(r){if(r.error)console.warn('saveSessao sb',r.error);});
     }).catch(function(e){toast('Sessão salva localmente. Erro Google Calendar: '+e.message,'error');});
   } else {
-    toast('Sessão agendada localmente','check');
+    _sb.from('sessoes').insert([{clinic_id:_clinicId,child_id:pacId,paciente_nome:document.getElementById('ag-nome')?document.getElementById('ag-nome').value.trim():null,data:data,hora:hora,tipo:tipo,status:'agendado',duracao_min:parseInt(duracao),notas:obs}]).then(function(r){if(r.error)console.warn('saveSessao sb',r.error);});
+    toast('Sessão agendada com sucesso','check');
   }
   document.getElementById('modal-agendar').classList.remove('open');
   if(document.getElementById('v-agenda')&&document.getElementById('v-agenda').style.display!=='none'){renderAgendaView&&renderAgendaView();}
