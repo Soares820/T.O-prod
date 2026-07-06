@@ -79,6 +79,7 @@
 }
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes blobA{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(80px,60px) scale(1.12)}70%{transform:translate(-50px,90px) scale(.9)}}
 @keyframes blobB{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(-70px,-55px) scale(.88)}70%{transform:translate(60px,-90px) scale(1.1)}}
@@ -3127,6 +3128,70 @@ function nowT(){var d=new Date();return d.getHours().toString().padStart(2,'0')+
 // ══════════════════════════════
 var _stripePk='pk_test_51TqKwL5rqO1GLGXfxLgUlSEZCITUjDAFdvBBPhBGUcsewqSjVohz9B0HsY1oEWSifAoIrjFNxrUHcsiozEXDdd3W00qmC5pTM8';
 
+function mostrarSelecaoPlano(clinicId,email,nome){
+  _clinicId=clinicId;
+  var modal=document.getElementById('modal-planos');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='modal-planos';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)';
+    modal.innerHTML='<div style="background:var(--sf,#fff);border-radius:20px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;padding:32px 24px">'+
+      '<div style="text-align:center;margin-bottom:24px"><div style="font-size:22px;font-weight:900;color:var(--t1,#0D1526)">Escolha seu plano</div>'+
+      '<div style="color:var(--t2,#4B5880);font-size:14px;margin-top:4px">Todos os planos incluem <strong>14 dias grátis</strong> com cartão. Cancele quando quiser.</div></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">'+
+        '<div style="border:2px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center">'+
+          '<div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:6px">Básico</div>'+
+          '<div style="font-size:32px;font-weight:900;color:#2563EB">R$ 197<span style="font-size:13px;font-weight:500;color:#94a3b8">/mês</span></div>'+
+          '<div style="font-size:12px;color:#94a3b8;margin:4px 0 12px">3 usuários · 20 pacientes</div>'+
+          '<div style="font-size:12px;color:#64748b;text-align:left;line-height:1.9;margin-bottom:14px">✓ Agenda completa<br>✓ Financeiro<br>✓ Avaliações PEDI/SPM<br>✓ Suporte e-mail</div>'+
+          '<button onclick="fecharModalPlanos();iniciarCheckoutPos(\'basico\',\''+clinicId+'\',\''+email+'\')" style="width:100%;padding:12px;background:#2563EB;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">Assinar Básico</button>'+
+        '</div>'+
+        '<div style="border:2px solid #2563EB;border-radius:16px;padding:20px;text-align:center;position:relative">'+
+          '<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#2563EB;color:#fff;font-size:11px;font-weight:700;padding:3px 14px;border-radius:20px">MAIS POPULAR</div>'+
+          '<div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:6px">Profissional</div>'+
+          '<div style="font-size:32px;font-weight:900;color:#2563EB">R$ 397<span style="font-size:13px;font-weight:500;color:#94a3b8">/mês</span></div>'+
+          '<div style="font-size:12px;color:#94a3b8;margin:4px 0 12px">10 usuários · 100 pacientes</div>'+
+          '<div style="font-size:12px;color:#64748b;text-align:left;line-height:1.9;margin-bottom:14px">✓ Tudo do Básico<br>✓ Reavix AI inclusa<br>✓ Suporte prioritário<br>✓ Relatórios avançados</div>'+
+          '<button onclick="fecharModalPlanos();iniciarCheckoutPos(\'profissional\',\''+clinicId+'\',\''+email+'\')" style="width:100%;padding:12px;background:#2563EB;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">Assinar Profissional</button>'+
+        '</div>'+
+        '<div style="border:2px solid #e2e8f0;border-radius:16px;padding:20px;text-align:center">'+
+          '<div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:6px">Enterprise</div>'+
+          '<div style="font-size:32px;font-weight:900;color:#0D1526">R$ 797<span style="font-size:13px;font-weight:500;color:#94a3b8">/mês</span></div>'+
+          '<div style="font-size:12px;color:#94a3b8;margin:4px 0 12px">Ilimitado</div>'+
+          '<div style="font-size:12px;color:#64748b;text-align:left;line-height:1.9;margin-bottom:14px">✓ Tudo do Profissional<br>✓ Subdomínio próprio<br>✓ SLA garantido<br>✓ Onboarding dedicado</div>'+
+          '<button onclick="fecharModalPlanos();iniciarCheckoutPos(\'enterprise\',\''+clinicId+'\',\''+email+'\')" style="width:100%;padding:12px;background:#0D1526;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">Assinar Enterprise</button>'+
+        '</div>'+
+      '</div>'+
+      '<div style="margin-top:20px;text-align:center">'+
+        '<button onclick="fecharModalPlanos();entrarSemPagar(\''+nome+'\')" style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;text-decoration:underline">Continuar com trial gratuito por 14 dias (sem cartão)</button>'+
+        '<div style="font-size:11px;color:#cbd5e1;margin-top:6px">Você pode assinar a qualquer momento dentro do sistema</div>'+
+      '</div>'+
+    '</div>';
+    document.body.appendChild(modal);
+  }
+  modal.style.display='flex';
+}
+function fecharModalPlanos(){var m=document.getElementById('modal-planos');if(m)m.style.display='none';}
+function entrarSemPagar(nome){
+  showLoading(function(){
+    loadSupabaseData().then(function(){
+      document.getElementById('app').classList.add('active');
+      document.getElementById('fab').style.display='flex';
+      setupRole();goV('dashboard');
+      setTimeout(function(){toast('Bem-vindo(a), '+(nome||'').split(' ')[0]+'! 14 dias grátis ativados.','check');},500);
+    });
+  });
+}
+function iniciarCheckoutPos(plano,clinicId,email){
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;color:#fff;font-size:15px;font-weight:600';
+  overlay.innerHTML='<div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite"></div>Redirecionando para o pagamento seguro…';
+  document.body.appendChild(overlay);
+  fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plano:plano,clinic_id:clinicId,email:email})})
+    .then(function(r){return r.json();}).then(function(d){if(d.url)window.location.href=d.url;else{document.body.removeChild(overlay);alert('Erro ao abrir checkout: '+(d.error||'tente novamente'));}})
+    .catch(function(){document.body.removeChild(overlay);alert('Erro de conexão. Tente novamente.');});
+}
+
 function iniciarCheckout(plano){
   var btn=event&&event.target;if(btn){btn.disabled=true;btn.textContent='Aguarde…';}
   fetch('/api/checkout',{
@@ -3422,8 +3487,14 @@ function goV(view){
   if(view==='gcal')renderGCalView();
   if(view==='funcionarios')renderFuncionariosView();
   if(view==='reavix')renderReavixView();
+  if(history.pushState)history.pushState({view:view},'','#'+view);
 }
 
+
+window.addEventListener('popstate',function(e){
+  if(e.state&&e.state.view&&document.getElementById('app').classList.contains('active'))goV(e.state.view);
+  else if(!e.state&&location.hash){var v=location.hash.replace('#','');if(v&&document.getElementById('app').classList.contains('active'))goV(v);}
+});
 // ══════════════════════════════
 // SIDEBAR
 // ══════════════════════════════
@@ -4036,16 +4107,7 @@ function doRegister(){
               reg.style.transition='opacity .4s';reg.style.opacity='0';
               setTimeout(function(){
                 reg.classList.remove('active');reg.style.opacity='';reg.style.transition='';
-                toast('Bem-vindo(a), '+name.split(' ')[0]+'! 14 dias grátis ativados.','check');
-                setTimeout(function(){
-                  showLoading(function(){
-                    loadSupabaseData().then(function(){
-                      document.getElementById('app').classList.add('active');
-                      document.getElementById('fab').style.display='flex';
-                      setupRole();goV('dashboard');
-                    });
-                  });
-                },600);
+                mostrarSelecaoPlano(clinicId,email,name);
               },420);
             } else {
               btn.disabled=false;btn.innerHTML=btnOrig;

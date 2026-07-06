@@ -1,4 +1,4 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+﻿const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const PRICES = {
   basico:        'price_1TqKzx5rqO1GLGXfhQgBRbW9',
@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'pix'],
       line_items: [{ price: PRICES[plano], quantity: 1 }],
       success_url: `${process.env.APP_URL || 'https://to-plataforma-oh0pxny3a-soares820s-projects.vercel.app'}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${process.env.APP_URL || 'https://to-plataforma-oh0pxny3a-soares820s-projects.vercel.app'}/?payment=cancelled`,
