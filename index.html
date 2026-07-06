@@ -2342,7 +2342,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <div style="font-size:36px;font-weight:900;color:var(--p)">R$ 197<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
         <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Clínica pequena</div>
         <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 3 usuários<br>✓ 20 pacientes<br>✓ Agenda + Financeiro<br>✓ Suporte por e-mail</div>
-        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="toast('Em breve! Entre em contato: contato@vero.app','info')">Contratar</button>
+        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="iniciarCheckout('basico')">Contratar</button>
       </div>
       <div class="card" style="border:2px solid var(--p);text-align:center;position:relative">
         <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--p);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px">POPULAR</div>
@@ -2350,7 +2350,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <div style="font-size:36px;font-weight:900;color:var(--p)">R$ 397<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
         <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Clínica em crescimento</div>
         <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 10 usuários<br>✓ 100 pacientes<br>✓ Reavix AI inclusa<br>✓ Suporte prioritário<br>✓ Relatórios avançados</div>
-        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="toast('Em breve! Entre em contato: contato@vero.app','info')">Contratar</button>
+        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="iniciarCheckout('profissional')">Contratar</button>
       </div>
       <div class="card" style="border:2px solid var(--bdr);text-align:center">
         <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Enterprise</div>
@@ -3125,6 +3125,20 @@ function nowT(){var d=new Date();return d.getHours().toString().padStart(2,'0')+
 // ══════════════════════════════
 // SUPABASE
 // ══════════════════════════════
+var _stripePk='pk_test_51TqKwL5rqO1GLGXfxLgUlSEZCITUjDAFdvBBPhBGUcsewqSjVohz9B0HsY1oEWSifAoIrjFNxrUHcsiozEXDdd3W00qmC5pTM8';
+
+function iniciarCheckout(plano){
+  var btn=event&&event.target;if(btn){btn.disabled=true;btn.textContent='Aguarde…';}
+  fetch('/api/checkout',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({plano:plano,clinic_id:_clinicId,email:_currentUser?_currentUser.email:null})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.url){window.location.href=d.url;}
+    else{toast('Erro ao iniciar checkout: '+(d.error||'tente novamente'),'err');if(btn){btn.disabled=false;btn.textContent='Contratar';}}
+  }).catch(function(e){toast('Erro de conexão','err');if(btn){btn.disabled=false;btn.textContent='Contratar';}});
+}
+
 var _sb=supabase.createClient('https://sceqtztqdmflabdvrzwt.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjZXF0enRxZG1mbGFiZHZyend0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ1MTIsImV4cCI6MjA5ODA1MDUxMn0.6yfv8M5c347FLdJ6Sxvd8813vV-axeeGWNrUtzSErLE');
 function loadSupabaseData(){
   return Promise.all([
@@ -3237,6 +3251,14 @@ function mostrarRecuperarSenha(){
     toast('Link de recuperação enviado para '+email,'check');
   });
 }
+
+// Handle Stripe payment redirect
+(function(){
+  var p=new URLSearchParams(window.location.search).get('payment');
+  if(p==='success'){setTimeout(function(){toast('Pagamento confirmado! Bem-vindo ao plano escolhido.','check');},1000);}
+  else if(p==='cancelled'){setTimeout(function(){toast('Checkout cancelado. Você pode tentar novamente a qualquer momento.','info');},1000);}
+  if(p){var url=new URL(window.location.href);url.searchParams.delete('payment');url.searchParams.delete('session_id');history.replaceState({},'',url);}
+})();
 
 function _checkSession(){
   _sb.auth.getSession().then(function(res){
