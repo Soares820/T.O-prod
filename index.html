@@ -41,6 +41,7 @@
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Sentry: adicione DSN em Sentry.init após criar projeto em sentry.io -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -1522,7 +1523,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <span style="color:var(--bdr2);font-size:11px">|</span>
         <a href="#" onclick="irParaCadastro();return false;" style="font-size:12px;color:var(--p);font-weight:600;text-decoration:none">Criar conta grátis →</a>
       </div>
-      <div class="l-ftr">© 2025 Software para Terapia ABA — Dados protegidos pela LGPD</div>
+      <div class="l-ftr">© 2026 Software para Terapia ABA · <a href="#" onclick="abrirLegalLogin('termos')" style="color:var(--t3)">Termos de Uso</a> · <a href="#" onclick="abrirLegalLogin('privacidade')" style="color:var(--t3)">Privacidade</a></div>
     </div>
   </div>
 </div>
@@ -2268,6 +2269,102 @@ select.reg-inp option{background:#0F1829;color:#fff}
   </div>
 </div>
 
+
+<!-- ════════════ TERMOS DE USO ════════════ -->
+<div id="v-termos" class="view">
+  <div class="page-body anim" style="max-width:760px;margin:0 auto">
+    <div class="card">
+      <h2 style="font-size:20px;font-weight:800;color:var(--t1);margin-bottom:4px">Termos de Uso</h2>
+      <div class="t3c mb4" style="font-size:12px">Última atualização: 06 de julho de 2026</div>
+      <div style="line-height:1.7;color:var(--t2);font-size:14px">
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">1. Aceitação dos Termos</h3>
+        <p>Ao acessar ou usar o <strong>Software para Terapia ABA (T.O Plataforma)</strong>, você concorda com estes Termos de Uso. Se não concordar, não utilize a plataforma.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">2. Descrição do Serviço</h3>
+        <p>A T.O Plataforma é um sistema SaaS (Software as a Service) de gestão clínica destinado a clínicas e consultórios especializados em Terapia Ocupacional e ABA para atendimento de pessoas com Transtorno do Espectro Autista (TEA).</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">3. Conta e Responsabilidades</h3>
+        <p>Você é responsável pela confidencialidade das suas credenciais de acesso. Cada clínica é responsável pelo uso da plataforma por sua equipe. É proibido compartilhar acesso entre clínicas distintas.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">4. Dados de Saúde e LGPD</h3>
+        <p>Os dados inseridos na plataforma são de titularidade da clínica. Dados de saúde são categoria especial conforme a <strong>Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</strong> e são tratados com nível máximo de proteção.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">5. Planos e Pagamentos</h3>
+        <p>O plano Trial concede 14 dias de acesso gratuito sem cartão de crédito. Após o período trial, a assinatura deve ser contratada para manter o acesso. Não há reembolso de mensalidades pagas.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">6. Limitação de Responsabilidade</h3>
+        <p>A plataforma é uma ferramenta de gestão clínica. Não substitui julgamento clínico profissional. O provedor não se responsabiliza por decisões clínicas tomadas com base nos dados registrados.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">7. Propriedade Intelectual</h3>
+        <p>Todo o software, interface, algoritmos e conteúdo da plataforma são propriedade exclusiva do desenvolvedor. É vedada qualquer cópia, engenharia reversa ou redistribuição.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">8. Contato</h3>
+        <p>Dúvidas: <strong>suporte@vero.app</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ POLÍTICA DE PRIVACIDADE ════════════ -->
+<div id="v-privacidade" class="view">
+  <div class="page-body anim" style="max-width:760px;margin:0 auto">
+    <div class="card">
+      <h2 style="font-size:20px;font-weight:800;color:var(--t1);margin-bottom:4px">Política de Privacidade</h2>
+      <div class="t3c mb4" style="font-size:12px">Última atualização: 06 de julho de 2026 · Conforme LGPD (Lei 13.709/2018)</div>
+      <div style="line-height:1.7;color:var(--t2);font-size:14px">
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">1. Controlador dos Dados</h3>
+        <p>A clínica que contrata a plataforma é a <strong>Controladora</strong> dos dados de seus pacientes. A T.O Plataforma atua como <strong>Operadora</strong>, processando dados exclusivamente conforme instruções da clínica.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">2. Dados Coletados</h3>
+        <p><strong>Dados da clínica:</strong> nome, CNPJ, e-mail, telefone, dados de faturamento.<br><strong>Dados da equipe:</strong> nome, e-mail, cargo, nível de acesso.<br><strong>Dados de pacientes:</strong> nome, data de nascimento, diagnóstico, responsável, avaliações clínicas, sessões, financeiro. Esses são dados de saúde (categoria especial LGPD).</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">3. Finalidade do Tratamento</h3>
+        <p>Os dados são usados exclusivamente para: prestação do serviço contratado, suporte técnico, e cumprimento de obrigações legais. Nunca vendemos ou compartilhamos dados com terceiros para fins comerciais.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">4. Segurança</h3>
+        <p>Utilizamos <strong>Row Level Security (RLS)</strong> no banco de dados, garantindo isolamento total entre clínicas. Dados em trânsito protegidos por TLS/HTTPS. Dados em repouso criptografados pelo Supabase (AES-256).</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">5. Retenção e Exclusão</h3>
+        <p>Dados são retidos enquanto a conta estiver ativa. Após cancelamento, os dados são mantidos por 30 dias e depois excluídos permanentemente. A clínica pode solicitar exclusão antecipada via suporte.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">6. Direitos dos Titulares</h3>
+        <p>Conforme LGPD, titulares têm direito de: acesso, correção, portabilidade, eliminação e revogação do consentimento. Solicitações: <strong>privacidade@vero.app</strong></p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">7. Cookies</h3>
+        <p>Utilizamos apenas cookies essenciais para autenticação e sessão. Não utilizamos cookies de rastreamento ou publicidade.</p>
+        <h3 style="color:var(--t1);font-size:15px;font-weight:700;margin:20px 0 8px">8. Encarregado (DPO)</h3>
+        <p>Para exercício de direitos LGPD: <strong>privacidade@vero.app</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PLANOS & UPGRADE ════════════ -->
+<div id="v-upgrade" class="view">
+  <div class="page-body anim" style="max-width:900px;margin:0 auto">
+    <div class="page-hero"><div class="ph-pre"><span></span>Planos</div><h1 class="ph-title">Escolha o plano ideal</h1><div class="ph-sub">Todos os planos incluem trial de 14 dias sem cartão de crédito</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:8px">
+      <div class="card" style="border:2px solid var(--bdr);text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Trial</div>
+        <div style="font-size:36px;font-weight:900;color:var(--t1)">Grátis</div>
+        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">14 dias · sem cartão</div>
+        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 3 usuários<br>✓ 20 pacientes<br>✓ Todas as funções<br>✓ Suporte por e-mail</div>
+      </div>
+      <div class="card" style="border:2px solid var(--bdr);text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Básico</div>
+        <div style="font-size:36px;font-weight:900;color:var(--p)">R$ 197<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
+        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Clínica pequena</div>
+        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 3 usuários<br>✓ 20 pacientes<br>✓ Agenda + Financeiro<br>✓ Suporte por e-mail</div>
+        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="toast('Em breve! Entre em contato: contato@vero.app','info')">Contratar</button>
+      </div>
+      <div class="card" style="border:2px solid var(--p);text-align:center;position:relative">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--p);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px">POPULAR</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Profissional</div>
+        <div style="font-size:36px;font-weight:900;color:var(--p)">R$ 397<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
+        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Clínica em crescimento</div>
+        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 10 usuários<br>✓ 100 pacientes<br>✓ Reavix AI inclusa<br>✓ Suporte prioritário<br>✓ Relatórios avançados</div>
+        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="toast('Em breve! Entre em contato: contato@vero.app','info')">Contratar</button>
+      </div>
+      <div class="card" style="border:2px solid var(--bdr);text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Enterprise</div>
+        <div style="font-size:36px;font-weight:900;color:var(--t1)">R$ 797<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
+        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Rede de clínicas</div>
+        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ Usuários ilimitados<br>✓ Pacientes ilimitados<br>✓ Subdomínio próprio<br>✓ SLA garantido<br>✓ Onboarding dedicado</div>
+        <button class="btn bw" style="margin-top:16px;width:100%;background:var(--t3);border-color:var(--t3);color:#fff" onclick="toast('Fale conosco: comercial@vero.app','info')">Falar com vendas</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;text-align:center;color:var(--t3);font-size:13px">
+      Dúvidas sobre planos? <strong style="color:var(--p)">contato@vero.app</strong> · Cancelamento a qualquer momento
+    </div>
+  </div>
+</div>
 <!-- ════════════ MODAL: FUNCIONÁRIO ════════════ -->
 <div class="mb" id="modal-funcionario">
   <div class="modal" style="max-width:520px">
@@ -3166,6 +3263,8 @@ function _checkSession(){
 }
 _checkSession();
 
+function abrirLegalLogin(pg){window.open('#'+pg,'_blank');}
+
 function setupRole(){
   var isCl=role==='clinic';
   document.getElementById('nav-f').classList.toggle('hidden',isCl);
@@ -3266,6 +3365,9 @@ var tbMap={
   gcal:['Google Agenda','Sessões sincronizadas com Google Calendar'],
   funcionarios:['Equipe & Funcionários','Cadastro e controle de acesso'],
   reavix:['Reavix AI','Assistente clínica integrada'],
+  termos:['Termos de Uso','Contrato de uso da plataforma'],
+  privacidade:['Política de Privacidade','Proteção de dados e LGPD'],
+  upgrade:['Planos & Preços','Escolha o plano ideal para sua clínica'],
 };
 
 function nav(view,navId,btn){
