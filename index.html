@@ -3247,6 +3247,7 @@ function loadSupabaseData(){
 // ══════════════════════════════
 var role='family',_loginRole='family',dark=false,fabOpen=false,sbCol=false,curNav='nav-f';
 var _currentUser=null,_clinicId=null,_userName=null;
+var _fromPopstate=false;
 
 function selRole(r){
   role=r;_loginRole=r;
@@ -3487,13 +3488,17 @@ function goV(view){
   if(view==='gcal')renderGCalView();
   if(view==='funcionarios')renderFuncionariosView();
   if(view==='reavix')renderReavixView();
-  if(history.pushState)history.pushState({view:view},'','#'+view);
+  if(!_fromPopstate&&history.pushState)history.pushState({view:view},'','#'+view);_fromPopstate=false;
 }
 
 
 window.addEventListener('popstate',function(e){
-  if(e.state&&e.state.view&&document.getElementById('app').classList.contains('active'))goV(e.state.view);
-  else if(!e.state&&location.hash){var v=location.hash.replace('#','');if(v&&document.getElementById('app').classList.contains('active'))goV(v);}
+  var inApp=document.getElementById('app').classList.contains('active');
+  if(!inApp)return;
+  _fromPopstate=true;
+  if(e.state&&e.state.view){goV(e.state.view);}
+  else if(location.hash){var v=location.hash.replace('#','');if(v)goV(v);else _fromPopstate=false;}
+  else{_fromPopstate=false;}
 });
 // ══════════════════════════════
 // SIDEBAR
