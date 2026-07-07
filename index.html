@@ -3009,7 +3009,9 @@ select.reg-inp option{background:#0F1829;color:#fff}
     </div>
     <div class="m-divider"></div>
     <div class="g2 mb3"><div class="fld"><label class="lbl">Nome completo *</label><input class="inp" id="c-name" placeholder="Nome da criança"/></div><div class="fld"><label class="lbl">Data de nascimento *</label><input class="inp" type="date" id="c-dob"/></div></div>
-    <div class="g2 mb3"><div class="fld"><label class="lbl">Sexo</label><select class="inp" id="c-sex"><option value="M">Masculino</option><option value="F">Feminino</option></select></div><div class="fld"><label class="lbl">Nome do responsável</label><input class="inp" id="c-resp" placeholder="Pai, mãe ou responsável"/></div></div>
+    <div class="g2 mb3"><div class="fld"><label class="lbl">Sexo</label><select class="inp" id="c-sex"><option value="M">Masculino</option><option value="F">Feminino</option></select></div><div class="fld"><label class="lbl">Nome do responsável</label><input class="inp" id="c-resp" placeholder="Nome do pai ou mãe"/></div></div>
+    <div class="g2 mb3"><div class="fld"><label class="lbl">E-mail do responsável</label><input class="inp" type="email" id="c-resp-email" placeholder="email@exemplo.com"/></div><div class="fld"><label class="lbl">Relação</label><select class="inp" id="c-resp-rel"><option value="Mãe">Mãe</option><option value="Pai">Pai</option><option value="Responsável">Responsável</option></select></div></div>
+    <div class="mb3" style="background:var(--ps);border:1px solid var(--pb);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--t2)">💡 Informe o e-mail para enviar acesso familiar automaticamente</div>
     <div class="fld mb3"><label class="lbl">Diagnóstico</label><input class="inp" id="c-diag" placeholder="Ex: TEA Nível 1"/></div>
     <div class="fld mb4"><label class="lbl">Observações clínicas</label><textarea class="inp" id="c-notes" placeholder="Informações relevantes sobre o paciente..."></textarea></div>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn bo" onclick="document.getElementById('modal-child').classList.remove('open')">Cancelar</button><button class="btn bp" onclick="saveChild()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Salvar criança</button></div>
@@ -3487,14 +3489,7 @@ var _obSteps=[
   {id:"ver-financeiro",label:"Explorar o financeiro",icon:"💰",view:"financeiro",done:false},
   {id:"ver-bi",label:"Ver o BI Clínico",icon:"📊",view:"clinic-bi",done:false},
 ];
-function initOnboarding(){
-  if(localStorage.getItem("to_onboarding_done"))return;
-  // Check if truly new (no patients yet)
-  if((db.children||[]).length>0){localStorage.setItem("to_onboarding_done","1");return;}
-  renderOnboardingSteps();
-  var modal=document.getElementById("onboarding-modal");
-  if(modal)modal.style.display="flex";
-}
+function initOnboarding(){return;/* popup disabled */}
 function renderOnboardingSteps(){
   var done=JSON.parse(localStorage.getItem("to_ob_progress")||"{}");
   var stepsEl=document.getElementById("onboarding-steps");
@@ -3797,7 +3792,7 @@ function doLogin(){
     _sb.from('users').select('role,clinic_id,nome').eq('auth_id',_currentUser.id).single().then(function(ur){
       if(ur.data){
         var r=ur.data.role;
-        role=(r==='familia')?'family':'clinic';
+        role=(r==='familia')?'family':_loginRole;
         _clinicId=ur.data.clinic_id;
         _userName=ur.data.nome;
       } else {
@@ -4335,6 +4330,17 @@ function saveChild(){
   if(editingChildId){db.children=db.children.map(function(c){return c.id===editingChildId?child:c;});}
   else db.children.push(child);
   _sb.from('pacientes').upsert({clinic_id:_clinicId,id:child.id,name:child.name,dob:child.dob,sex:child.sex,responsible:child.responsible,diagnosis:child.diagnosis,notes:child.notes,status:child.status||'ativo'}).then(function(r){if(r.error)console.warn('saveChild sb',r.error);});
+  var respEmail=(document.getElementById('c-resp-email')||{}).value||'';
+  if(!editingChildId&&respEmail.trim()&&child.responsible&&_clinicId){
+    var respRel=(document.getElementById('c-resp-rel')||{}).value||'Responsável';
+    fetch('/api/invite',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({clinic_id:_clinicId,email:respEmail.trim(),nome:child.responsible,cargo:respRel+' de '+child.name,role:'familia',invited_by:_userName||'Clínica'})
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.ok)toast('Acesso familiar enviado para '+respEmail.trim(),'success');
+      else if((d.error||'').includes('á'))toast('Responsável já possui acesso','info');
+    }).catch(function(){});
+    document.getElementById('c-resp-email').value='';
+  }
   document.getElementById('modal-child').classList.remove('open');
   renderChildrenTable(document.getElementById('criancas-search').value);
   toast(editingChildId?'Criança atualizada com sucesso':'Criança cadastrada com sucesso','check');
