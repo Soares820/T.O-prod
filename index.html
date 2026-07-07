@@ -3795,9 +3795,13 @@ function doLogin(){
     _sb.from('users').select('role,clinic_id,nome').eq('auth_id',_currentUser.id).single().then(function(ur){
       if(ur.data){
         var r=ur.data.role;
-        role=(r==='familia')?'family':'clinic';
         _clinicId=ur.data.clinic_id;
         _userName=ur.data.nome;
+        if(_loginRole==='family'){
+          role='family';
+        } else {
+          role=(r==='familia')?'family':'clinic';
+        }
       } else {
         role=_loginRole;
       }
@@ -3814,13 +3818,10 @@ function _entrarNoApp(){
   setTimeout(function(){
     document.getElementById('login').classList.remove('active');
     document.getElementById('login').style.opacity='1';
-    showLoading(function(){
-      loadSupabaseData().then(function(){
-        document.getElementById('app').classList.add('active');
-        document.getElementById('fab').style.display='flex';
-        setupRole();goV('dashboard');
-        setTimeout(initOnboarding,900);
-      });
+    loadSupabaseData().then(function(){
+      document.getElementById('app').classList.add('active');
+      document.getElementById('fab').style.display='flex';
+      setupRole();goV('dashboard');
     });
   },400);
 }
