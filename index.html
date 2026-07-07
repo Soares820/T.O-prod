@@ -1114,6 +1114,21 @@ select.reg-inp option{background:#0F1829;color:#fff}
 .rv-send:hover{opacity:.85}
 .rv-send:disabled{opacity:.4;cursor:not-allowed}
 .rv-ctx-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--rvs);border-radius:10px;border:1px solid rgba(124,58,237,.15);margin-bottom:14px;font-size:12px;color:var(--rv);font-weight:600}
+
+.tb-search-wrap{position:relative;flex:1;max-width:380px;margin:0 16px}
+.tb-search-box{display:flex;align-items:center;gap:8px;background:var(--sb,rgba(255,255,255,.06));border:1px solid var(--bdr,rgba(255,255,255,.1));border-radius:10px;padding:7px 12px;transition:.2s}
+.tb-search-box:focus-within{border-color:var(--acc,#2563EB);background:var(--sf,rgba(255,255,255,.09))}
+.tb-search-box svg{flex-shrink:0;opacity:.5}
+.tb-search-box input{background:none;border:none;outline:none;color:var(--t1);font-size:13px;width:100%;min-width:0}
+.tb-search-box input::placeholder{color:var(--t3,#6b7280)}
+.tb-search-results{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--sf,#1a2035);border:1px solid var(--bdr);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.35);z-index:9999;max-height:320px;overflow-y:auto}
+.tb-sr-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:.15s}
+.tb-sr-item:hover{background:var(--sb)}
+.tb-sr-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.tb-sr-main{font-size:13px;font-weight:600;color:var(--t1)}
+.tb-sr-sub{font-size:11px;color:var(--t2);margin-top:1px}
+.tb-sr-empty{padding:20px;text-align:center;font-size:13px;color:var(--t2)}
+
 </style>
 </head>
 <body>
@@ -2341,11 +2356,12 @@ select.reg-inp option{background:#0F1829;color:#fff}
           <div style="font-size:13px;color:var(--t2)" id="conta-email">—</div>
         </div>
         <div style="background:var(--sb,rgba(255,255,255,.04));border-radius:12px;padding:16px">
-          <div style="font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Exportar seus dados (LGPD)</div>
+          <div style="font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Exportar e Relatórios</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button onclick="exportarDados('pacientes')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Pacientes CSV</button>
             <button onclick="exportarDados('sessoes')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Sessões CSV</button>
             <button onclick="exportarDados('financeiro')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Financeiro CSV</button>
+            <button onclick="gerarRelatorioClinica()" style="padding:9px 18px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">📄 Relatório PDF Geral</button>
           </div>
         </div>
         <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:16px">
@@ -3251,6 +3267,216 @@ function mostrarSelecaoPlano(clinicId,email,nome){
   }
   modal.style.display='flex';
 }
+
+
+var _obSteps=[
+  {id:"add-paciente",label:"Cadastrar seu primeiro paciente",icon:"👤",view:"criancas",done:false},
+  {id:"add-sessao",label:"Agendar uma sessão",icon:"📅",view:"agenda",done:false},
+  {id:"add-funcionario",label:"Adicionar um funcionário",icon:"👩‍⚕️",view:"funcionarios",done:false},
+  {id:"ver-financeiro",label:"Explorar o financeiro",icon:"💰",view:"financeiro",done:false},
+  {id:"ver-bi",label:"Ver o BI Clínico",icon:"📊",view:"clinic-bi",done:false},
+];
+function initOnboarding(){
+  if(localStorage.getItem("to_onboarding_done"))return;
+  // Check if truly new (no patients yet)
+  if((db.children||[]).length>0){localStorage.setItem("to_onboarding_done","1");return;}
+  renderOnboardingSteps();
+  var modal=document.getElementById("onboarding-modal");
+  if(modal)modal.style.display="flex";
+}
+function renderOnboardingSteps(){
+  var done=JSON.parse(localStorage.getItem("to_ob_progress")||"{}");
+  var stepsEl=document.getElementById("onboarding-steps");
+  if(!stepsEl)return;
+  var allDone=true;
+  stepsEl.innerHTML=_obSteps.map(function(s,i){
+    var isDone=!!done[s.id];
+    if(!isDone)allDone=false;
+    return '<div onclick="obGoStep('+i+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;background:'+(isDone?"rgba(16,185,129,.08)":"var(--sb,rgba(255,255,255,.04))")+';border:1px solid '+(isDone?"rgba(16,185,129,.2)":"var(--bdr,rgba(255,255,255,.08))")+';transition:.2s">'
+      +'<div style="width:28px;height:28px;border-radius:50%;background:'+(isDone?"rgba(16,185,129,.2)":"rgba(255,255,255,.08)")+';display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+(isDone?"✅":s.icon)+"</div>"
+      +'<span style="font-size:13px;font-weight:600;color:var(--t1);'+(isDone?"text-decoration:line-through;opacity:.5":"")+'">'+(i+1)+". "+s.label+"</span>"
+      +'</div>';
+  }).join("");
+  if(allDone){
+    setTimeout(function(){
+      localStorage.setItem("to_onboarding_done","1");
+      var m=document.getElementById("onboarding-modal");
+      if(m)m.style.display="none";
+      toast("Configuração completa! Sua clínica está pronta. 🎉","check");
+    },500);
+  }
+}
+function obGoStep(i){
+  var s=_obSteps[i];
+  var done=JSON.parse(localStorage.getItem("to_ob_progress")||"{}");
+  done[s.id]=true;
+  localStorage.setItem("to_ob_progress",JSON.stringify(done));
+  fecharOnboarding();
+  goV(s.view);
+}
+function fecharOnboarding(){
+  var m=document.getElementById("onboarding-modal");
+  if(m)m.style.display="none";
+}
+function reabrirOnboarding(){
+  renderOnboardingSteps();
+  var m=document.getElementById("onboarding-modal");
+  if(m)m.style.display="flex";
+}
+
+
+function gerarRelatorioPaciente(pacienteId){
+  var p=(db.children||[]).find(function(x){return x.id===pacienteId;});
+  if(!p){toast("Paciente não encontrado","erro");return;}
+  var sessoes=(db.sessoes||[]).filter(function(s){return s.child_id===pacienteId;});
+  var avaliacoes=(db.avaliacoes||[]).filter(function(a){return a.child_id===pacienteId;});
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório - '+p.nome+'</title>'
+    +'<style>body{font-family:Arial,sans-serif;padding:32px;color:#0D1526;max-width:800px;margin:0 auto}'
+    +'h1{font-size:22px;border-bottom:2px solid #2563EB;padding-bottom:8px;margin-bottom:20px}'
+    +'h2{font-size:15px;color:#2563EB;margin:20px 0 8px}'
+    +'.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}'
+    +'.info-row{background:#f8fafc;border-radius:6px;padding:8px 12px;font-size:13px}'
+    +'.info-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}'
+    +'table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}'
+    +'th{background:#f1f5f9;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#64748b}'
+    +'td{padding:8px 10px;border-bottom:1px solid #e2e8f0}'
+    +'.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}'
+    +'@media print{body{padding:16px}}'
+    +'</style></head><body>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">'
+    +'<div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">T.O Plataforma · Relatório Clínico</div>'
+    +'<h1 style="margin:4px 0">'+p.nome+'</h1></div>'
+    +'<div style="font-size:12px;color:#94a3b8">Emitido em '+new Date().toLocaleDateString("pt-BR")+'</div></div>'
+    +'<h2>Dados do Paciente</h2><div class="info-grid">'
+    +'<div class="info-row"><div class="info-label">Data de Nascimento</div>'+( p.nascimento||"—")+'</div>'
+    +'<div class="info-row"><div class="info-label">Diagnóstico</div>'+(p.diagnostico||"—")+'</div>'
+    +'<div class="info-row"><div class="info-label">Responsável</div>'+(p.responsavel||"—")+'</div>'
+    +'<div class="info-row"><div class="info-label">Telefone</div>'+(p.telefone||"—")+'</div>'
+    +'</div>';
+  if(sessoes.length>0){
+    html+='<h2>Sessões ('+sessoes.length+')</h2>'
+    +'<table><thead><tr><th>Data</th><th>Hora</th><th>Tipo</th><th>Status</th><th>Notas</th></tr></thead><tbody>'
+    +sessoes.slice(0,20).map(function(s){
+      return '<tr><td>'+(s.data||"—")+'</td><td>'+(s.hora||"—")+'</td><td>'+(s.tipo||"—")+'</td>'
+        +'<td>'+(s.status||"—")+'</td><td style="max-width:220px">'+(s.notas||"—")+'</td></tr>';
+    }).join("")+'</tbody></table>';
+  }
+  if(avaliacoes.length>0){
+    html+='<h2>Avaliações ('+avaliacoes.length+')</h2>'
+    +'<table><thead><tr><th>Data</th><th>Tipo</th><th>Resultado</th><th>Notas</th></tr></thead><tbody>'
+    +avaliacoes.map(function(a){
+      return '<tr><td>'+(a.data||"—")+'</td><td>'+(a.tipo||"—")+'</td><td>'+(a.resultado||"—")+'</td><td>'+(a.notas||"—")+'</td></tr>';
+    }).join("")+'</tbody></table>';
+  }
+  html+='<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center">T.O Plataforma · Documento gerado automaticamente · '+new Date().toLocaleString("pt-BR")+'</div>'
+    +'</body></html>';
+  var win=window.open("","_blank","width=900,height=700");
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function(){win.print();},400);
+}
+
+function gerarRelatorioClinica(){
+  var pac=db.children||[];
+  var sess=db.sessoes||[];
+  var func=db.funcionarios||[];
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório da Clínica</title>'
+    +'<style>body{font-family:Arial,sans-serif;padding:32px;color:#0D1526;max-width:800px;margin:0 auto}'
+    +'h1{font-size:22px;border-bottom:2px solid #2563EB;padding-bottom:8px}'
+    +'h2{font-size:15px;color:#2563EB;margin:20px 0 8px}'
+    +'.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}'
+    +'.stat{background:#f8fafc;border-radius:8px;padding:16px;text-align:center}'
+    +'.stat-num{font-size:28px;font-weight:900;color:#2563EB}'
+    +'.stat-lbl{font-size:11px;color:#64748b;margin-top:4px}'
+    +'table{width:100%;border-collapse:collapse;font-size:13px}'
+    +'th{background:#f1f5f9;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#64748b}'
+    +'td{padding:8px 10px;border-bottom:1px solid #e2e8f0}'
+    +'@media print{body{padding:16px}}'
+    +'</style></head><body>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">T.O Plataforma</div>'
+    +'<h1 style="margin:4px 0">Relatório Gerencial da Clínica</h1></div>'
+    +'<div style="font-size:12px;color:#94a3b8">'+new Date().toLocaleDateString("pt-BR")+'</div></div>'
+    +'<div class="stat-row">'
+    +'<div class="stat"><div class="stat-num">'+pac.length+'</div><div class="stat-lbl">Pacientes</div></div>'
+    +'<div class="stat"><div class="stat-num">'+sess.length+'</div><div class="stat-lbl">Sessões</div></div>'
+    +'<div class="stat"><div class="stat-num">'+func.length+'</div><div class="stat-lbl">Funcionários</div></div>'
+    +'</div>'
+    +'<h2>Lista de Pacientes</h2>'
+    +'<table><thead><tr><th>Nome</th><th>Diagnóstico</th><th>Responsável</th><th>Sessões</th></tr></thead><tbody>'
+    +pac.map(function(p){
+      var ns=sess.filter(function(s){return s.child_id===p.id;}).length;
+      return '<tr><td>'+p.nome+'</td><td>'+(p.diagnostico||"—")+'</td><td>'+(p.responsavel||"—")+'</td><td>'+ns+'</td></tr>';
+    }).join("")
+    +'</tbody></table>'
+    +'<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center">T.O Plataforma · Gerado em '+new Date().toLocaleString("pt-BR")+'</div>'
+    +'</body></html>';
+  var win=window.open("","_blank","width=900,height=700");
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function(){win.print();},400);
+}
+
+function buscaGlobal(q){
+  var res=document.getElementById("tb-search-results");
+  if(!res)return;
+  q=(q||"").toLowerCase().trim();
+  if(!q){res.style.display="none";return;}
+  var items=[];
+  // Search patients
+  (db.children||[]).forEach(function(p){
+    if((p.nome||"").toLowerCase().includes(q)||(p.diagnostico||"").toLowerCase().includes(q)){
+      items.push({icon:"👤",bg:"rgba(37,99,235,.15)",label:p.nome,sub:(p.diagnostico||"Paciente"),action:function(){goV("criancas");}});
+    }
+  });
+  // Search funcionarios
+  (db.funcionarios||[]).forEach(function(f){
+    if((f.nome||"").toLowerCase().includes(q)||(f.cargo||"").toLowerCase().includes(q)){
+      items.push({icon:"👩‍⚕️",bg:"rgba(16,185,129,.15)",label:f.nome,sub:(f.cargo||"Funcionário"),action:function(){goV("funcionarios");}});
+    }
+  });
+  // Search sessoes
+  (db.sessoes||[]).forEach(function(s){
+    if((s.notas||"").toLowerCase().includes(q)||(s.tipo||"").toLowerCase().includes(q)){
+      items.push({icon:"📋",bg:"rgba(245,158,11,.15)",label:s.tipo||"Sessão",sub:s.data||"",action:function(){goV("sessoes");}});
+    }
+  });
+  if(items.length===0){
+    res.innerHTML='<div class="tb-sr-empty">Nenhum resultado para "'+q+'"</div>';
+  } else {
+    res.innerHTML=items.slice(0,8).map(function(it,i){
+      return '<div class="tb-sr-item" onmousedown="buscaAcao('+i+')">'
+        +'<div class="tb-sr-icon" style="background:'+it.bg+'">'+it.icon+'</div>'
+        +'<div><div class="tb-sr-main">'+it.label+'</div><div class="tb-sr-sub">'+it.sub+'</div></div></div>';
+    }).join("");
+  }
+  res.style.display="block";
+  window._buscaItems=items;
+}
+function buscaAcao(i){
+  if(window._buscaItems&&window._buscaItems[i]){
+    window._buscaItems[i].action();
+    fecharBusca();
+    document.getElementById("tb-search-inp").value="";
+  }
+}
+function mostrarResultadosBusca(){
+  var inp=document.getElementById("tb-search-inp");
+  if(inp&&inp.value.trim())buscaGlobal(inp.value);
+}
+function fecharBusca(){
+  var res=document.getElementById("tb-search-results");
+  if(res)res.style.display="none";
+}
+// Keyboard shortcut Cmd/Ctrl+K
+document.addEventListener("keydown",function(e){
+  if((e.metaKey||e.ctrlKey)&&e.key==="k"){
+    e.preventDefault();
+    var inp=document.getElementById("tb-search-inp");
+    if(inp){inp.focus();inp.select();}
+  }
+});
+
 function fecharModalPlanos(){var m=document.getElementById('modal-planos');if(m)m.style.display='none';}
 function entrarSemPagar(nome){
   showLoading(function(){
@@ -3258,7 +3484,7 @@ function entrarSemPagar(nome){
       document.getElementById('app').classList.add('active');
       document.getElementById('fab').style.display='flex';
       setupRole();goV('dashboard');
-      setTimeout(function(){toast('Bem-vindo(a), '+(nome||'').split(' ')[0]+'! 14 dias grátis ativados.','check');},500);
+      setTimeout(function(){toast('Bem-vindo(a), '+(nome||'').split(' ')[0]+'! 14 dias grátis ativados.','check');initOnboarding();},600);
     });
   });
 }
@@ -3384,6 +3610,7 @@ function _entrarNoApp(){
         document.getElementById('app').classList.add('active');
         document.getElementById('fab').style.display='flex';
         setupRole();goV('dashboard');
+        setTimeout(initOnboarding,900);
       });
     });
   },400);
@@ -3423,6 +3650,7 @@ function _checkSession(){
             document.getElementById('app').classList.add('active');
             document.getElementById('fab').style.display='flex';
             setupRole();goV('dashboard');
+            setTimeout(initOnboarding,900);
           });
         });
       }).catch(function(){/* perfil não encontrado — fica na tela de login */});
@@ -5627,6 +5855,23 @@ chkMob();
   </div>
   <div style="display:flex;gap:10px;flex-shrink:0">
     <button onclick="aceitarCookies()" style="padding:10px 24px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Aceitar e continuar</button>
+  </div>
+</div>
+
+
+<!-- Onboarding Welcome Modal -->
+<div id="onboarding-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99996;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
+  <div style="background:var(--sf,#1a2035);border-radius:20px;max-width:520px;width:100%;padding:32px 28px;position:relative">
+    <button onclick="fecharOnboarding()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;line-height:1">&times;</button>
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:36px;margin-bottom:8px">🎉</div>
+      <h2 style="font-size:20px;font-weight:900;color:var(--t1);margin:0 0 6px">Bem-vindo(a) à T.O Plataforma!</h2>
+      <p style="font-size:13px;color:var(--t2);margin:0">Siga os passos abaixo para configurar sua clínica em menos de 5 minutos.</p>
+    </div>
+    <div id="onboarding-steps" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
+    <div style="background:rgba(37,99,235,.08);border-radius:12px;padding:12px 16px;font-size:12px;color:var(--t2);text-align:center">
+      💡 Você tem <strong style="color:var(--acc,#2563EB)" id="ob-trial-days">14 dias grátis</strong> para explorar tudo sem cartão.
+    </div>
   </div>
 </div>
 

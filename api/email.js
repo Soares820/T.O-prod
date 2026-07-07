@@ -1,4 +1,5 @@
-module.exports = async (req, res) => {
+﻿const { withRateLimit } = require('./_middleware');
+const _handler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -96,3 +97,4 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+module.exports = withRateLimit(_handler, { max: 5, windowMs: 60000 });

@@ -1,4 +1,5 @@
 ﻿const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { withRateLimit } = require('./_middleware');
 
 const PRICES = {
   basico:        'price_1TqKzx5rqO1GLGXfhQgBRbW9',
@@ -6,7 +7,7 @@ const PRICES = {
   enterprise:    'price_1TqKzy5rqO1GLGXfazg0wfYa',
 };
 
-module.exports = async (req, res) => {
+const _handler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -42,3 +43,5 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+module.exports = withRateLimit(_handler, { max: 10, windowMs: 60000 });
