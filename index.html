@@ -3370,8 +3370,8 @@ function enviarConvite(){
 }
 
 function calcularMRR(){
-  var contratos=(db.contratos||db.contracts||[]).filter(function(c){return c.status==="ativo";});
-  return contratos.reduce(function(s,c){return s+(c.valor||0);},0);
+  var contratos=(db.contracts||[]).filter(function(c){return c.status==="ativo";});
+  return contratos.reduce(function(s,c){var v=c.valorSessao||c.valor_sessao||c.valor||0;var w=c.sessoesSemanais||c.sessoes_semanais||1;return s+(v*w*4);},0);
 }
 function renderFinanceiroDashboard(){
   var mrr=calcularMRR();
@@ -4201,7 +4201,8 @@ function saveAtividade(){
   if(!name){toast('Informe o nome da atividade','error');return;}
   var cat=document.getElementById('ativ-cat').value;
   var desc=(document.getElementById('ativ-desc').value||'').trim();
-  db.activities.push({id:db.nextAtivId++,name:name,category:cat,desc:desc,preset:false});
+  var _ativ={id:db.nextAtivId++,name:name,category:cat,desc:desc,preset:false};db.activities.push(_ativ);
+  if(_clinicId){_sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'ATIVIDADE',tabela:'atividades',detalhes:JSON.stringify({nome:name,categoria:cat,descricao:desc})}]).then(function(r){if(r.error)console.warn('ativ sb',r.error);});}
   document.getElementById('modal-ativ').classList.remove('open');
   renderAtividades();
   toast('"'+name+'" cadastrada com sucesso!','check');
@@ -4524,7 +4525,7 @@ function setSev(n){
     document.getElementById('si'+i).classList.toggle('hidden',i!==n);
   });
 }
-function submitCrisis(){var txt=document.getElementById('cr-txt').value.trim();if(!txt){toast('Descreva o que aconteceu antes de enviar','error');return;}document.getElementById('cr-ok').classList.remove('hidden');if(curSev===3)toast('Grau 3 — ligue 192 (SAMU) imediatamente!','error');else toast('Registro enviado à equipe','check');document.getElementById('cr-txt').value='';document.querySelector('.page-scroll').scrollTop=0;}
+function submitCrisis(){var txt=document.getElementById('cr-txt').value.trim();if(!txt){toast('Descreva o que aconteceu antes de enviar','error');return;}var child=(db.children||[]).find(function(c){return c.id===currentChildId;})||{name:'Paciente'};if(_clinicId){_sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'CRISE',tabela:'pacientes',record_id:currentChildId||null,detalhes:JSON.stringify({paciente:child.name,descricao:txt,severidade:curSev,timestamp:new Date().toISOString()})}]).then(function(r){if(r.error)console.warn('crisis sb',r.error);});}document.getElementById('cr-ok').classList.remove('hidden');if(curSev===3)toast('Grau 3 — ligue 192 (SAMU) imediatamente!','error');else toast('Registro enviado à equipe','check');document.getElementById('cr-txt').value='';document.querySelector('.page-scroll').scrollTop=0;}
 
 var aiR=['Obrigada pelo contato! Verificarei com a Dra. Ana.','Entendido, anotamos aqui. Ela responderá até o fim do dia.','Perfeito! Vamos abordar isso na sessão de hoje.','Informação registrada. A equipe está acompanhando.','Ótimo! Continue anotando esses progressos — são muito importantes.'];
 var aiI=0;
@@ -4753,13 +4754,8 @@ var esperaList=[];
 var esperaNextId=1;
 var esperaColors=['#2563EB','#059669','#7C3AED','#EA580C','#D97706','#DC2626'];
 
-function addToEspera(){
-  var name=prompt('Nome do paciente:');
-  if(!name||!name.trim())return;
-  var terapeuta=prompt('Terapeuta responsável:')||'Não informado';
-  esperaList.push({id:esperaNextId++,name:name.trim(),terapeuta:terapeuta,status:'aguardando',arrivalTime:Date.now(),color:esperaColors[Math.floor(Math.random()*esperaColors.length)]});
-  renderEspera();
-}
+function addToEspera(){var sel=document.getElementById('esp-ter-sel');if(sel){sel.innerHTML='<option value="">Selecione...</option>';(db.funcionarios||[]).forEach(function(f){var o=document.createElement('option');o.value=f.nome;o.textContent=f.nome;sel.appendChild(o);});}if(document.getElementById('esp-nome-inp'))document.getElementById('esp-nome-inp').value='';var m=document.getElementById('modal-espera-checkin');if(m)m.style.display='flex';}
+function confirmarCheckin(){var name=(document.getElementById('esp-nome-inp').value||'').trim();if(!name){toast('Informe o nome do paciente','error');return;}var terapeuta=document.getElementById('esp-ter-sel').value||'Não informado';esperaList.push({id:esperaNextId++,name:name,terapeuta:terapeuta,status:'aguardando',arrivalTime:Date.now(),color:esperaColors[Math.floor(Math.random()*esperaColors.length)]});if(_clinicId){_sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'CHECKIN_ESPERA',tabela:'espera',detalhes:JSON.stringify({paciente:name,terapeuta:terapeuta,hora:new Date().toLocaleTimeString('pt-BR')})}]).then(function(r){if(r.error)console.warn('espera sb',r.error);});}var m=document.getElementById('modal-espera-checkin');if(m)m.style.display='none';renderEspera();toast(name+' adicionado à sala de espera','check');}
 
 function esperaAction(id,action){
   var item=esperaList.find(function(e){return e.id===id;});
@@ -4803,6 +4799,7 @@ function saveGoal(){
   if(!desc){toast('Descreva a meta','error');return;}
   var goal={id:db.nextGoalId++,childId:currentChildId,desc:desc,area:document.getElementById('goal-area').value,status:document.getElementById('goal-status').value,criteria:(document.getElementById('goal-criteria').value||'').trim(),date:Date.now()};
   db.goals.push(goal);
+  if(_clinicId){_sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'META_PEI',tabela:'metas',record_id:goal.childId||null,detalhes:JSON.stringify({descricao:goal.desc,area:goal.area,status:goal.status,criterio:goal.criteria})}]).then(function(r){if(r.error)console.warn('goal sb',r.error);});}
   document.getElementById('modal-goal').classList.remove('open');
   renderPEI();
   toast('Meta adicionada ao PEI','check');
@@ -5173,7 +5170,7 @@ function saveContrato(){
   if(existing>=0){db.contracts[existing].tipo=tipo;db.contracts[existing].convenio=document.getElementById('ct-convenio').value;db.contracts[existing].valorSessao=valor;db.contracts[existing].sessoesSemanais=sess;db.contracts[existing].duracaoMin=parseInt(document.getElementById('ct-duracao').value)||50;db.contracts[existing].diaVencimento=parseInt(document.getElementById('ct-venc').value)||10;}
   else{db.contracts.push({id:db.nextContractId++,childId:childId,tipo:tipo,convenio:document.getElementById('ct-convenio').value,valorSessao:valor,sessoesSemanais:sess,duracaoMin:parseInt(document.getElementById('ct-duracao').value)||50,diaVencimento:parseInt(document.getElementById('ct-venc').value)||10,status:'ativo'});}
   var ct=existing>=0?db.contracts[existing]:db.contracts[db.contracts.length-1];
-  _sb.from('contratos').upsert({clinic_id:_clinicId,child_id:ct.childId,tipo:ct.tipo,convenio:ct.convenio||'',valor_sessao:ct.valorSessao,sessoes_semanais:ct.sessoesSemanais,duracao_min:ct.duracaoMin,dia_vencimento:ct.diaVencimento,status:ct.status||'ativo'}).then(function(r){if(r.error)console.warn('saveContrato sb',r.error);});
+  var _ctPayload={clinic_id:_clinicId,child_id:ct.childId,tipo:ct.tipo,convenio:ct.convenio||'',valor_sessao:ct.valorSessao,sessoes_semanais:ct.sessoesSemanais,duracao_min:ct.duracaoMin,dia_vencimento:ct.diaVencimento,status:ct.status||'ativo'};if(existing>=0&&ct.id){_sb.from('contratos').update(_ctPayload).eq('id',ct.id).then(function(r){if(r.error)console.warn('updateContrato sb',r.error);});}else{_sb.from('contratos').insert([_ctPayload]).select().then(function(r){if(r.error)console.warn('insertContrato sb',r.error);else if(r.data&&r.data[0])ct.id=r.data[0].id;});}
   document.getElementById('modal-contrato').classList.remove('open');
   renderFinanceiro();
   var child=db.children.find(function(x){return x.id===childId;})||{name:'Paciente'};
@@ -5246,6 +5243,7 @@ function saveDTT(){
   var tot=dttTrials.length;
   var pct=Math.round(ac/tot*100);
   dttRegistros.push({id:Date.now(),programa:prog,target:target,sd:document.getElementById('dtt-sd').value,criterio:document.getElementById('dtt-criterio').value,dica:document.getElementById('dtt-dica').value,trials:dttTrials.slice(),ac:ac,tot:tot,pct:pct,date:Date.now()});
+  if(_clinicId){_sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'DTT',tabela:'dtt',detalhes:JSON.stringify({programa:prog,target:target,acertos:ac,total:tot,percentual:pct,data:new Date().toISOString()})}]).then(function(r){if(r.error)console.warn('dtt sb',r.error);});}
   document.getElementById('modal-dtt').classList.remove('open');
   dttTrials=[];
   toast('DTT salvo — '+prog+' / '+target+': '+pct+'% ('+ac+'/'+tot+')','check');
@@ -5785,12 +5783,7 @@ function createGCalEvent(appt){
 var _agCurDate=new Date();
 var _agSelDate=new Date();
 
-var _agDemoSessoes=[
-  {id:'d1',pacienteNome:'Lucas M.',terapeuta:'Dra. Ana',data:_todayStr(),hora:'08:00',duracao:45,tipo:'individual',status:'concluido'},
-  {id:'d2',pacienteNome:'Sofia K.',terapeuta:'Dr. Pedro',data:_todayStr(),hora:'09:30',duracao:45,tipo:'individual',status:'concluido'},
-  {id:'d3',pacienteNome:'Família Silva',terapeuta:'Dra. Ana',data:_todayStr(),hora:'16:00',duracao:45,tipo:'familiar',status:'agendado'},
-  {id:'d4',pacienteNome:'Reavaliação de risco',terapeuta:'3 profissionais',data:_todayStr(),hora:'17:00',duracao:60,tipo:'grupo',status:'agendado'},
-];
+var _agDemoSessoes=[];
 
 function _todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function _dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -5999,10 +5992,10 @@ function salvarSessaoAgendada(){
     createGCalEvent(appt).then(function(ev){
       if(ev&&ev.id){appt.gcalEventId=ev.id;toast('Sessão agendada e sincronizada com Google Calendar!','check');}
       else toast('Sessão salva (Google Calendar não retornou evento)','info');
-      _sb.from('sessoes').insert([{clinic_id:_clinicId,child_id:pacId,paciente_nome:document.getElementById('ag-nome')?document.getElementById('ag-nome').value.trim():null,data:data,hora:hora,tipo:tipo,status:'agendado',duracao_min:parseInt(duracao),notas:obs}]).then(function(r){if(r.error)console.warn('saveSessao sb',r.error);});
+      _sb.from('sessoes').insert([{clinic_id:_clinicId,child_id:pacId,paciente_nome:pac?pac.name||pac.nome:'Paciente',data:data,hora:hora,tipo:tipo,status:'agendado',duracao_min:parseInt(duracao),notas:obs}]).then(function(r){if(r.error)console.warn('saveSessao sb',r.error);});
     }).catch(function(e){toast('Sessão salva localmente. Erro Google Calendar: '+e.message,'error');});
   } else {
-    _sb.from('sessoes').insert([{clinic_id:_clinicId,child_id:pacId,paciente_nome:document.getElementById('ag-nome')?document.getElementById('ag-nome').value.trim():null,data:data,hora:hora,tipo:tipo,status:'agendado',duracao_min:parseInt(duracao),notas:obs}]).then(function(r){if(r.error)console.warn('saveSessao sb',r.error);});
+    _sb.from('sessoes').insert([{clinic_id:_clinicId,child_id:pacId,paciente_nome:pac?pac.name||pac.nome:'Paciente',data:data,hora:hora,tipo:tipo,status:'agendado',duracao_min:parseInt(duracao),notas:obs}]).then(function(r){if(r.error)console.warn('saveSessao sb',r.error);});
     toast('Sessão agendada com sucesso','check');
   }
   document.getElementById('modal-agendar').classList.remove('open');
@@ -6105,5 +6098,19 @@ chkMob();
   </div>
 </div>
 
+
+<div id="modal-espera-checkin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center">
+  <div class="card" style="min-width:320px;max-width:440px;width:90%;border-radius:16px">
+    <div class="card-header" style="padding:18px 20px"><h3 style="margin:0;font-size:16px">Check-in — Sala de Espera</h3></div>
+    <div style="padding:20px">
+      <div class="fld mb3"><label class="lbl">Nome do paciente</label><input class="inp" id="esp-nome-inp" placeholder="Nome completo" style="width:100%"/></div>
+      <div class="fld mb4"><label class="lbl">Terapeuta responsável</label><select class="inp" id="esp-ter-sel" style="width:100%"><option value="">Selecione...</option></select></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn" onclick="document.getElementById('modal-espera-checkin').style.display='none'">Cancelar</button>
+        <button class="btn bp" onclick="confirmarCheckin()">Confirmar Check-in</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
