@@ -1536,13 +1536,13 @@ select.reg-inp option{background:#0F1829;color:#fff}
       <div class="l-field"><label class="l-lbl">Senha</label><div class="reg-pass-wrap"><input id="l-pw" class="l-inp reg-inp" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px"/><button class="reg-pass-toggle" onclick="togglePw('l-pw',this)" type="button" tabindex="-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       <div class="l-role-lbl" style="margin-bottom:10px">Tipo de acesso</div>
       <div class="l-roles">
-        <button class="l-role active" id="role-f" onclick="selRole('family')">
+        <button class="l-role" id="role-f" onclick="selRole('family')">
           <div class="l-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
           <div class="l-rico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#60A5FA"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
           <div class="l-rlbl">Família</div>
           <div class="l-rsub">Pai, mãe, responsável</div>
         </button>
-        <button class="l-role" id="role-c" onclick="selRole('clinic')">
+        <button class="l-role active" id="role-c" onclick="selRole('clinic')">
           <div class="l-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
           <div class="l-rico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:#60A5FA"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></svg></div>
           <div class="l-rlbl">Clínica</div>
@@ -3010,8 +3010,11 @@ select.reg-inp option{background:#0F1829;color:#fff}
     <div class="m-divider"></div>
     <div class="g2 mb3"><div class="fld"><label class="lbl">Nome completo *</label><input class="inp" id="c-name" placeholder="Nome da criança"/></div><div class="fld"><label class="lbl">Data de nascimento *</label><input class="inp" type="date" id="c-dob"/></div></div>
     <div class="g2 mb3"><div class="fld"><label class="lbl">Sexo</label><select class="inp" id="c-sex"><option value="M">Masculino</option><option value="F">Feminino</option></select></div><div class="fld"><label class="lbl">Nome do responsável</label><input class="inp" id="c-resp" placeholder="Nome do pai ou mãe"/></div></div>
-    <div class="g2 mb3"><div class="fld"><label class="lbl">E-mail do responsável</label><input class="inp" type="email" id="c-resp-email" placeholder="email@exemplo.com"/></div><div class="fld"><label class="lbl">Relação</label><select class="inp" id="c-resp-rel"><option value="Mãe">Mãe</option><option value="Pai">Pai</option><option value="Responsável">Responsável</option></select></div></div>
-    <div class="mb3" style="background:var(--ps);border:1px solid var(--pb);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--t2)">💡 Informe o e-mail para enviar acesso familiar automaticamente</div>
+    <div style="background:var(--ps);border:1px solid var(--pb);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Acesso Familiar — enviar convite por e-mail</div>
+      <div class="g2 mb2"><div class="fld"><label class="lbl">E-mail da Mãe</label><input class="inp" type="email" id="c-mae-email" placeholder="mae@email.com"/></div><div class="fld"><label class="lbl">Nome da Mãe</label><input class="inp" id="c-mae-nome" placeholder="Nome completo"/></div></div>
+      <div class="g2"><div class="fld"><label class="lbl">E-mail do Pai</label><input class="inp" type="email" id="c-pai-email" placeholder="pai@email.com"/></div><div class="fld"><label class="lbl">Nome do Pai</label><input class="inp" id="c-pai-nome" placeholder="Nome completo"/></div></div>
+    </div>
     <div class="fld mb3"><label class="lbl">Diagnóstico</label><input class="inp" id="c-diag" placeholder="Ex: TEA Nível 1"/></div>
     <div class="fld mb4"><label class="lbl">Observações clínicas</label><textarea class="inp" id="c-notes" placeholder="Informações relevantes sobre o paciente..."></textarea></div>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn bo" onclick="document.getElementById('modal-child').classList.remove('open')">Cancelar</button><button class="btn bp" onclick="saveChild()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Salvar criança</button></div>
@@ -3757,7 +3760,7 @@ function loadSupabaseData(){
 // ══════════════════════════════
 // AUTH
 // ══════════════════════════════
-var role='family',_loginRole='family',dark=false,fabOpen=false,sbCol=false,curNav='nav-f';
+var role='clinic',_loginRole='clinic',dark=false,fabOpen=false,sbCol=false,curNav='nav-f';
 var _currentUser=null,_clinicId=null,_userName=null;
 var _fromPopstate=false;
 
@@ -3792,7 +3795,7 @@ function doLogin(){
     _sb.from('users').select('role,clinic_id,nome').eq('auth_id',_currentUser.id).single().then(function(ur){
       if(ur.data){
         var r=ur.data.role;
-        role=(r==='familia')?'family':_loginRole;
+        role=(r==='familia')?'family':'clinic';
         _clinicId=ur.data.clinic_id;
         _userName=ur.data.nome;
       } else {
@@ -3850,14 +3853,12 @@ function _checkSession(){
           _clinicId=ur.data.clinic_id;
           _userName=ur.data.nome;
         }
-        showLoading(function(){
-          loadSupabaseData().then(function(){
-            document.getElementById('login').classList.remove('active');
-            document.getElementById('app').classList.add('active');
-            document.getElementById('fab').style.display='flex';
-            setupRole();goV('dashboard');
-            setTimeout(initOnboarding,900);
-          });
+        loadSupabaseData().then(function(){
+          document.getElementById('landing').classList.remove('active');
+          document.getElementById('login').classList.remove('active');
+          document.getElementById('app').classList.add('active');
+          document.getElementById('fab').style.display='flex';
+          setupRole();goV('dashboard');
         });
       }).catch(function(){/* perfil não encontrado — fica na tela de login */});
     }
@@ -4308,7 +4309,7 @@ var editingChildId=null;
 function openAddChild(){
   editingChildId=null;
   document.getElementById('child-modal-title').textContent='Nova Criança';
-  ['c-name','c-resp','c-diag','c-notes'].forEach(function(id){document.getElementById(id).value='';});
+  ['c-name','c-resp','c-diag','c-notes','c-mae-email','c-mae-nome','c-pai-email','c-pai-nome'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('c-dob').value='';
   document.getElementById('c-sex').value='M';
   document.getElementById('modal-child').classList.add('open');
@@ -4330,23 +4331,27 @@ function saveChild(){
   if(editingChildId){db.children=db.children.map(function(c){return c.id===editingChildId?child:c;});}
   else db.children.push(child);
   _sb.from('pacientes').upsert({clinic_id:_clinicId,id:child.id,name:child.name,dob:child.dob,sex:child.sex,responsible:child.responsible,diagnosis:child.diagnosis,notes:child.notes,status:child.status||'ativo'}).then(function(r){if(r.error)console.warn('saveChild sb',r.error);});
-  var respEmail=(document.getElementById('c-resp-email')||{}).value||'';
-  if(!editingChildId&&respEmail.trim()&&child.responsible&&_clinicId){
-    var respRel=(document.getElementById('c-resp-rel')||{}).value||'Responsável';
+  function enviarConviteFamilia(emailEl,nomeEl,cargo){
+    var email=(document.getElementById(emailEl)||{}).value||'';
+    var nome=(document.getElementById(nomeEl)||{}).value||'';
+    if(!email.trim()||!nome.trim()) return;
     fetch('/api/invite',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({clinic_id:_clinicId,email:respEmail.trim(),nome:child.responsible,cargo:respRel+' de '+child.name,role:'familia',invited_by:_userName||'Clínica'})
+      body:JSON.stringify({clinic_id:_clinicId,email:email.trim(),nome:nome.trim(),cargo:cargo+' de '+child.name,role:'familia',invited_by:_userName||'Clínica'})
     }).then(function(r){return r.json();}).then(function(d){
-      if(d.ok)toast('Acesso familiar enviado para '+respEmail.trim(),'success');
-      else if((d.error||'').includes('á'))toast('Responsável já possui acesso','info');
+      if(d.ok)toast('Convite enviado para '+email.trim(),'success');
+      else if((d.error||'').includes('já'))toast(nome.trim()+' já possui acesso','info');
     }).catch(function(){});
-    document.getElementById('c-resp-email').value='';
+  }
+  if(!editingChildId&&_clinicId){
+    enviarConviteFamilia('c-mae-email','c-mae-nome','Mãe');
+    enviarConviteFamilia('c-pai-email','c-pai-nome','Pai');
   }
   document.getElementById('modal-child').classList.remove('open');
   renderChildrenTable(document.getElementById('criancas-search').value);
   toast(editingChildId?'Criança atualizada com sucesso':'Criança cadastrada com sucesso','check');
 }
 function deleteChild(id){
-  if(!confirm('Remover esta criança e todas as avaliações?'))return;
+  if(!window.confirm('Remover esta criança e todas as avaliações?')){toast('Exclusão cancelada','info');return;}
   db.children=db.children.filter(function(c){return c.id!==id;});
   db.evaluations=db.evaluations.filter(function(e){return e.childId!==id;});
   _sb.from('pacientes').delete().eq('id',id).then(function(r){if(r.error)console.warn('deleteChild sb',r.error);});
