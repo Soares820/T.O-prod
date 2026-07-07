@@ -1804,9 +1804,9 @@ select.reg-inp option{background:#0F1829;color:#fff}
     <div class="dash-content">
       <div class="dash-top">
         <div class="dash-greet">
-          <div class="dash-greet-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>6 profissionais online</div>
-          <h1 class="dash-greet-h">Olá, Dra. Ana! 👋</h1>
-          <p class="dash-greet-sub">Central de atendimento ativa. <strong>42 sessões hoje</strong> · <strong>5 crises</strong> em monitoramento.</p>
+          <div class="dash-greet-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span id="dash-prof-online">—</span> profissionais</div>
+          <h1 class="dash-greet-h" id="dash-greet-name">Olá! 👋</h1>
+          <p class="dash-greet-sub">Central de atendimento ativa. <strong id="dash-sess-hoje">—</strong> · <strong id="dash-crises-ativas">monitoramento ativo</strong>.</p>
         </div>
         <div class="dash-date-chip">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -3879,6 +3879,16 @@ function setupRole(){
   if(pr)pr.textContent=role==='clinic'?'Administrador da Clínica':'Acesso Família';
   if(pa&&_userName)pa.textContent=_userName.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
   if(av&&_userName)av.textContent=_userName.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  // Dashboard: populate with real data
+  var gn=document.getElementById('dash-greet-name');
+  if(gn)gn.innerHTML='Olá, '+(_userName?_userName.split(' ')[0]:'')+'! 👋';
+  var _today=new Date().toISOString().slice(0,10);
+  var _sesHoje=(db.sessoes||[]).filter(function(s){return(s.data||'').slice(0,10)===_today;}).length;
+  var _shEl=document.getElementById('dash-sess-hoje');
+  if(_shEl)_shEl.textContent=_sesHoje+(_sesHoje===1?' sessão hoje':' sessões hoje');
+  var _profCount=(db.funcionarios||[]).filter(function(f){return f.status!=='inativo';}).length||0;
+  var _poEl=document.getElementById('dash-prof-online');
+  if(_poEl)_poEl.textContent=_profCount;
 
   var isCl=role==='clinic';
   document.getElementById('nav-f').classList.toggle('hidden',isCl);
