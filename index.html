@@ -1643,7 +1643,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
       </div>
     </div>
 
-    <div class="sb-profile" onclick="toast('Perfil em breve','info')">
+    <div class="sb-profile" onclick="goV('conta')" style="cursor:pointer" title="Minha Conta">
       <div class="p-av-wrap">
         <div class="p-av" id="pav">F</div>
         <div class="p-online"></div>
@@ -1695,7 +1695,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
         <button class="tb-btn bpill hide-mob" onclick="logout()">Sair</button>
-        <div class="tb-avatar hide-mob" id="tb-av" onclick="logout()">F</div>
+        <div class="tb-avatar hide-mob" id="tb-av" onclick="goV('conta')">F</div>
       </div>
     </div>
 
@@ -2329,6 +2329,39 @@ select.reg-inp option{background:#0F1829;color:#fff}
 </div>
 
 <!-- ════════════ PLANOS & UPGRADE ════════════ -->
+<div id="v-conta" class="view">
+  <div class="page-body anim" style="max-width:680px;margin:0 auto">
+    <div class="card" style="margin-bottom:16px">
+      <h2 style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px">Minha Conta</h2>
+      <p style="font-size:13px;color:var(--t2);margin-bottom:20px">Gerencie suas informações e preferências</p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="background:var(--sb,rgba(255,255,255,.04));border-radius:12px;padding:16px">
+          <div style="font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Informações</div>
+          <div style="font-size:14px;color:var(--t1)" id="conta-nome">—</div>
+          <div style="font-size:13px;color:var(--t2)" id="conta-email">—</div>
+        </div>
+        <div style="background:var(--sb,rgba(255,255,255,.04));border-radius:12px;padding:16px">
+          <div style="font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Exportar seus dados (LGPD)</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onclick="exportarDados('pacientes')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Pacientes CSV</button>
+            <button onclick="exportarDados('sessoes')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Sessões CSV</button>
+            <button onclick="exportarDados('financeiro')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Financeiro CSV</button>
+          </div>
+        </div>
+        <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:16px">
+          <div style="font-size:12px;color:#ef4444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Zona de Perigo</div>
+          <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Solicitar exclusão permanente da conta e todos os dados clínicos. Esta ação é irreversível e será processada em até 30 dias conforme LGPD Art. 18.</p>
+          <button onclick="solicitarExclusaoConta()" style="padding:10px 20px;background:#ef4444;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">Excluir minha conta e dados</button>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--t2);text-align:center;line-height:1.8">
+      <a onclick="goV('termos')" style="cursor:pointer;color:var(--acc,#2563EB)">Termos de Uso</a> · 
+      <a onclick="goV('privacidade')" style="cursor:pointer;color:var(--acc,#2563EB)">Política de Privacidade</a> · 
+      <a onclick="logout()" style="cursor:pointer;color:var(--t2)">Sair da conta</a>
+    </div>
+  </div>
+</div>
 <div id="v-upgrade" class="view">
   <div class="page-body anim" style="max-width:900px;margin:0 auto">
     <div class="page-hero"><div class="ph-pre"><span></span>Planos</div><h1 class="ph-title">Escolha o plano ideal</h1><div class="ph-sub">Todos os planos incluem trial de 14 dias sem cartão de crédito</div></div>
@@ -3129,6 +3162,52 @@ function nowT(){var d=new Date();return d.getHours().toString().padStart(2,'0')+
 // ══════════════════════════════
 var _stripePk='pk_test_51TqKwL5rqO1GLGXfxLgUlSEZCITUjDAFdvBBPhBGUcsewqSjVohz9B0HsY1oEWSifAoIrjFNxrUHcsiozEXDdd3W00qmC5pTM8';
 
+
+function renderContaView(){
+  var n=document.getElementById('conta-nome');
+  var e=document.getElementById('conta-email');
+  if(n)n.textContent=_userName||'—';
+  if(e)e.textContent=_currentUser&&_currentUser.email||'—';
+  // Update avatar initials
+  var av=document.getElementById('tb-av');
+  if(av&&_userName)av.textContent=_userName.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+}
+
+function exportarDados(tipo){
+  var data, headers, rows, fname;
+  if(tipo==='pacientes'){
+    data=db.children||[];
+    headers=['Nome','Data Nasc.','Diagnóstico','Responsável','Email Resp.','Telefone'];
+    rows=data.map(function(p){return [p.nome||'',p.nascimento||'',p.diagnostico||'',p.responsavel||'',p.email_responsavel||'',p.telefone||''];});
+    fname='pacientes.csv';
+  } else if(tipo==='sessoes'){
+    data=db.sessoes||[];
+    headers=['Data','Hora','Paciente','Terapeuta','Tipo','Status','Notas'];
+    rows=data.map(function(s){return [s.data||'',s.hora||'',s.child_id||'',s.terapeuta||'',s.tipo||'',s.status||'',s.notas||''];});
+    fname='sessoes.csv';
+  } else if(tipo==='financeiro'){
+    data=db.contratos||[];
+    headers=['Paciente','Tipo','Valor','Vencimento','Status','Método'];
+    rows=data.map(function(c){return [c.paciente||'',c.tipo||'',(c.valor||0).toFixed(2),c.vencimento||'',c.status||'',c.metodo||''];});
+    fname='financeiro.csv';
+  } else { return; }
+  var csv=[headers.join(',')].concat(rows.map(function(r){return r.map(function(v){return '"'+(v+'').replace(/"/g,'""')+'"';}).join(',');})).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('Arquivo '+fname+' baixado!','check');
+}
+
+function solicitarExclusaoConta(){
+  if(!confirm('ATENÇÃO: Esta ação solicitará a exclusão permanente de sua conta e TODOS os dados clínicos.\n\nO processo leva até 30 dias (LGPD Art. 18).\n\nDeseja continuar?')) return;
+  var email=_currentUser&&_currentUser.email;
+  _sb.from('audit_logs').insert({clinic_id:_clinicId,user_id:_currentUser&&_currentUser.id,action:'SOLICITAR_EXCLUSAO_CONTA',tabela:'users',detalhes:'Usuário solicitou exclusão da conta e dados - '+new Date().toISOString()}).then(function(){
+    toast('Solicitação registrada. Você receberá um e-mail de confirmação em até 24h.','check');
+    _auditLog('SOLICITAR_EXCLUSAO_CONTA','users',null,'email:'+email);
+  });
+}
+
 function mostrarSelecaoPlano(clinicId,email,nome){
   _clinicId=clinicId;
   var modal=document.getElementById('modal-planos');
@@ -3355,6 +3434,16 @@ _checkSession();
 function abrirLegalLogin(pg){window.open('#'+pg,'_blank');}
 
 function setupRole(){
+  // Update sidebar profile
+  var pn=document.getElementById('pname');
+  var pr=document.getElementById('prole');
+  var pa=document.getElementById('pav');
+  var av=document.getElementById('tb-av');
+  if(pn&&_userName)pn.textContent=_userName;
+  if(pr)pr.textContent=role==='clinic'?'Administrador da Clínica':'Acesso Família';
+  if(pa&&_userName)pa.textContent=_userName.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  if(av&&_userName)av.textContent=_userName.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+
   var isCl=role==='clinic';
   document.getElementById('nav-f').classList.toggle('hidden',isCl);
   document.getElementById('nav-c').classList.toggle('hidden',!isCl);
@@ -3456,6 +3545,7 @@ var tbMap={
   reavix:['Reavix AI','Assistente clínica integrada'],
   termos:['Termos de Uso','Contrato de uso da plataforma'],
   privacidade:['Política de Privacidade','Proteção de dados e LGPD'],
+  conta:['Minha Conta','Dados e preferências da conta'],
   upgrade:['Planos & Preços','Escolha o plano ideal para sua clínica'],
 };
 
@@ -3489,6 +3579,7 @@ function goV(view){
   if(view==='gcal')renderGCalView();
   if(view==='funcionarios')renderFuncionariosView();
   if(view==='reavix')renderReavixView();
+  if(view==='conta')renderContaView();
   if(!_fromPopstate&&history.pushState)history.pushState({view:view},'','#'+view);_fromPopstate=false;
 }
 
@@ -4055,6 +4146,18 @@ function abrirDocLegal(tipo){
   document.body.appendChild(modal);
 }
 
+
+function aceitarCookies(){
+  localStorage.setItem('to_cookie_consent','1');
+  var b=document.getElementById('cookie-banner');
+  if(b){b.style.transition='opacity .3s ease';b.style.opacity='0';setTimeout(function(){b.style.display='none';},300);}
+}
+function initCookieBanner(){
+  if(!localStorage.getItem('to_cookie_consent')){
+    var b=document.getElementById('cookie-banner');
+    if(b){b.style.display='flex';b.style.opacity='0';setTimeout(function(){b.style.opacity='1';b.style.transition='opacity .4s ease';},100);}
+  }
+}
 function toggleRegTerms(){
   _regTermsChecked=!_regTermsChecked;
   document.getElementById('reg-terms-box').classList.toggle('checked',_regTermsChecked);
@@ -4121,7 +4224,7 @@ function doRegister(){
       .select().single().then(function(cr){
         if(cr.error){console.error('clinic insert',cr.error);}
         var clinicId=cr.data?cr.data.id:null;
-        return _sb.from('users').insert({auth_id:authId,clinic_id:clinicId,nome:name,email:email,telefone:phone,role:'admin',cargo:'Administrador',status:'ativo'})
+        return _sb.from('users').insert({auth_id:authId,clinic_id:clinicId,nome:name,email:email,telefone:phone,role:'admin',cargo:'Administrador',status:'ativo',terms_accepted_at:new Date().toISOString()})
           .then(function(){
             _clinicId=clinicId;_userName=name;role='clinic';
             if(res.data.session){
@@ -4130,6 +4233,7 @@ function doRegister(){
               reg.style.transition='opacity .4s';reg.style.opacity='0';
               setTimeout(function(){
                 reg.classList.remove('active');reg.style.opacity='';reg.style.transition='';
+                fetch('/api/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'welcome',to:email,name:name,clinicName:clinicName})}).catch(function(){});
                 mostrarSelecaoPlano(clinicId,email,name);
               },420);
             } else {
@@ -5515,5 +5619,16 @@ if('serviceWorker' in navigator){
 document.querySelectorAll('.view').forEach(function(el){el.style.display='none';});
 chkMob();
 </script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99997;background:linear-gradient(135deg,#1a2035,#0d1526);border-top:1px solid rgba(255,255,255,.1);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 -4px 24px rgba(0,0,0,.3)">
+  <div style="font-size:13px;color:rgba(255,255,255,.85);max-width:680px;line-height:1.5">
+    🍪 Usamos cookies essenciais para autenticação e funcionamento seguro da plataforma. Conforme a <strong>LGPD (Lei 13.709/2018)</strong>, ao continuar você concorda com nossa <a onclick="abrirDocLegal('privacidade')" style="color:#60a5fa;cursor:pointer;text-decoration:underline">Política de Privacidade</a>.
+  </div>
+  <div style="display:flex;gap:10px;flex-shrink:0">
+    <button onclick="aceitarCookies()" style="padding:10px 24px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Aceitar e continuar</button>
+  </div>
+</div>
+
 </body>
 </html>

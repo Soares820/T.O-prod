@@ -44,6 +44,17 @@ module.exports = async (req, res) => {
             stripe_customer_id:     data.customer,
             stripe_subscription_id: data.subscription,
           }).eq('id', clinicId);
+
+          // Send payment confirmation email
+          const email = data.customer_details?.email || data.customer_email;
+          if (email && process.env.RESEND_API_KEY) {
+            const appUrl = process.env.APP_URL || 'https://to-plataforma.vercel.app';
+            fetch(`${appUrl}/api/email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'payment_confirmed', to: email, plano }),
+            }).catch(() => {});
+          }
         }
         break;
       }
