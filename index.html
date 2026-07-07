@@ -3,7 +3,29 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<title>Software para Terapia ABA</title>
+<title>T.O Plataforma — Software para Clínicas de Terapia ABA e TEA</title>
+<meta name="description" content="Sistema completo de gestão para clínicas de Terapia Ocupacional e ABA especializadas em TEA. Prontuário eletrônico, agenda, financeiro, BI clínico e muito mais. Experimente grátis por 14 dias."/>
+<meta name="keywords" content="software ABA, sistema clínica TEA, prontuário eletrônico autismo, gestão terapia ocupacional, software terapia ABA"/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://to-plataforma.vercel.app/"/>
+
+<!-- Open Graph -->
+<meta property="og:type"        content="website"/>
+<meta property="og:title"       content="T.O Plataforma — Software para Clínicas ABA e TEA"/>
+<meta property="og:description" content="Gestão completa: prontuário, agenda, financeiro, BI e relatórios. 14 dias grátis, sem cartão."/>
+<meta property="og:url"         content="https://to-plataforma.vercel.app/"/>
+<meta property="og:image"       content="https://to-plataforma.vercel.app/icons/icon-512.png"/>
+<meta property="og:locale"      content="pt_BR"/>
+<meta property="og:site_name"   content="T.O Plataforma"/>
+
+<!-- Twitter Card -->
+<meta name="twitter:card"        content="summary_large_image"/>
+<meta name="twitter:title"       content="T.O Plataforma — Software ABA e TEA"/>
+<meta name="twitter:description" content="Gestão completa para clínicas de Terapia ABA e TEA. 14 dias grátis."/>
+<meta name="twitter:image"       content="https://to-plataforma.vercel.app/icons/icon-512.png"/>
+
+<!-- Structured Data -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"T.O Plataforma","description":"Software de gestão para clínicas de Terapia Ocupacional e ABA especializadas em TEA","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","priceCurrency":"BRL","price":"197","prialPeriodDays":14},"url":"https://to-plataforma.vercel.app/"}</script>
 
 <!-- PWA Manifest -->
 <link rel="manifest" href="/manifest.json"/>
@@ -2255,6 +2277,9 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Novo Funcionário
       </button>
+      <button class="btn" style="background:rgba(37,99,235,.12);color:var(--acc,#2563EB);border:1px solid rgba(37,99,235,.3)" onclick="abrirConvite()">
+        ✉ Convidar por Email
+      </button>
     </div>
 
     <!-- KPIs -->
@@ -2362,6 +2387,26 @@ select.reg-inp option{background:#0F1829;color:#fff}
             <button onclick="exportarDados('sessoes')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Sessões CSV</button>
             <button onclick="exportarDados('financeiro')" class="btn-sec" style="font-size:13px;padding:9px 18px">⬇ Financeiro CSV</button>
             <button onclick="gerarRelatorioClinica()" style="padding:9px 18px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">📄 Relatório PDF Geral</button>
+          </div>
+        </div>
+        
+        <div style="background:var(--sb,rgba(255,255,255,.04));border-radius:12px;padding:16px;margin-top:0">
+          <div style="font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Segurança — Autenticação em 2 Fatores (MFA)</div>
+          <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Adicione uma camada extra de segurança usando um aplicativo autenticador (Google Authenticator, Authy etc).</p>
+          <div id="mfa-status" style="font-size:13px;color:var(--t2);margin-bottom:10px">Verificando status…</div>
+          <button id="mfa-btn" onclick="iniciarMFA()" style="padding:10px 20px;background:var(--acc,#2563EB);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">Ativar MFA</button>
+        </div>
+        <div id="mfa-setup-panel" style="display:none;background:var(--sb);border-radius:12px;padding:16px;margin-top:0">
+          <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:10px">Configure seu aplicativo autenticador</div>
+          <div style="text-align:center;margin-bottom:12px">
+            <img id="mfa-qr" src="" alt="QR Code MFA" style="width:160px;height:160px;border-radius:8px;background:#fff;padding:6px"/>
+          </div>
+          <div style="font-size:11px;color:var(--t2);margin-bottom:10px;text-align:center">Ou insira o código manualmente: <code id="mfa-secret" style="font-size:11px;word-break:break-all"></code></div>
+          <input id="mfa-code-inp" type="text" placeholder="Código de 6 dígitos" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+            style="width:100%;padding:10px 14px;border:1px solid var(--bdr);border-radius:10px;background:var(--sf);color:var(--t1);font-size:16px;letter-spacing:4px;text-align:center;margin-bottom:10px;box-sizing:border-box"/>
+          <div style="display:flex;gap:8px">
+            <button onclick="verificarMFA()" style="flex:1;padding:10px;background:#10b981;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">Verificar e ativar</button>
+            <button onclick="cancelarMFA()" style="padding:10px 14px;background:none;border:1px solid var(--bdr);color:var(--t2);border-radius:10px;font-size:13px;cursor:pointer">Cancelar</button>
           </div>
         </div>
         <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:16px">
@@ -3179,11 +3224,140 @@ function nowT(){var d=new Date();return d.getHours().toString().padStart(2,'0')+
 var _stripePk='pk_test_51TqKwL5rqO1GLGXfxLgUlSEZCITUjDAFdvBBPhBGUcsewqSjVohz9B0HsY1oEWSifAoIrjFNxrUHcsiozEXDdd3W00qmC5pTM8';
 
 
+
+var _mfaFactorId=null;
+function renderMFAStatus(){
+  _sb.auth.mfa.listFactors().then(function(res){
+    var status=document.getElementById("mfa-status");
+    var btn=document.getElementById("mfa-btn");
+    if(!status)return;
+    var factors=(res.data&&res.data.totp)||[];
+    var verified=factors.filter(function(f){return f.status==="verified";});
+    if(verified.length>0){
+      status.innerHTML='<span style="color:#10b981;font-weight:700">✅ MFA ativo</span> — Autenticação em 2 fatores habilitada';
+      if(btn){btn.textContent="Desativar MFA";btn.style.background="#ef4444";btn.onclick=desativarMFA;}
+    } else {
+      status.textContent="MFA não ativo — recomendamos ativar para maior segurança.";
+      if(btn){btn.textContent="Ativar MFA";btn.style.background="";btn.onclick=iniciarMFA;}
+    }
+  });
+}
+function iniciarMFA(){
+  _sb.auth.mfa.enroll({factorType:"totp",friendlyName:"T.O Plataforma"}).then(function(res){
+    if(res.error){toast("Erro ao iniciar MFA: "+res.error.message,"erro");return;}
+    _mfaFactorId=res.data.id;
+    var qr=document.getElementById("mfa-qr");
+    var sec=document.getElementById("mfa-secret");
+    if(qr)qr.src=res.data.totp.qr_code;
+    if(sec)sec.textContent=res.data.totp.secret;
+    document.getElementById("mfa-setup-panel").style.display="block";
+    document.getElementById("mfa-btn").style.display="none";
+  });
+}
+function verificarMFA(){
+  var code=(document.getElementById("mfa-code-inp").value||"").replace(/s/g,"");
+  if(!code||code.length!==6){toast("Digite o código de 6 dígitos","info");return;}
+  _sb.auth.mfa.challengeAndVerify({factorId:_mfaFactorId,code:code}).then(function(res){
+    if(res.error){toast("Código inválido. Tente novamente.","erro");return;}
+    toast("MFA ativado com sucesso!","check");
+    document.getElementById("mfa-setup-panel").style.display="none";
+    document.getElementById("mfa-btn").style.display="block";
+    renderMFAStatus();
+    _auditLog("ATIVAR_MFA","users",null,"MFA TOTP ativado");
+  });
+}
+function desativarMFA(){
+  if(!confirm("Desativar o MFA reduz a segurança da sua conta. Confirmar?"))return;
+  _sb.auth.mfa.listFactors().then(function(res){
+    var factors=(res.data&&res.data.totp)||[];
+    Promise.all(factors.map(function(f){return _sb.auth.mfa.unenroll({factorId:f.id});})).then(function(){
+      toast("MFA desativado.","info");
+      renderMFAStatus();
+      _auditLog("DESATIVAR_MFA","users",null,"MFA TOTP desativado");
+    });
+  });
+}
+function cancelarMFA(){
+  if(_mfaFactorId){_sb.auth.mfa.unenroll({factorId:_mfaFactorId}).catch(function(){});}
+  _mfaFactorId=null;
+  document.getElementById("mfa-setup-panel").style.display="none";
+  document.getElementById("mfa-btn").style.display="block";
+}
+
+function abrirConvite(){
+  var m=document.getElementById("modal-convite");
+  if(!m){
+    m=document.createElement("div");
+    m.id="modal-convite";
+    m.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)";
+    m.innerHTML='<div style="background:var(--sf,#1a2035);border-radius:16px;max-width:440px;width:100%;padding:28px 24px;position:relative">'
+      +'<button onclick="this.closest('[id=modal-convite]').remove()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer">&times;</button>'
+      +'<h3 style="font-size:16px;font-weight:800;color:var(--t1);margin:0 0 16px">Convidar Funcionário</h3>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'
+      +'<input id="inv-nome" type="text" placeholder="Nome completo *" style="padding:10px 14px;border:1px solid var(--bdr);border-radius:10px;background:var(--sb);color:var(--t1);font-size:14px;width:100%;box-sizing:border-box"/>'
+      +'<input id="inv-email" type="email" placeholder="E-mail *" style="padding:10px 14px;border:1px solid var(--bdr);border-radius:10px;background:var(--sb);color:var(--t1);font-size:14px;width:100%;box-sizing:border-box"/>'
+      +'<input id="inv-cargo" type="text" placeholder="Cargo (ex: Terapeuta ABA)" style="padding:10px 14px;border:1px solid var(--bdr);border-radius:10px;background:var(--sb);color:var(--t1);font-size:14px;width:100%;box-sizing:border-box"/>'
+      +'<select id="inv-role" style="padding:10px 14px;border:1px solid var(--bdr);border-radius:10px;background:var(--sb);color:var(--t1);font-size:14px;width:100%;box-sizing:border-box">'
+      +'<option value="terapeuta">Terapeuta</option><option value="admin">Administrador</option><option value="recepcao">Recepção</option>'
+      +'</select>'
+      +'<button onclick="enviarConvite()" style="padding:12px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;margin-top:4px">Enviar convite por email</button>'
+      +'</div></div>';
+    document.body.appendChild(m);
+  }
+  m.style.display="flex";
+}
+function enviarConvite(){
+  var nome=(document.getElementById("inv-nome").value||"").trim();
+  var email=(document.getElementById("inv-email").value||"").trim();
+  var cargo=(document.getElementById("inv-cargo").value||"Terapeuta").trim();
+  var role=document.getElementById("inv-role").value||"terapeuta";
+  if(!nome||!email){toast("Nome e email são obrigatórios","info");return;}
+  var btn=document.querySelector("#modal-convite button[onclick='enviarConvite()']");
+  if(btn){btn.disabled=true;btn.textContent="Enviando…";}
+  fetch("/api/invite",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({clinic_id:_clinicId,email:email,nome:nome,cargo:cargo,role:role,invited_by:_userName})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.ok){
+      toast("Convite enviado para "+email+"!","check");
+      var m=document.getElementById("modal-convite");
+      if(m)m.remove();
+      goV("funcionarios");
+    } else { toast("Erro: "+(d.error||"tente novamente"),"erro"); }
+  }).catch(function(){toast("Erro de conexão","erro");})
+  .finally(function(){if(btn){btn.disabled=false;btn.textContent="Enviar convite por email";}});
+}
+
+function calcularMRR(){
+  var contratos=(db.contratos||db.contracts||[]).filter(function(c){return c.status==="ativo";});
+  return contratos.reduce(function(s,c){return s+(c.valor||0);},0);
+}
+function renderFinanceiroDashboard(){
+  var mrr=calcularMRR();
+  var sessoes=db.sessoes||[];
+  var mesSessoes=sessoes.filter(function(s){
+    var d=new Date(s.data||"");
+    var now=new Date();
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  });
+  var inadimplentes=(db.pagamentos||[]).filter(function(p){return p.status==="inadimplente";}).length;
+  var total=(db.pagamentos||[]).length||1;
+  var inadPct=Math.round(inadimplentes/total*100);
+  // Update fin dashboard KPIs if els exist
+  ["fin-mrr","fin-sessoes-mes","fin-inadimplencia"].forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(!el)return;
+    if(i===0)el.textContent=fmtBRL(mrr);
+    if(i===1)el.textContent=mesSessoes.length;
+    if(i===2)el.textContent=inadPct+"%";
+  });
+}
+
 function renderContaView(){
   var n=document.getElementById('conta-nome');
   var e=document.getElementById('conta-email');
   if(n)n.textContent=_userName||'—';
   if(e)e.textContent=_currentUser&&_currentUser.email||'—';
+  setTimeout(renderMFAStatus,100);
   // Update avatar initials
   var av=document.getElementById('tb-av');
   if(av&&_userName)av.textContent=_userName.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
