@@ -80,6 +80,7 @@
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes blobA{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(80px,60px) scale(1.12)}70%{transform:translate(-50px,90px) scale(.9)}}
 @keyframes blobB{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(-70px,-55px) scale(.88)}70%{transform:translate(60px,-90px) scale(1.1)}}
@@ -1467,9 +1468,9 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <div class="reg-fld"><label class="reg-lbl">CNPJ (opcional)</label><input class="reg-inp" id="rg-cnpj" placeholder="00.000.000/0001-00"/></div>
       </div>
       <!-- Terms -->
-      <div class="reg-terms-row" onclick="toggleRegTerms()">
+      <div class="reg-terms-row" onclick="toggleRegTerms()" id="reg-terms-row">
         <div class="reg-terms-box" id="reg-terms-box"></div>
-        <div class="reg-terms-txt">Concordo com os <a onclick="event.stopPropagation();toast('Termos em breve','info')">Termos de Uso</a> e <a onclick="event.stopPropagation();toast('Política em breve','info')">Política de Privacidade</a> da T.O Plataforma</div>
+        <div class="reg-terms-txt">Concordo com os <a onclick="event.stopPropagation();abrirDocLegal('termos')">Termos de Uso</a> e <a onclick="event.stopPropagation();abrirDocLegal('privacidade')">Política de Privacidade</a> da T.O Plataforma</div>
       </div>
       <!-- Submit -->
       <button class="reg-submit" onclick="doRegister()">
@@ -4043,6 +4044,17 @@ function setRegRole(role){
   if(clSec)clSec.style.display=role==='clinica'?'':'none';
 }
 
+function abrirDocLegal(tipo){
+  var modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)';
+  var src=document.getElementById('v-'+tipo);
+  var inner=src?src.innerHTML:'<p>Conteúdo em breve.</p>';
+  modal.innerHTML='<div style="background:var(--sf,#1a2035);border-radius:16px;max-width:760px;width:100%;max-height:85vh;overflow-y:auto;padding:28px 24px;position:relative">'+
+    '<button onclick="this.closest('[style*=fixed]').remove()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--t2,#aaa);font-size:22px;cursor:pointer;line-height:1">&times;</button>'+
+    inner+'</div>';
+  document.body.appendChild(modal);
+}
+
 function toggleRegTerms(){
   _regTermsChecked=!_regTermsChecked;
   document.getElementById('reg-terms-box').classList.toggle('checked',_regTermsChecked);
@@ -4084,7 +4096,13 @@ function doRegister(){
   if(pw!==pw2){showErr('As senhas não conferem.');return;}
   if(!clinicName){showErr('Informe o nome da clínica ou consultório.');return;}
   if(!city){showErr('Informe a cidade.');return;}
-  if(!_regTermsChecked){showErr('Aceite os Termos de Uso para continuar.');return;}
+  if(!_regTermsChecked){
+    showErr('Aceite os Termos de Uso e a Política de Privacidade para continuar.');
+    var row=document.getElementById('reg-terms-row');
+    if(row){row.style.outline='2px solid #ef4444';row.style.borderRadius='8px';row.style.animation='shake .4s ease';
+      setTimeout(function(){row.style.outline='';row.style.animation='';},1200);}
+    return;
+  }
 
   var btn=document.querySelector('.reg-submit');
   var btnOrig=btn.innerHTML;
