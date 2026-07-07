@@ -1315,17 +1315,15 @@ select.reg-inp option{background:#0F1829;color:#fff}
     <!-- PRICING -->
     <section class="lp-sec" id="lp-pricing">
       <div class="lp-sec-in">
-        <div class="lp-sec-chip">Planos e preços</div>
-        <h2 class="lp-sec-h">Simples, transparente,<br>sem surpresas</h2>
-        <p class="lp-sec-sub">14 dias grátis em todos os planos, sem cartão de crédito. Mude de plano quando quiser.</p>
+        <div class="lp-sec-chip">Planos</div>
+        <h2 class="lp-sec-h">Escolha o plano ideal<br>para sua clínica</h2>
+        <p class="lp-sec-sub">Converse com um de nossos consultores e descubra qual plano atende melhor sua clínica.</p>
         <div class="lp-price-grid">
 
           <!-- STARTER -->
           <div class="lp-plan">
             <div class="lp-plan-name" style="color:rgba(255,255,255,.4)">Starter</div>
             <div class="lp-plan-desc">Para clínicas que estão começando</div>
-            <div class="lp-price-row"><span class="lp-curr">R$</span><span class="lp-price-num">0</span></div>
-            <div class="lp-price-sub">Gratuito para sempre · até 5 pacientes</div>
             <button class="lp-plan-cta lp-cta-out" onclick="goRegister('clinica')">Criar conta grátis</button>
             <div class="lp-plan-div"></div>
             <div class="lp-fl">
@@ -1345,9 +1343,8 @@ select.reg-inp option{background:#0F1829;color:#fff}
             <div class="lp-pop-tag">Mais popular</div>
             <div class="lp-plan-name" style="color:#60A5FA">Clínica Pro</div>
             <div class="lp-plan-desc">Para clínicas em crescimento que precisam de gestão completa</div>
-            <div class="lp-price-row"><span class="lp-curr">R$</span><span class="lp-price-num">249</span><span class="lp-price-per">/mês</span></div>
-            <div class="lp-price-sub">ou R$2.390/ano · economize 20%</div>
-            <button class="lp-plan-cta lp-cta-prim" onclick="goRegister('clinica')">Começar 14 dias grátis<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+            
+            <button class="lp-plan-cta lp-cta-prim" onclick="falarConsultor('Clínica Pro')">Falar com consultor →</button>
             <div class="lp-plan-div"></div>
             <div class="lp-fl">
               <div class="lp-fi"><span class="lp-fck y"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><strong>Até 30 pacientes</strong></div>
@@ -1365,8 +1362,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
           <div class="lp-plan">
             <div class="lp-plan-name" style="color:#A78BFA">Enterprise</div>
             <div class="lp-plan-desc">Para redes e grandes clínicas com múltiplas unidades</div>
-            <div class="lp-price-row"><span class="lp-curr">R$</span><span class="lp-price-num">549</span><span class="lp-price-per">/mês</span></div>
-            <div class="lp-price-sub">ou R$5.270/ano · economize 20%</div>
+            
             <button class="lp-plan-cta lp-cta-out" onclick="goRegister('clinica')">Começar 14 dias grátis</button>
             <div class="lp-plan-div"></div>
             <div class="lp-fl">
@@ -2424,40 +2420,81 @@ select.reg-inp option{background:#0F1829;color:#fff}
   </div>
 </div>
 <div id="v-upgrade" class="view">
-  <div class="page-body anim" style="max-width:900px;margin:0 auto">
-    <div class="page-hero"><div class="ph-pre"><span></span>Planos</div><h1 class="ph-title">Escolha o plano ideal</h1><div class="ph-sub">Todos os planos incluem trial de 14 dias sem cartão de crédito</div></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:8px">
-      <div class="card" style="border:2px solid var(--bdr);text-align:center">
-        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Trial</div>
-        <div style="font-size:36px;font-weight:900;color:var(--t1)">Grátis</div>
-        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">14 dias · sem cartão</div>
-        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 3 usuários<br>✓ 20 pacientes<br>✓ Todas as funções<br>✓ Suporte por e-mail</div>
-      </div>
-      <div class="card" style="border:2px solid var(--bdr);text-align:center">
-        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Básico</div>
-        <div style="font-size:36px;font-weight:900;color:var(--p)">R$ 197<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
-        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Clínica pequena</div>
-        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 3 usuários<br>✓ 20 pacientes<br>✓ Agenda + Financeiro<br>✓ Suporte por e-mail</div>
-        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="iniciarCheckout('basico')">Contratar</button>
-      </div>
-      <div class="card" style="border:2px solid var(--p);text-align:center;position:relative">
-        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--p);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px">POPULAR</div>
-        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Profissional</div>
-        <div style="font-size:36px;font-weight:900;color:var(--p)">R$ 397<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
-        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Clínica em crescimento</div>
-        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ 10 usuários<br>✓ 100 pacientes<br>✓ Reavix AI inclusa<br>✓ Suporte prioritário<br>✓ Relatórios avançados</div>
-        <button class="btn bp bw" style="margin-top:16px;width:100%" onclick="iniciarCheckout('profissional')">Contratar</button>
-      </div>
-      <div class="card" style="border:2px solid var(--bdr);text-align:center">
-        <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Enterprise</div>
-        <div style="font-size:36px;font-weight:900;color:var(--t1)">R$ 797<span style="font-size:15px;font-weight:500;color:var(--t3)">/mês</span></div>
-        <div style="color:var(--t3);font-size:13px;margin-bottom:16px">Rede de clínicas</div>
-        <div style="text-align:left;font-size:13px;color:var(--t2);line-height:2">✓ Usuários ilimitados<br>✓ Pacientes ilimitados<br>✓ Subdomínio próprio<br>✓ SLA garantido<br>✓ Onboarding dedicado</div>
-        <button class="btn bw" style="margin-top:16px;width:100%;background:var(--t3);border-color:var(--t3);color:#fff" onclick="toast('Fale conosco: comercial@vero.app','info')">Falar com vendas</button>
-      </div>
+  <div class="page-body anim" style="max-width:960px;margin:0 auto">
+    <div class="page-hero">
+      <div class="ph-pre"><span></span>Planos</div>
+      <h1 class="ph-title">Encontre o plano ideal para sua clínica</h1>
+      <div class="ph-sub">Converse com um de nossos consultores e descubra qual plano se encaixa melhor na sua realidade</div>
     </div>
-    <div class="card" style="margin-top:16px;text-align:center;color:var(--t3);font-size:13px">
-      Dúvidas sobre planos? <strong style="color:var(--p)">contato@vero.app</strong> · Cancelamento a qualquer momento
+
+    <!-- Plan cards — no prices -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:8px">
+
+      <!-- Starter -->
+      <div class="card" style="border:2px solid var(--bdr)">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Starter</div>
+        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:4px">Para clínicas que estão começando</div>
+        <div style="width:32px;height:2px;background:var(--bdr);border-radius:2px;margin:12px 0"></div>
+        <div style="font-size:13px;color:var(--t2);line-height:2.1">
+          ✓ Até 5 pacientes<br>
+          ✓ Avaliações PEDI/PS/SPM<br>
+          ✓ Registro de atividades<br>
+          ✓ Central de crises<br>
+          ✓ Dashboard familiar incluso
+        </div>
+        <button onclick="falarConsultor('Starter')" class="btn bo" style="margin-top:20px;width:100%;font-size:13px">Saiba mais</button>
+      </div>
+
+      <!-- Clínica Pro -->
+      <div class="card" style="border:2px solid var(--p);position:relative">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--p);color:#fff;font-size:11px;font-weight:700;padding:3px 14px;border-radius:20px;white-space:nowrap">MAIS POPULAR</div>
+        <div style="font-size:11px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Clínica Pro</div>
+        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:4px">Para clínicas em crescimento que precisam de gestão completa</div>
+        <div style="width:32px;height:2px;background:var(--p);opacity:.4;border-radius:2px;margin:12px 0"></div>
+        <div style="font-size:13px;color:var(--t2);line-height:2.1">
+          ✓ Até 30 pacientes<br>
+          ✓ PEI + Folha de registro DTT/NET<br>
+          ✓ BI clínico avançado + radar<br>
+          ✓ Sala de espera virtual<br>
+          ✓ Multi-terapeuta (até 10)<br>
+          ✓ Agenda inteligente<br>
+          ✓ Relatórios PDF<br>
+          ✓ Notificações de crise 24h
+        </div>
+        <button onclick="falarConsultor('Clínica Pro')" class="btn bp bw" style="margin-top:20px;width:100%;font-size:13px">Falar com consultor →</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="card" style="border:2px solid var(--bdr)">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Enterprise</div>
+        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:4px">Para redes e grandes clínicas com múltiplas unidades</div>
+        <div style="width:32px;height:2px;background:var(--bdr);border-radius:2px;margin:12px 0"></div>
+        <div style="font-size:13px;color:var(--t2);line-height:2.1">
+          ✓ Pacientes ilimitados<br>
+          ✓ Tudo do Pro +<br>
+          ✓ Multi-profissional ilimitado<br>
+          ✓ White-label com logo da clínica<br>
+          ✓ Integração com convênios<br>
+          ✓ Onboarding dedicado<br>
+          ✓ SLA 99.9%<br>
+          ✓ API de integração
+        </div>
+        <button onclick="falarConsultor('Enterprise')" class="btn bo" style="margin-top:20px;width:100%;font-size:13px">Saiba mais</button>
+      </div>
+
+    </div>
+
+    <!-- CTA consultor -->
+    <div class="card" style="margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(124,58,237,.06));border:1px solid rgba(37,99,235,.2)">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:4px">Tem dúvidas sobre qual plano escolher?</div>
+        <div style="font-size:13px;color:var(--t2)">Nossos consultores estão prontos para entender sua realidade e indicar o melhor plano para sua clínica.</div>
+      </div>
+      <button onclick="falarConsultor('')" style="padding:12px 28px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0">Falar com consultor →</button>
+    </div>
+
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--t3)">
+      Todos os planos incluem 14 dias de teste gratuito · Sem cartão de crédito · Cancele quando quiser
     </div>
   </div>
 </div>
@@ -4549,16 +4586,22 @@ function abrirDocLegal(tipo){
 }
 
 
+function falarConsultor(plano){
+  var msg=plano?'Olá! Tenho interesse no plano '+plano+' da T.O Plataforma. Pode me ajudar?':'Olá! Tenho interesse na T.O Plataforma. Pode me ajudar?';
+  var url='https://wa.me/5511999999999?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
 function aceitarCookies(){
   localStorage.setItem('to_cookie_consent','1');
   var b=document.getElementById('cookie-banner');
   if(b){b.style.transition='opacity .3s ease';b.style.opacity='0';setTimeout(function(){b.style.display='none';},300);}
 }
 function initCookieBanner(){
-  if(!localStorage.getItem('to_cookie_consent')){
-    var b=document.getElementById('cookie-banner');
-    if(b){b.style.display='flex';b.style.opacity='0';setTimeout(function(){b.style.opacity='1';b.style.transition='opacity .4s ease';},100);}
-  }
+  var b=document.getElementById('cookie-banner');
+  if(!b) return;
+  if(localStorage.getItem('to_cookie_consent')){b.style.display='none';return;}
+  b.style.display='flex';b.style.opacity='0';
+  setTimeout(function(){b.style.opacity='1';b.style.transition='opacity .4s ease';},100);
 }
 function toggleRegTerms(){
   _regTermsChecked=!_regTermsChecked;
@@ -6023,7 +6066,7 @@ chkMob();
 </script>
 
 <!-- Cookie Consent Banner -->
-<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99997;background:linear-gradient(135deg,#1a2035,#0d1526);border-top:1px solid rgba(255,255,255,.1);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 -4px 24px rgba(0,0,0,.3)">
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99997;background:linear-gradient(135deg,#1a2035,#0d1526);border-top:1px solid rgba(255,255,255,.1);padding:16px 24px;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 -4px 24px rgba(0,0,0,.3)">
   <div style="font-size:13px;color:rgba(255,255,255,.85);max-width:680px;line-height:1.5">
     🍪 Usamos cookies essenciais para autenticação e funcionamento seguro da plataforma. Conforme a <strong>LGPD (Lei 13.709/2018)</strong>, ao continuar você concorda com nossa <a onclick="abrirDocLegal('privacidade')" style="color:#60a5fa;cursor:pointer;text-decoration:underline">Política de Privacidade</a>.
   </div>
