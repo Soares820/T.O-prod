@@ -49,9 +49,11 @@ module.exports = async (req, res) => {
           const email = data.customer_details?.email || data.customer_email;
           if (email && process.env.RESEND_API_KEY) {
             const appUrl = process.env.APP_URL || 'https://to-plataforma.vercel.app';
+            const internalHeaders = { 'Content-Type': 'application/json' };
+            if (process.env.API_INTERNAL_SECRET) internalHeaders['x-api-key'] = process.env.API_INTERNAL_SECRET;
             fetch(`${appUrl}/api/email`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: internalHeaders,
               body: JSON.stringify({ type: 'payment_confirmed', to: email, plano }),
             }).catch(() => {});
           }
@@ -98,4 +100,4 @@ module.exports = async (req, res) => {
 };
 
 // Vercel precisa do body raw para verificar assinatura Stripe
-export const config = { api: { bodyParser: false } };
+module.exports.config = { api: { bodyParser: false } };

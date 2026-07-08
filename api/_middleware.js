@@ -1,3 +1,5 @@
+const { createClient } = require('@supabase/supabase-js');
+
 // Simple in-memory rate limiter for Vercel serverless functions
 // Usage: wrap your handler with withRateLimit(handler, { max, windowMs })
 
@@ -37,4 +39,20 @@ function withRateLimit(handler, opts = {}) {
   };
 }
 
-module.exports = { withRateLimit };
+async function verifyJWT(req) {
+  const auth = req.headers['authorization'];
+  const token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) return null;
+  try {
+    const sb = createClient(
+      process.env.SUPABASE_URL || 'https://sceqtztqdmflabdvrzwt.supabase.co',
+      process.env.SUPABASE_SERVICE_KEY
+    );
+    const { data: { user } } = await sb.auth.getUser(token);
+    return user || null;
+  } catch {
+    return null;
+  }
+}
+
+module.exports = { withRateLimit, verifyJWT };

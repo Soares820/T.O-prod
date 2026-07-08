@@ -1,5 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
-const { withRateLimit } = require('./_middleware');
+const { withRateLimit, verifyJWT } = require('./_middleware');
 
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://sceqtztqdmflabdvrzwt.supabase.co',
@@ -7,11 +7,16 @@ const supabase = createClient(
 );
 
 const _handler = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = process.env.APP_URL || 'https://to-plataforma.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Vary', 'Origin');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const user = await verifyJWT(req);
+  if (!user) return res.status(401).json({ error: 'Não autorizado' });
 
   const { clinic_id, email, nome, cargo, role, invited_by } = req.body || {};
 

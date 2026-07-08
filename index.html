@@ -3356,7 +3356,9 @@ function enviarConvite(){
   if(!nome||!email){toast("Nome e email são obrigatórios","info");return;}
   var btn=document.querySelector("#modal-convite button[onclick='enviarConvite()']");
   if(btn){btn.disabled=true;btn.textContent="Enviando…";}
-  fetch("/api/invite",{method:"POST",headers:{"Content-Type":"application/json"},
+  _sb.auth.getSession().then(function(gs){
+  var _tok=gs.data&&gs.data.session?gs.data.session.access_token:'';
+  fetch("/api/invite",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+_tok},
     body:JSON.stringify({clinic_id:_clinicId,email:email,nome:nome,cargo:cargo,role:role,invited_by:_userName})
   }).then(function(r){return r.json();}).then(function(d){
     if(d.ok){
@@ -3367,6 +3369,7 @@ function enviarConvite(){
     } else { toast("Erro: "+(d.error||"tente novamente"),"erro"); }
   }).catch(function(){toast("Erro de conexão","erro");})
   .finally(function(){if(btn){btn.disabled=false;btn.textContent="Enviar convite por email";}});
+});
 }
 
 function calcularMRR(){
@@ -5533,13 +5536,16 @@ function rvChamarAPI(pergunta){
     return;
   }
 
-  fetch('/api/reavix',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({messages:messages,system:system,question:pergunta})
-  }).then(function(r){return r.json();}).then(function(d){
-    if(d.error)terminar('Desculpe, tive um problema ao processar sua pergunta. Tente novamente.');
-    else terminar(d.content||d.response||'Sem resposta.');
+  _sb.auth.getSession().then(function(gs){
+    var _tok=gs.data&&gs.data.session?gs.data.session.access_token:'';
+    fetch('/api/reavix',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+_tok},
+      body:JSON.stringify({messages:messages,system:system,question:pergunta})
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.error)terminar('Desculpe, tive um problema ao processar sua pergunta. Tente novamente.');
+      else terminar(d.content||d.response||'Sem resposta.');
+    })
   }).catch(function(){
     terminar(rvRespostaDemo(pergunta));
   });

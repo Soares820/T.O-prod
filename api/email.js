@@ -1,10 +1,24 @@
 ﻿const { withRateLimit } = require('./_middleware');
 const _handler = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = process.env.APP_URL || 'https://to-plataforma.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
+  res.setHeader('Vary', 'Origin');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Allow internal server-to-server calls with API_INTERNAL_SECRET header
+  const internalSecret = process.env.API_INTERNAL_SECRET;
+  if (internalSecret && req.headers['x-api-key'] !== internalSecret) {
+    // Not an internal call — still allow (protected by CORS + rate limit)
+    // but reject obviously invalid email formats
+    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const { to: toAddr } = req.body || {};
+    if (toAddr && !emailRx.test(toAddr)) {
+      return res.status(400).json({ error: 'Endereço de email inválido' });
+    }
+  }
 
   const { type, to, name, clinicName, plano } = req.body || {};
   const RESEND_KEY = process.env.RESEND_API_KEY;

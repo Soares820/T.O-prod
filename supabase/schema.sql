@@ -176,10 +176,9 @@ CREATE POLICY "iso_contratos"    ON public.contratos    FOR ALL USING (clinic_id
 CREATE POLICY "iso_pagamentos"   ON public.pagamentos   FOR ALL USING (clinic_id = public.minha_clinica());
 CREATE POLICY "iso_funcionarios" ON public.funcionarios FOR ALL USING (clinic_id = public.minha_clinica());
 CREATE POLICY "iso_sessoes"      ON public.sessoes      FOR ALL USING (clinic_id = public.minha_clinica());
-CREATE POLICY "iso_audit"        ON public.audit_logs   FOR ALL USING (clinic_id = public.minha_clinica());
-
--- Audit log: apenas INSERT (ninguém apaga logs)
-CREATE POLICY "audit_insert_only" ON public.audit_logs FOR INSERT WITH CHECK (clinic_id = public.minha_clinica());
+-- Audit log: SELECT e INSERT apenas — UPDATE e DELETE bloqueados por ausência de política
+CREATE POLICY "audit_select"  ON public.audit_logs FOR SELECT USING (clinic_id = public.minha_clinica());
+CREATE POLICY "audit_insert"  ON public.audit_logs FOR INSERT WITH CHECK (clinic_id = public.minha_clinica());
 
 -- ══════════════════════════════════════════════════════════════
 -- SEED — crie uma clínica demo + usuário admin para testar

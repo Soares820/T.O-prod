@@ -8,9 +8,11 @@ const PRICES = {
 };
 
 const _handler = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = process.env.APP_URL || 'https://to-plataforma.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Vary', 'Origin');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -26,8 +28,8 @@ const _handler = async (req, res) => {
       mode: 'subscription',
       automatic_payment_methods: { enabled: true },
       line_items: [{ price: PRICES[plano], quantity: 1 }],
-      success_url: `${process.env.APP_URL || 'https://to-plataforma-oh0pxny3a-soares820s-projects.vercel.app'}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${process.env.APP_URL || 'https://to-plataforma-oh0pxny3a-soares820s-projects.vercel.app'}/?payment=cancelled`,
+      success_url: `${process.env.APP_URL || 'https://to-plataforma.vercel.app'}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${process.env.APP_URL || 'https://to-plataforma.vercel.app'}/?payment=cancelled`,
       customer_email: email || undefined,
       metadata: { clinic_id: clinic_id || '', plano },
       subscription_data: {
