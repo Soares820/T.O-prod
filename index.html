@@ -1430,14 +1430,14 @@ select.reg-inp option{background:#0F1829;color:#fff}
         </div>
       </div>
       <div class="reg-plan-box" id="reg-plan-box">
-        <div class="reg-plan-chip" id="reg-plan-chip">Plano selecionado</div>
-        <div class="reg-plan-name" id="reg-plan-name">Família</div>
-        <div class="reg-plan-price" id="reg-plan-price">R$79,90/mês · 14 dias grátis</div>
+        <div class="reg-plan-chip" id="reg-plan-chip">Trial gratuito</div>
+        <div class="reg-plan-name" id="reg-plan-name">14 dias grátis</div>
+        <div class="reg-plan-price" id="reg-plan-price">Sem cartão · Cancele quando quiser</div>
         <div class="reg-plan-feats" id="reg-plan-feats">
-          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Até 3 crianças cadastradas</div>
-          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>BI de evolução completo</div>
-          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Chat prioritário com a clínica</div>
-          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Biblioteca completa de vídeos</div>
+          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Pacientes, agenda e sessões</div>
+          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>PEI, DTT e terapia ABA</div>
+          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Financeiro e MRR em tempo real</div>
+          <div class="reg-pf"><span class="reg-pf-ck"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Portal da família incluído</div>
         </div>
       </div>
       <div class="reg-testem">
@@ -1482,7 +1482,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <div class="reg-fld"><label class="reg-lbl">Confirmar senha *</label><div class="reg-pass-wrap"><input class="reg-inp" id="rg-pw2" type="password" placeholder="Repita a senha"/><button class="reg-pass-toggle" onclick="togglePw('rg-pw2',this)" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       </div>
       <!-- FAMÍLIA fields -->
-      <div id="reg-familia-sec">
+      <div id="reg-familia-sec" style="display:none">
         <div class="reg-section-lbl">Informações do(a) filho(a)</div>
         <div class="reg-grid2">
           <div class="reg-fld"><label class="reg-lbl">Nome da criança *</label><input class="reg-inp" id="rg-child" placeholder="Nome completo"/></div>
@@ -1491,7 +1491,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <div class="reg-fld"><label class="reg-lbl">Diagnóstico</label><select class="reg-inp" id="rg-diag"><option value="">Selecione…</option><option>TEA Nível 1</option><option>TEA Nível 2</option><option>TEA Nível 3</option><option>TEA (nível em avaliação)</option><option>Suspeita diagnóstica</option><option>Outro</option></select></div>
       </div>
       <!-- CLÍNICA fields -->
-      <div id="reg-clinica-sec" style="display:none">
+      <div id="reg-clinica-sec">
         <div class="reg-section-lbl">Informações da clínica</div>
         <div class="reg-fld"><label class="reg-lbl">Nome da clínica / consultório *</label><input class="reg-inp" id="rg-clinic" placeholder="Ex: Clínica TEA Cuidar"/></div>
         <div class="reg-grid2">
@@ -2387,6 +2387,14 @@ select.reg-inp option{background:#0F1829;color:#fff}
         </div>
         
         <div style="background:var(--sb,rgba(255,255,255,.04));border-radius:12px;padding:16px;margin-top:0">
+          <div style="font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Trocar Senha</div>
+          <div style="display:flex;flex-direction:column;gap:8px;max-width:400px">
+            <input id="pw-nova" type="password" placeholder="Nova senha (mín. 8 caracteres)" style="padding:10px 14px;border:1px solid var(--bdr,rgba(255,255,255,.12));border-radius:10px;background:var(--sf);color:var(--t1);font-size:14px;box-sizing:border-box;width:100%"/>
+            <input id="pw-conf" type="password" placeholder="Confirmar nova senha" style="padding:10px 14px;border:1px solid var(--bdr,rgba(255,255,255,.12));border-radius:10px;background:var(--sf);color:var(--t1);font-size:14px;box-sizing:border-box;width:100%"/>
+            <button onclick="trocarSenha()" style="padding:10px 20px;background:var(--acc,#2563EB);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;width:fit-content">Atualizar senha</button>
+          </div>
+        </div>
+        <div style="background:var(--sb,rgba(255,255,255,.04));border-radius:12px;padding:16px;margin-top:0">
           <div style="font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Segurança — Autenticação em 2 Fatores (MFA)</div>
           <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Adicione uma camada extra de segurança usando um aplicativo autenticador (Google Authenticator, Authy etc).</p>
           <div id="mfa-status" style="font-size:13px;color:var(--t2);margin-bottom:10px">Verificando status…</div>
@@ -2405,11 +2413,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
             <button onclick="cancelarMFA()" style="padding:10px 14px;background:none;border:1px solid var(--bdr);color:var(--t2);border-radius:10px;font-size:13px;cursor:pointer">Cancelar</button>
           </div>
         </div>
-        <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:16px">
-          <div style="font-size:12px;color:#ef4444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Zona de Perigo</div>
-          <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Solicitar exclusão permanente da conta e todos os dados clínicos. Esta ação é irreversível e será processada em até 30 dias conforme LGPD Art. 18.</p>
-          <button onclick="solicitarExclusaoConta()" style="padding:10px 20px;background:#ef4444;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">Excluir minha conta e dados</button>
-        </div>
+        
       </div>
     </div>
     <div style="font-size:12px;color:var(--t2);text-align:center;line-height:1.8">
@@ -2593,6 +2597,11 @@ select.reg-inp option{background:#0F1829;color:#fff}
       </div>
     </div>
 
+    <!-- Disclaimer -->
+    <div style="background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.25);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CA8A04" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6"><strong style="color:var(--t1)">Aviso importante:</strong> A Reavix AI � um assistente de apoio e <strong>n�o substitui o julgamento cl�nico profissional</strong>. Ela n�o realiza diagn�stico de TEA, n�o indica tratamentos de forma determinante, n�o calcula risco cl�nico, n�o apoia decis�es cl�nicas definitivas e n�o controla dispositivos m�dicos. Todas as decis�es cl�nicas devem ser tomadas pelo profissional habilitado.</div>
+    </div>
     <!-- Context bar -->
     <div class="rv-ctx-bar" id="rv-ctx-bar">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -2978,7 +2987,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
       <div class="card"><div class="sec-hd"><div class="stitle">Distribuição de avaliações</div></div><div style="display:flex;flex-direction:column;gap:12px" id="bi-eval-dist"><div class="t2c">Calculando...</div></div><div class="card-divider"></div><div class="sec-hd mb3"><div class="stitle">Crescimento</div></div><div class="bc"><div class="bcc"><div class="bar" style="height:50px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.05s"></div><div class="blbl">Jan</div></div><div class="bcc"><div class="bar" style="height:58px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.1s"></div><div class="blbl">Fev</div></div><div class="bcc"><div class="bar" style="height:65px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.15s"></div><div class="blbl">Mar</div></div><div class="bcc"><div class="bar" style="height:72px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.2s"></div><div class="blbl">Abr</div></div><div class="bcc"><div class="bar" style="height:80px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.25s"></div><div class="blbl">Mai</div></div><div class="bcc"><div class="bar bar-hi" style="height:100px;animation-delay:.3s"></div><div class="blbl">Jun</div></div></div></div>
     </div>
     <div class="card"><div class="sec-hd"><div class="stitle">Evolução média por área — PEDI</div></div><div style="display:flex;flex-direction:column;gap:14px" id="bi-areas"><div class="t2c">Calculando médias das avaliações...</div></div></div>
-    <div class="card"><div class="sec-hd"><div class="stitle">Alertas e ações</div></div><div style="display:flex;flex-direction:column;gap:9px"><div class="al ald"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div class="f1"><div class="fw7">2 pacientes em situação crítica</div><div class="mt1" style="font-size:11px;opacity:.8">Requerem resposta imediata</div></div><button class="btn bd bsm" style="flex-shrink:0" onclick="goV('crisis-form')">Abrir</button></div><div class="al alw"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div class="f1"><div class="fw7">8 relatórios pendentes</div><div class="mt1" style="font-size:11px;opacity:.8">Famílias aguardam atualização</div></div><button class="btn bo bsm" style="flex-shrink:0" onclick="toast('Relatórios em breve','info')">Ver</button></div><div class="al als"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><div class="f1"><div class="fw7">3 pacientes com excelente evolução</div><div class="mt1" style="font-size:11px;opacity:.8">Reavaliar frequência das sessões</div></div></div></div></div>
+    <div class="card"><div class="sec-hd"><div class="stitle">Alertas e ações</div></div><div style="display:flex;flex-direction:column;gap:9px"><div class="al ald"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div class="f1"><div class="fw7">2 pacientes em situação crítica</div><div class="mt1" style="font-size:11px;opacity:.8">Requerem resposta imediata</div></div><button class="btn bd bsm" style="flex-shrink:0" onclick="goV('crisis-form')">Abrir</button></div><div class="al alw"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div class="f1"><div class="fw7">8 relatórios pendentes</div><div class="mt1" style="font-size:11px;opacity:.8">Famílias aguardam atualização</div></div><button class="btn bo bsm" style="flex-shrink:0" onclick="toast('Relatórios goV('criancas')">Ver</button></div><div class="al als"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><div class="f1"><div class="fw7">3 pacientes com excelente evolução</div><div class="mt1" style="font-size:11px;opacity:.8">Reavaliar frequência das sessões</div></div></div></div></div>
   </div>
 </div>
 
@@ -3434,6 +3443,21 @@ function exportarDados(tipo){
   toast('Arquivo '+fname+' baixado!','check');
 }
 
+function trocarSenha(){
+  var nova=document.getElementById('pw-nova').value.trim();
+  var conf=document.getElementById('pw-conf').value.trim();
+  if(!nova||nova.length<8){toast('A nova senha deve ter pelo menos 8 caracteres','err');return;}
+  if(nova!==conf){toast('As senhas n�o coincidem','err');return;}
+  _sb.auth.updateUser({password:nova}).then(function(r){
+    if(r.error){toast('Erro: '+r.error.message,'err');}
+    else{
+      document.getElementById('pw-nova').value='';
+      document.getElementById('pw-conf').value='';
+      toast('Senha atualizada com sucesso!','check');
+    }
+  });
+}
+
 function solicitarExclusaoConta(){
   if(!confirm('ATENÇÃO: Esta ação solicitará a exclusão permanente de sua conta e TODOS os dados clínicos.\n\nO processo leva até 30 dias (LGPD Art. 18).\n\nDeseja continuar?')) return;
   var email=_currentUser&&_currentUser.email;
@@ -3582,10 +3606,12 @@ function gerarRelatorioPaciente(pacienteId){
   }
   html+='<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center">T.O Plataforma · Documento gerado automaticamente · '+new Date().toLocaleString("pt-BR")+'</div>'
     +'</body></html>';
-  var win=window.open("","_blank","width=900,height=700");
-  win.document.write(html);
-  win.document.close();
-  setTimeout(function(){win.print();},400);
+  var blob=new Blob([html],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.target='_blank';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
 }
 
 function gerarRelatorioClinica(){
