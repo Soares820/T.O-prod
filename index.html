@@ -1783,7 +1783,13 @@ select.reg-inp option{background:#0F1829;color:#fff}
           <div class="dt-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
           <div class="dt-body"><div class="dt-lbl">Suporte & Crise</div><div class="dt-sub">Central de apoio e emergências</div></div>
           <svg class="dt-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+        
+        <button class="dash-tile" onclick="mostrarContaFamilia()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)">
+          <div class="dt-ico" style="background:rgba(255,255,255,.08)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div class="dt-body"><div class="dt-lbl">Minha Conta</div><div class="dt-sub">Alterar senha</div></div>
+          <svg class="dt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+</button>
       </div>
       <div class="dash-stats">
         <div class="dash-stat"><div class="dash-stat-ico" style="background:rgba(14,165,233,.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7DD3FC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="dash-stat-info"><div class="dash-stat-val">72%</div><div class="dash-stat-lbl">Progresso geral</div></div></div>
@@ -1940,7 +1946,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
       </div>
       <div class="row mt2" style="gap:12px;flex-wrap:wrap;align-items:flex-start">
         <h1 id="child-name" style="flex:1">—</h1>
-        <button class="btn bo bsm" onclick="window.print()" title="Exportar relatório em PDF" style="gap:5px">
+        <button class="btn bo bsm" onclick="gerarRelatorioPaciente(currentChildId)" title="Exportar relatório em PDF" style="gap:5px">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           PDF
         </button>
@@ -3774,6 +3780,44 @@ function selRole(r){
 document.getElementById('l-email').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('l-pw').focus();});
 document.getElementById('l-pw').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
+function mostrarContaFamilia(){
+  var modal=document.getElementById('modal-conta-familia');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='modal-conta-familia';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+    var html='<div style="background:#1e293b;border-radius:18px;padding:28px 24px;width:100%;max-width:400px;position:relative">';
+    html+='<button onclick="document.getElementById(\'modal-conta-familia\').remove()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:18px">&#10005;</button>';
+    html+='<div style="font-size:17px;font-weight:800;color:#fff;margin-bottom:20px">Minha Conta</div>';
+    html+='<div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Trocar Senha</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:8px">';
+    html+='<input id="pw-nova-f" type="password" placeholder="Nova senha (mín. 8 caracteres)" style="padding:10px 14px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.06);color:#fff;font-size:14px;box-sizing:border-box;width:100%"/>';
+    html+='<input id="pw-conf-f" type="password" placeholder="Confirmar nova senha" style="padding:10px 14px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.06);color:#fff;font-size:14px;box-sizing:border-box;width:100%"/>';
+    html+='<button onclick="trocarSenhaFamilia()" style="padding:10px 20px;background:#2563EB;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">Atualizar senha</button>';
+    html+='</div><div style="margin-top:20px;border-top:1px solid rgba(255,255,255,.1);padding-top:16px;text-align:center">';
+    html+='<a onclick="logout();document.getElementById(\'modal-conta-familia\').remove()" style="cursor:pointer;font-size:13px;color:rgba(255,255,255,.5)">Sair da conta</a>';
+    html+='</div></div>';
+    modal.innerHTML=html;
+    document.body.appendChild(modal);
+  }
+  modal.style.display='flex';
+}
+function trocarSenhaFamilia(){
+  var nova=document.getElementById('pw-nova-f').value.trim();
+  var conf=document.getElementById('pw-conf-f').value.trim();
+  if(!nova||nova.length<8){toast('A nova senha deve ter pelo menos 8 caracteres','err');return;}
+  if(nova!==conf){toast('As senhas não coincidem','err');return;}
+  _sb.auth.updateUser({password:nova}).then(function(r){
+    if(r.error){toast('Erro: '+r.error.message,'err');}
+    else{
+      document.getElementById('pw-nova-f').value='';
+      document.getElementById('pw-conf-f').value='';
+      toast('Senha atualizada com sucesso!','check');
+      document.getElementById('modal-conta-familia').remove();
+    }
+  });
+}
+
 function doLogin(){
   var er=document.getElementById('l-err');
   er.classList.remove('vis');
@@ -4707,7 +4751,7 @@ function doRegister(){
               setTimeout(function(){
                 reg.classList.remove('active');reg.style.opacity='';reg.style.transition='';
                 fetch('/api/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'welcome',to:email,name:name,clinicName:clinicName})}).catch(function(){});
-                mostrarSelecaoPlano(clinicId,email,name);
+                goV('dashboard');
               },420);
             } else {
               btn.disabled=false;btn.innerHTML=btnOrig;
