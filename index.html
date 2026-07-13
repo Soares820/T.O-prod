@@ -310,8 +310,12 @@ body[data-theme="dark"]{background:#0D1117}
 .rowb{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 
 /* ── CARD ── */
-.card{background:#FFFFFF;border:1px solid #E8ECF4;border-radius:var(--r);padding:22px;box-shadow:var(--sh-sm);transition:box-shadow .2s,transform .2s}
+.card{background:#FFFFFF;border:1px solid #E8ECF4;border-radius:var(--r);padding:22px;box-shadow:var(--sh-sm);transition:box-shadow .2s,transform .2s,border-color .3s;position:relative}
 .card:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+/*    GlowingEffect             */
+.card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at var(--glow-x,50%) var(--glow-y,50%),rgba(59,130,246,.12) 0%,rgba(99,102,241,.06) 40%,transparent 65%);opacity:var(--glow-opacity,0);transition:opacity .4s ease;pointer-events:none}
+.card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:conic-gradient(from calc((var(--glow-angle,0) - 45)*1deg) at 50% 50%,transparent 0deg,rgba(59,130,246,.9) 40deg,rgba(96,165,250,1) 60deg,rgba(129,140,248,.8) 70deg,transparent 90deg);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:destination-out;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;opacity:var(--glow-opacity,0);transition:opacity .4s ease;pointer-events:none}
+/*                             */
 [data-theme="dark"] .card{background:#1C2335;border:1px solid rgba(255,255,255,.07);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 [data-theme="dark"] .card:hover{box-shadow:0 4px 20px rgba(0,0,0,.45);transform:translateY(-2px)}
 .card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:10px}
@@ -6284,5 +6288,76 @@ chkMob();
     </div>
   </div>
 </div>
+
+<script>
+/* GlowingEffect  vanilla JS port */
+(function(){
+  var animFrames=new WeakMap();
+  var currentAngles=new WeakMap();
+  function lerp(a,b,t){return a+(b-a)*t;}
+
+  function initGlow(){
+    document.querySelectorAll('.card').forEach(function(card){
+      if(card._glowInit)return;
+      card._glowInit=true;
+      currentAngles.set(card,0);
+
+      card.addEventListener('mousemove',function(e){
+        var rect=card.getBoundingClientRect();
+        var cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+        var targetAngle=Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI+90;
+        var curAngle=currentAngles.get(card)||0;
+        var diff=((targetAngle-curAngle+180)%360)-180;
+        var newAngle=curAngle+diff;
+
+        // Animate angle
+        var fid=animFrames.get(card);
+        if(fid)cancelAnimationFrame(fid);
+        var start=null,from=curAngle,to=newAngle;
+        function frame(t){
+          if(!start)start=t;
+          var p=Math.min((t-start)/800,1);
+          var ease=1-Math.pow(1-p,3);
+          var val=lerp(from,to,ease);
+          currentAngles.set(card,val);
+          card.style.setProperty('--glow-angle',val);
+          if(p<1)animFrames.set(card,requestAnimationFrame(frame));
+        }
+        animFrames.set(card,requestAnimationFrame(frame));
+
+        // Spotlight position
+        var x=((e.clientX-rect.left)/rect.width)*100;
+        var y=((e.clientY-rect.top)/rect.height)*100;
+        card.style.setProperty('--glow-x',x+'%');
+        card.style.setProperty('--glow-y',y+'%');
+      });
+
+      card.addEventListener('mouseenter',function(){
+        card.style.setProperty('--glow-opacity','1');
+      });
+      card.addEventListener('mouseleave',function(){
+        card.style.setProperty('--glow-opacity','0');
+      });
+    });
+  }
+
+  // Init on load
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',initGlow);
+  }else{
+    initGlow();
+  }
+
+  // Re-init when SPA screens become active
+  var observer=new MutationObserver(function(mutations){
+    var needsInit=false;
+    mutations.forEach(function(m){
+      if(m.attributeName==='class'&&m.target.classList.contains('active'))needsInit=true;
+    });
+    if(needsInit)setTimeout(initGlow,50);
+  });
+  observer.observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
+})();
+</script>
 </body>
 </html>
