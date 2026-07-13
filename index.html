@@ -1192,7 +1192,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
   <div class="ls-scan"></div>
   <div class="ls-center">
     <div class="ls-mark-wrap">
-      <div class="ls-mark"><img src="/Vero_logo.jpeg" alt="Software para Terapia ABA" style="width:100%;height:100%;object-fit:contain;padding:8px;"></div>
+      <div class="ls-mark"><img src="/logo.svg" alt="T.O Plataforma" style="height:44px;width:auto;object-fit:contain;padding:4px"></div>
     </div>
     <div class="ls-name">Software para Terapia ABA</div>
     <div class="ls-ver">Sistema Clínico · v2.1</div>
@@ -1213,7 +1213,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
   <!-- NAV -->
   <nav class="lp-nav">
     <button class="lp-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-      <div class="lp-logo-mark"><img src="/Vero_logo.jpeg" alt="Clínica de T.O" style="width:100%;height:100%;object-fit:cover;object-position:left center;"></div>
+      <div class="lp-logo-mark"><img src="/logo.svg" alt="T.O Plataforma" style="height:40px;width:auto;object-fit:contain"></div>
       <div><div class="lp-logo-name">Software para Terapia ABA</div><div class="lp-logo-tag">Sistema Clínico</div></div>
     </button>
     <div class="lp-navlinks">
@@ -1427,7 +1427,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
     <footer class="lp-foot">
       <div class="lp-foot-in">
         <div class="lp-foot-l">
-          <div class="lp-logo-mark" style="width:30px;height:30px;border-radius:8px"><img src="/Vero_logo.jpeg" alt="Clínica de T.O" style="width:100%;height:100%;object-fit:cover;object-position:left center;"></div>
+          <div class="lp-logo-mark" style="width:30px;height:30px;border-radius:8px"><img src="/logo.svg" alt="T.O Plataforma" style="height:40px;width:auto;object-fit:contain"></div>
           <span class="lp-foot-txt">© 2025 T.O Plataforma · Todos os direitos reservados</span>
         </div>
         <div class="lp-foot-links">
@@ -1449,7 +1449,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
     <!-- LEFT: plan summary + brand -->
     <div class="reg-left">
       <div class="reg-logo-row">
-        <div class="reg-logo-mark"><img src="/Vero_logo.jpeg" alt="Clínica de T.O" style="width:100%;height:100%;object-fit:cover;object-position:left center;"></div>
+        <div class="reg-logo-mark"><img src="/logo.svg" alt="T.O Plataforma" style="height:40px;width:auto;object-fit:contain"></div>
         <div>
           <div class="reg-brand-name">Software para Terapia ABA</div>
           <div class="reg-brand-tag">Sistema Clínico</div>
@@ -1625,7 +1625,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
   <div class="lbox">
     <div class="lbox-inner">
       <div class="l-brand" style="flex-direction:column;align-items:center;gap:0;margin-bottom:20px;">
-        <img src="/Vero_logo.jpeg" alt="Software para Terapia ABA" style="height:80px;object-fit:contain;">
+        <img src="/logo.svg" alt="Software para Terapia ABA" style="height:80px;object-fit:contain;">
       </div>
       <div class="l-title">Bem-vindo de volta</div>
       <div class="l-sub">Acesse a plataforma com suas credenciais e selecione o perfil de acesso.</div>
@@ -1669,7 +1669,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
 <div class="app-shell" id="app">
   <aside class="sidebar" id="sb">
     <div class="sb-logo">
-      <div class="sb-mark"><img src="/Vero_logo.jpeg" alt="Clínica de T.O" style="width:100%;height:100%;object-fit:cover;object-position:left center;"></div>
+      <div class="sb-mark"><img src="/logo.svg" alt="T.O Plataforma" style="height:40px;width:auto;object-fit:contain"></div>
       <div class="sb-info">
         <div class="sb-name">Software ABA</div>
         <div class="sb-sub">Terapia ABA</div>
@@ -1795,7 +1795,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
     <div class="topbar">
       <div class="tb-l">
         <div class="tb-brand" onclick="goV('dashboard')" title="Ir para o início">
-          <div class="tb-mark-sm"><img src="/Vero_logo.jpeg" alt="Clínica de T.O" style="width:100%;height:100%;object-fit:cover;object-position:left center;"></div>
+          <div class="tb-mark-sm"><img src="/logo.svg" alt="T.O Plataforma" style="height:40px;width:auto;object-fit:contain"></div>
           <div class="tb-brand-txt">
             <span class="tb-brand-name">Software para Terapia ABA</span>
             <span class="tb-brand-sub">Sistema Clínico</span>
@@ -4180,7 +4180,16 @@ function goV(view){
 
 window.addEventListener('popstate',function(e){
   var inApp=document.getElementById('app').classList.contains('active');
-  if(!inApp)return;
+  if(!inApp){
+    // Outside app: back always returns to landing page
+    var landing=document.getElementById('landing');
+    if(landing&&!landing.classList.contains('active')){
+      ['login','register'].forEach(function(s){var el=document.getElementById(s);if(el)el.classList.remove('active');});
+      landing.classList.add('active');
+      history.replaceState(null,'',location.pathname);
+    }
+    return;
+  }
   _fromPopstate=true;
   if(e.state&&e.state.view){goV(e.state.view);}
   else if(location.hash){var v=location.hash.replace('#','');if(v)goV(v);else _fromPopstate=false;}
@@ -4882,6 +4891,7 @@ function goLogin(){
     setTimeout(function(){
       from.classList.remove('active');from.style.opacity='';from.style.transition='';
       document.getElementById('login').classList.add('active');
+      history.pushState(null,'','#login');
     },450);
   }else{
     document.getElementById('login').classList.add('active');

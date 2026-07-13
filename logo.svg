@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 72" fill="none" role="img" aria-label="T.O Plataforma">
+  <defs>
+    <linearGradient id="mk" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e4080"/>
+      <stop offset="100%" stop-color="#0d1f4a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── MARK ── rounded square 72×72 -->
+  <rect width="72" height="72" rx="16" fill="url(#mk)"/>
+
+  <!-- O: circle stroke centered in square -->
+  <circle cx="36" cy="38" r="20" stroke="white" stroke-width="3.2" fill="none"/>
+
+  <!-- T crossbar — inside the O, near upper third -->
+  <line x1="24" y1="28" x2="48" y2="28" stroke="white" stroke-width="3.2" stroke-linecap="round"/>
+
+  <!-- T stem — from crossbar to bottom of O -->
+  <line x1="36" y1="28" x2="36" y2="58" stroke="white" stroke-width="3.2" stroke-linecap="round"/>
+
+  <!-- small notch caps on crossbar ends for finish -->
+  <circle cx="24" cy="28" r="1.6" fill="white"/>
+  <circle cx="48" cy="28" r="1.6" fill="white"/>
+
+  <!-- ── WORDMARK ── -->
+  <!-- "T.O" — bold -->
+  <text x="88" y="42" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif"
+        font-weight="800" font-size="30" fill="#0d1f4a" letter-spacing="-0.5">T.O</text>
+
+  <!-- "Plataforma" — medium, brand blue -->
+  <text x="89" y="62" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif"
+        font-weight="500" font-size="13" fill="#3B82F6" letter-spacing="2.5">PLATAFORMA</text>
+</svg>
