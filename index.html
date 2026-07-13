@@ -800,6 +800,7 @@ select.inp{cursor:pointer;appearance:none;background-image:url("data:image/svg+x
 .dash-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:1120px}
 .dash-tile{border-radius:20px;padding:28px 24px 24px;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;display:flex;flex-direction:column;align-items:flex-start;gap:14px;border:none;font-family:inherit;text-align:left;position:relative;overflow:hidden;min-height:160px}
 .dash-tile::after{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.12);pointer-events:none;transition:transform .3s}
+.dash-tile::before{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at var(--glow-x,50%) var(--glow-y,50%),rgba(255,255,255,.25) 0%,rgba(255,255,255,.08) 40%,transparent 65%);opacity:var(--glow-opacity,.07);transition:opacity .4s ease;pointer-events:none;z-index:1}
 .dash-tile:hover{transform:translateY(-6px) scale(1.015);box-shadow:0 24px 56px rgba(0,0,0,.4)}
 .dash-tile:hover::after{transform:scale(1.3)}
 .dash-tile:active{transform:translateY(-2px) scale(1.005)}
@@ -1851,7 +1852,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
       <div class="dash-top">
         <div class="dash-greet">
           <div class="dash-greet-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Sessão hoje às 16:00</div>
-          <h1 class="dash-greet-h">Olá, Família! 👋</h1>
+          <h1 class="dash-greet-h">Olá, Família!</h1>
           <p class="dash-greet-sub">Bem-vinda à T.O Plataforma. <strong>Lucas</strong> tem evoluído muito — acompanhe o progresso dele por aqui.</p>
         </div>
         <div class="dash-date-chip">
@@ -1916,7 +1917,7 @@ select.reg-inp option{background:#0F1829;color:#fff}
       <div class="dash-top">
         <div class="dash-greet">
           <div class="dash-greet-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span id="dash-prof-online">—</span> profissionais</div>
-          <h1 class="dash-greet-h" id="dash-greet-name">Olá! 👋</h1>
+          <h1 class="dash-greet-h" id="dash-greet-name">Olá,</h1>
           <p class="dash-greet-sub">Central de atendimento ativa. <strong id="dash-sess-hoje">—</strong> · <strong id="dash-crises-ativas">monitoramento ativo</strong>.</p>
         </div>
         <div class="dash-date-chip">
@@ -4033,7 +4034,7 @@ function setupRole(){
   if(av&&_userName)av.textContent=_userName.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
   // Dashboard: populate with real data
   var gn=document.getElementById('dash-greet-name');
-  if(gn)gn.innerHTML='Olá, '+(_userName?_userName.split(' ')[0]:'')+'! 👋';
+  if(gn)gn.innerHTML='Olá, '+(_userName?_userName.split(' ')[0]:'')+'!';
   var _today=new Date().toISOString().slice(0,10);
   var _sesHoje=(db.sessoes||[]).filter(function(s){return(s.data||'').slice(0,10)===_today;}).length;
   var _shEl=document.getElementById('dash-sess-hoje');
@@ -6297,7 +6298,7 @@ chkMob();
   function lerp(a,b,t){return a+(b-a)*t;}
 
   function initGlow(){
-    document.querySelectorAll('.card').forEach(function(card){
+    document.querySelectorAll('.card,.dash-tile').forEach(function(card){
       if(card._glowInit)return;
       card._glowInit=true;
       currentAngles.set(card,0);
