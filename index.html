@@ -311,10 +311,10 @@ body[data-theme="dark"]{background:#0D1117}
 
 /* ── CARD ── */
 .card{background:#FFFFFF;border:1px solid #E8ECF4;border-radius:var(--r);padding:22px;box-shadow:var(--sh-sm);transition:box-shadow .2s,transform .2s,border-color .3s;position:relative}
-.card:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+.card:hover{box-shadow:var(--sh);transform:translateY(-2px);--glow-border:.25;--glow-shine:.08}
 /*    GlowingEffect             */
-.card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at var(--glow-x,50%) var(--glow-y,50%),rgba(59,130,246,.12) 0%,rgba(99,102,241,.06) 40%,transparent 65%);opacity:var(--glow-opacity,0);transition:opacity .4s ease;pointer-events:none}
-.card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:conic-gradient(from calc((var(--glow-angle,0) - 45)*1deg) at 50% 50%,transparent 0deg,rgba(59,130,246,.9) 40deg,rgba(96,165,250,1) 60deg,rgba(129,140,248,.8) 70deg,transparent 90deg);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:destination-out;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;opacity:var(--glow-opacity,0);transition:opacity .4s ease;pointer-events:none}
+.card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at var(--glow-x,50%) var(--glow-y,50%),rgba(59,130,246,.12) 0%,rgba(99,102,241,.06) 40%,transparent 65%);opacity:var(--glow-opacity,.18);transition:opacity .4s ease;pointer-events:none}
+.card::after{content:'';position:absolute;inset:-1px;border-radius:inherit;border:1px solid rgba(59,130,246,var(--glow-border,.08));box-shadow:0 0 0 0 rgba(59,130,246,0),inset 0 1px 0 rgba(255,255,255,var(--glow-shine,.04));transition:border-color .4s ease,box-shadow .4s ease;pointer-events:none}
 /*                             */
 [data-theme="dark"] .card{background:#1C2335;border:1px solid rgba(255,255,255,.07);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 [data-theme="dark"] .card:hover{box-shadow:0 4px 20px rgba(0,0,0,.45);transform:translateY(-2px)}
@@ -6336,7 +6336,7 @@ chkMob();
         card.style.setProperty('--glow-opacity','1');
       });
       card.addEventListener('mouseleave',function(){
-        card.style.setProperty('--glow-opacity','0');
+        card.style.removeProperty('--glow-opacity');
       });
     });
   }
