@@ -149,7 +149,7 @@ body[data-theme="dark"]{background:#0D1117}
 .ls-info{margin-top:52px;font-size:9px;color:rgba(255,255,255,.1);font-family:monospace;letter-spacing:.18em;text-transform:uppercase}
 
 /* ── LOGIN ── */
-#login{position:relative;overflow:hidden;background:#060C18;display:flex;align-items:stretch;min-height:100vh}
+#login{position:relative;overflow:hidden;background:#060C18}
 .l-visual{flex:1;min-height:100vh;position:relative;overflow:hidden;background:radial-gradient(circle at 55% 45%,rgba(59,130,246,.22) 0%,transparent 60%),linear-gradient(155deg,#1c3d7a 0%,#102150 35%,#08132e 70%,#050c1f 100%);display:flex;align-items:center;justify-content:center;padding:40px;border-right:1px solid rgba(59,130,246,.18)}
 @media(max-width:860px){.l-visual{display:none}}
 .l-form-side{width:480px;min-width:320px;max-width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(6,12,24,.98);overflow-y:auto;position:relative;z-index:2}
@@ -169,7 +169,7 @@ body[data-theme="dark"]{background:#0D1117}
 .l-orb-inner{transform:translate(-50%,-50%);background:rgba(59,130,246,.18);border:1px solid rgba(99,160,255,.35);border-radius:14px;padding:13px;backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(59,130,246,.25)}
 @keyframes lOrbit{0%{transform:rotate(0deg) translateX(var(--r,140px)) rotate(0deg)}100%{transform:rotate(360deg) translateX(var(--r,140px)) rotate(-360deg)}}
 .l-visual-center{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
-.l-visual-logo{width:72px;height:72px;border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1)}
+.l-visual-art{display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 30px rgba(59,130,246,.35))}
 .l-visual-nm{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px;text-shadow:0 0 30px rgba(59,130,246,.5)}
 .l-visual-sub{font-size:14px;color:rgba(255,255,255,.5);line-height:1.5}
 .l-visual-feats{display:flex;flex-direction:column;gap:8px;margin-top:12px;width:100%}
@@ -1560,7 +1560,55 @@ select.reg-inp option{background:#0F1829;color:#fff}
       <div class="l-orb l-orb-rev" style="--r:260px;--d:38s;--dl:-22s"><div class="l-orb-inner"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div>
     </div>
     <div class="l-visual-center">
-      <div class="l-visual-logo"><img src="/Vero_logo.jpeg" alt="T.O Plataforma" style="width:100%;height:100%;object-fit:cover;object-position:left center"/></div>
+      <div class="l-visual-art">
+      <svg width="200" height="160" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#3B82F6" stop-opacity=".35"/>
+            <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- Central glow -->
+        <ellipse cx="100" cy="80" rx="78" ry="58" fill="url(#cg)"/>
+        <!-- Central hub -->
+        <circle cx="100" cy="80" r="30" fill="rgba(59,130,246,.22)" stroke="rgba(99,160,255,.55)" stroke-width="1.5"/>
+        <circle cx="100" cy="80" r="21" fill="rgba(59,130,246,.32)"/>
+        <!-- Person icon in center -->
+        <circle cx="100" cy="74" r="8" fill="#93C5FD"/>
+        <path d="M86 93c0-7.7 6.3-14 14-14s14 6.3 14 14" stroke="#93C5FD" stroke-width="2" stroke-linecap="round"/>
+        <!-- Satellite: BI / Analytics (top-left) -->
+        <circle cx="28" cy="26" r="19" fill="rgba(59,130,246,.13)" stroke="rgba(99,160,255,.3)" stroke-width="1"/>
+        <polyline points="19,31 23,24 28,28 33,20 38,24" stroke="#7DD3FC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Satellite: Portal Familiar (top-right) -->
+        <circle cx="172" cy="26" r="19" fill="rgba(59,130,246,.13)" stroke="rgba(99,160,255,.3)" stroke-width="1"/>
+        <circle cx="166" cy="22" r="5" stroke="#7DD3FC" stroke-width="1.5"/>
+        <circle cx="178" cy="22" r="5" stroke="#7DD3FC" stroke-width="1.5"/>
+        <path d="M159 34c0-3.9 3.1-7 7-7" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M171 34c0-3.9 3.1-7 7-7" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Satellite: Relat�rios (bottom-left) -->
+        <circle cx="28" cy="134" r="19" fill="rgba(59,130,246,.13)" stroke="rgba(99,160,255,.3)" stroke-width="1"/>
+        <rect x="20" y="126" width="16" height="16" rx="2.5" stroke="#7DD3FC" stroke-width="1.5"/>
+        <line x1="24" y1="131" x2="32" y2="131" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="24" y1="135" x2="30" y2="135" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="24" y1="139" x2="28" y2="139" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Satellite: PEI / Agenda (bottom-right) -->
+        <circle cx="172" cy="134" r="19" fill="rgba(59,130,246,.13)" stroke="rgba(99,160,255,.3)" stroke-width="1"/>
+        <rect x="164" y="126" width="16" height="16" rx="2.5" stroke="#7DD3FC" stroke-width="1.5"/>
+        <line x1="168" y1="126" x2="168" y2="122" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="176" y1="126" x2="176" y2="122" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="164" y1="132" x2="180" y2="132" stroke="#7DD3FC" stroke-width="1.5"/>
+        <!-- Connection lines (dashed) -->
+        <line x1="45" y1="38" x2="75" y2="60" stroke="rgba(99,160,255,.4)" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <line x1="155" y1="38" x2="125" y2="60" stroke="rgba(99,160,255,.4)" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <line x1="45" y1="122" x2="75" y2="100" stroke="rgba(99,160,255,.4)" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <line x1="155" y1="122" x2="125" y2="100" stroke="rgba(99,160,255,.4)" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <!-- Pulse dots on connection lines -->
+        <circle cx="60" cy="49" r="3" fill="#3B82F6" opacity=".7"/>
+        <circle cx="140" cy="49" r="3" fill="#3B82F6" opacity=".7"/>
+        <circle cx="60" cy="111" r="3" fill="#3B82F6" opacity=".7"/>
+        <circle cx="140" cy="111" r="3" fill="#3B82F6" opacity=".7"/>
+      </svg>
+    </div>
       <div class="l-visual-nm">T.O Plataforma</div>
       <div class="l-visual-sub">Gestão clínica para clínicas de TEA</div>
       <div class="l-visual-divider"></div>
