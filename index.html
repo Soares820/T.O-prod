@@ -5165,7 +5165,7 @@ function saveGoal(){
       else if(r.data&&r.data[0])goal.id=r.data[0].id;
     });
     _sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'META_PEI',tabela:'metas',detalhes:JSON.stringify({descricao:goal.desc,area:goal.area})}]).then(function(){});
-  }}
+  }
   document.getElementById('modal-goal').classList.remove('open');
   renderPEI();
   toast('Meta adicionada ao PEI','check');
