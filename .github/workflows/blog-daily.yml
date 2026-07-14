@@ -1,0 +1,41 @@
+name: Blog — Atualização Diária
+
+on:
+  schedule:
+    # 08:00 BRT (UTC-3) = 11:00 UTC
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Forçar execução mesmo sem novos artigos'
+        required: false
+        default: 'false'
+
+jobs:
+  update-blog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Buscar e publicar novos artigos
+        run: |
+          echo "🔄 Iniciando atualização do blog — $(date '+%Y-%m-%d %H:%M UTC')"
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "x-cron-secret: ${{ secrets.BLOG_CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.VERCEL_DEPLOYMENT_URL }}/api/blog-cron")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -1)
+
+          echo "Status HTTP: $HTTP_CODE"
+          echo "Resposta: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Erro na atualização (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
+          echo "✅ Blog atualizado com sucesso"
