@@ -1,4 +1,7 @@
 {
+  "buildCommand": "echo 'static site'",
+  "outputDirectory": ".",
+  "installCommand": "npm install",
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
