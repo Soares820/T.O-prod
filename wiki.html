@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual do Sistema — T.O Plataforma</title>
+<style>
+:root {
+  --bg:#F8FAFC;--bg2:#FFFFFF;--bg3:#F1F5F9;
+  --p:#1c3d7a;--acc:#3B82F6;--s:#10b981;--v:#7c3aed;--w:#f59e0b;
+  --t1:#0F172A;--t2:#334155;--t3:#64748B;--t4:#94A3B8;
+  --bdr:#E2E8F0;--bdr2:#CBD5E1;--ag:rgba(59,130,246,0.1);
+  --sw:260px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#060C18;--bg2:#0D1829;--bg3:#0F2040;--t1:#F1F5F9;--t2:#CBD5E1;--t3:#94A3B8;--t4:#64748B;--bdr:rgba(255,255,255,0.08);--bdr2:rgba(255,255,255,0.14);--ag:rgba(59,130,246,0.18);}
+}
+:root[data-theme="light"]{--bg:#F8FAFC;--bg2:#FFFFFF;--bg3:#F1F5F9;--t1:#0F172A;--t2:#334155;--t3:#64748B;--t4:#94A3B8;--bdr:#E2E8F0;--bdr2:#CBD5E1;--ag:rgba(59,130,246,0.1);}
+:root[data-theme="dark"]{--bg:#060C18;--bg2:#0D1829;--bg3:#0F2040;--t1:#F1F5F9;--t2:#CBD5E1;--t3:#94A3B8;--t4:#64748B;--bdr:rgba(255,255,255,0.08);--bdr2:rgba(255,255,255,0.14);--ag:rgba(59,130,246,0.18);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t1);line-height:1.6;font-size:14px;}
+a{color:var(--acc);text-decoration:none;}
+a:hover{text-decoration:underline;}
+code{font-family:'SF Mono','Fira Code',monospace;font-size:12px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--v);}
+
+/* layout */
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bdr);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.main{flex:1;min-width:0;}
+
+/* sidebar */
+.sb-brand{padding:20px 18px 14px;border-bottom:1px solid var(--bdr);}
+.sb-logo{display:flex;align-items:center;gap:9px;margin-bottom:3px;}
+.sb-icon{width:30px;height:30px;background:linear-gradient(135deg,#1c3d7a,#3B82F6);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.sb-icon svg{width:14px;height:14px;color:#fff;}
+.sb-name{font-size:14px;font-weight:700;color:var(--t1);}
+.sb-ver{font-size:11px;color:var(--t4);}
+.sb-back{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--t3);cursor:pointer;}
+.sb-back:hover{color:var(--acc);}
+.sb-back svg{width:12px;height:12px;}
+
+.nav{padding:10px 0;flex:1;}
+.nl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t4);padding:10px 18px 3px;}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 18px;font-size:12.5px;color:var(--t2);text-decoration:none;cursor:pointer;border-left:3px solid transparent;transition:all .12s;}
+.ni:hover{background:var(--ag);color:var(--acc);}
+.ni.active{background:var(--ag);color:var(--acc);border-left-color:var(--acc);font-weight:600;}
+.ni svg{width:15px;height:15px;flex-shrink:0;opacity:.7;}
+.ni.active svg,.ni:hover svg{opacity:1;}
+
+/* hero */
+.hero{background:linear-gradient(135deg,#060C18 0%,#0F2040 50%,#1c3d7a 100%);padding:52px 48px 44px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(59,130,246,0.18) 0%,transparent 70%);}
+.hero-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:#93C5FD;letter-spacing:.05em;text-transform:uppercase;margin-bottom:16px;position:relative;}
+.hero h1{font-size:32px;font-weight:800;color:#F1F5F9;line-height:1.15;letter-spacing:-.4px;margin-bottom:10px;position:relative;text-wrap:balance;}
+.hero h1 span{color:#60A5FA;}
+.hero-sub{font-size:14px;color:#94A3B8;max-width:480px;position:relative;margin-bottom:26px;}
+.hero-stats{display:flex;gap:28px;flex-wrap:wrap;position:relative;}
+.hs-n{font-size:24px;font-weight:800;color:#F1F5F9;}
+.hs-l{font-size:11px;color:#64748B;}
+
+/* content */
+.content{padding:40px 48px;max-width:880px;}
+.section{margin-bottom:48px;}
+.sec-hdr{margin-bottom:22px;}
+.sec-tag{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:5px;}
+.sec-ttl{font-size:21px;font-weight:700;color:var(--t1);letter-spacing:-.3px;margin-bottom:4px;}
+.sec-dsc{font-size:13.5px;color:var(--t3);}
+
+/* modules */
+.mods{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.mod{background:var(--bg2);border:1px solid var(--bdr);border-radius:13px;padding:18px;transition:border-color .15s;}
+.mod:hover{border-color:var(--bdr2);}
+.mod.full{grid-column:1/-1;}
+.mod-hd{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;}
+.mi{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mi svg{width:17px;height:17px;}
+.ib{background:rgba(59,130,246,.12);color:var(--acc);}
+.ig{background:rgba(16,185,129,.12);color:var(--s);}
+.ip{background:rgba(124,58,237,.12);color:var(--v);}
+.ia{background:rgba(245,158,11,.12);color:var(--w);}
+.in{background:rgba(28,61,122,.15);color:#60A5FA;}
+.ir{background:rgba(244,63,94,.1);color:#f43f5e;}
+.mod-t{font-size:13.5px;font-weight:700;color:var(--t1);margin-bottom:1px;}
+.mod-s{font-size:11.5px;color:var(--t3);}
+.fl{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.fl li{font-size:12px;color:var(--t2);display:flex;align-items:flex-start;gap:7px;line-height:1.4;}
+.fl li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--acc);margin-top:5px;flex-shrink:0;}
+.mod-ft{margin-top:12px;display:flex;gap:5px;flex-wrap:wrap;}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.bc{background:rgba(59,130,246,.1);color:var(--acc);}
+.bf{background:rgba(16,185,129,.1);color:var(--s);}
+.ba{background:rgba(124,58,237,.1);color:var(--v);}
+.bai{background:rgba(124,58,237,.15);color:var(--v);border:1px solid rgba(124,58,237,.25);}
+
+/* steps */
+.steps{display:flex;flex-direction:column;}
+.step{display:flex;gap:14px;padding-bottom:20px;position:relative;}
+.step:not(:last-child)::before{content:'';position:absolute;left:13px;top:28px;bottom:0;width:1px;background:var(--bdr);}
+.sn{width:28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sb{flex:1;padding-top:4px;}
+.st{font-size:13.5px;font-weight:600;color:var(--t1);margin-bottom:3px;}
+.sd{font-size:12.5px;color:var(--t3);line-height:1.5;}
+
+/* roles */
+.rg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.rc{background:var(--bg2);border:1px solid var(--bdr);border-radius:11px;padding:16px 14px;}
+.rt{font-size:12.5px;font-weight:700;color:var(--t1);margin-bottom:8px;}
+.rp{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.rp li{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px;}
+.ok{color:var(--s);font-size:10px;}.no{color:var(--t4);font-size:10px;}
+
+/* faq */
+.faq{display:flex;flex-direction:column;gap:2px;}
+.fi{background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;overflow:hidden;}
+.fq{padding:13px 16px;font-size:13px;font-weight:600;color:var(--t1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;user-select:none;}
+.fq:hover{background:var(--ag);}
+.fa{display:none;padding:0 16px 13px;font-size:12.5px;color:var(--t3);line-height:1.6;}
+.fi.open .fa{display:block;}
+.arr{color:var(--t4);font-size:11px;transition:transform .2s;}
+.fi.open .arr{transform:rotate(180deg);}
+
+/* info box */
+.ib2{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:9px;padding:12px 16px;font-size:12.5px;color:var(--t2);margin-bottom:20px;display:flex;gap:9px;align-items:flex-start;}
+.ib2 svg{color:var(--acc);flex-shrink:0;margin-top:1px;}
+
+.divider{height:1px;background:var(--bdr);margin:36px 0;}
+
+/* scrollbar */
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+
+@media(max-width:768px){
+  .layout{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:static;}
+  .hero{padding:32px 20px;}
+  .hero h1{font-size:24px;}
+  .content{padding:28px 20px;}
+  .mods,.rg{grid-template-columns:1fr;}
+  .mod.full{grid-column:unset;}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <div class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+      <div class="sb-name">T.O Plataforma</div>
+    </div>
+    <div class="sb-ver">Manual do Sistema v1.0</div>
+    <a class="sb-back" href="/" onclick="history.back();return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar ao sistema
+    </a>
+  </div>
+  <nav class="nav">
+    <div class="nl">Início</div>
+    <a class="ni active" href="#visao-geral" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Visão Geral</a>
+    <a class="ni" href="#como-comecar" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Como Começar</a>
+    <div class="nl">Módulos</div>
+    <a class="ni" href="#dashboard" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a class="ni" href="#pacientes" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Pacientes & PEI</a>
+    <a class="ni" href="#agenda" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agenda & Sessões</a>
+    <a class="ni" href="#financeiro" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a class="ni" href="#bi" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>BI & Relatórios</a>
+    <a class="ni" href="#equipe" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Equipe</a>
+    <a class="ni" href="#reavix" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Reavix AI</a>
+    <a class="ni" href="#familia" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Portal da Família</a>
+    <a class="ni" href="#integracoes" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Integrações</a>
+    <div class="nl">Referência</div>
+    <a class="ni" href="#perfis" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Perfis de Acesso</a>
+    <a class="ni" href="#faq" onclick="setA(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>FAQ</a>
+  </nav>
+</aside>
+<main class="main">
+  <div class="hero">
+    <div class="hero-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>T.O Plataforma &middot; Manual do Sistema</div>
+    <h1>Tudo que você precisa saber<br>para usar o sistema <span>com confiança</span></h1>
+    <p class="hero-sub">Guia completo de funcionalidades, fluxos e configurações da plataforma de gestão clínica para terapia ABA/TEA.</p>
+    <div class="hero-stats">
+      <div><div class="hs-n">20+</div><div class="hs-l">Funcionalidades</div></div>
+      <div><div class="hs-n">4</div><div class="hs-l">Perfis de acesso</div></div>
+      <div><div class="hs-n">100%</div><div class="hs-l">Dados no Supabase</div></div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="section" id="visao-geral">
+      <div class="sec-hdr"><div class="sec-tag">Visão Geral</div><div class="sec-ttl">O que é o T.O Plataforma?</div><div class="sec-dsc">Sistema SaaS de gestão clínica para clínicas de Terapia Ocupacional e ABA/TEA no Brasil.</div></div>
+      <div class="ib2"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>O sistema tem <strong>dois tipos de usuário</strong>: <strong>Clínica</strong> (equipe interna — admin, terapeuta, secretaria, financeiro) e <strong>Família</strong> (responsáveis). Cada perfil vê apenas o que é relevante para ele.</div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div><div class="mod-t">Perfil Clínica</div><div class="mod-s">Gestão completa da operação</div></div></div><ul class="fl"><li>Cadastro de pacientes e prontuários</li><li>Agenda e controle de sessões</li><li>Gestão financeira e contratos</li><li>BI com indicadores operacionais</li><li>Gerenciamento da equipe</li></ul></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="mod-t">Perfil Família</div><div class="mod-s">Acompanhamento do filho</div></div></div><ul class="fl"><li>Acompanhar progresso e metas do filho</li><li>Ver agenda e histórico de sessões</li><li>Chat direto com a equipe clínica</li><li>Registrar crises e intercorrências</li><li>Acessar vídeos e materiais de apoio</li></ul></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="como-comecar">
+      <div class="sec-hdr"><div class="sec-tag">Primeiros Passos</div><div class="sec-ttl">Como começar a usar</div></div>
+      <div class="steps">
+        <div class="step"><div class="sn">1</div><div class="sb"><div class="st">Criar conta da clínica</div><div class="sd">Na tela inicial clique em "Criar conta". Preencha nome da clínica, email e senha. Após o cadastro a tela de Termos de Uso é exibida — aceite para acessar o sistema.</div></div></div>
+        <div class="step"><div class="sn">2</div><div class="sb"><div class="st">Cadastrar os primeiros pacientes</div><div class="sd">Vá em <strong>Crianças</strong> → "+ Nova Criança". Preencha nome, data de nascimento, diagnóstico, responsável e terapeuta. O perfil é salvo imediatamente no banco de dados.</div></div></div>
+        <div class="step"><div class="sn">3</div><div class="sb"><div class="st">Criar contrato e pagamentos</div><div class="sd">Em <strong>Financeiro</strong> → "+ Novo Contrato". Selecione o paciente, tipo (particular/convênio), valor por sessão e sessões semanais. O sistema gera automaticamente 12 meses de pagamentos previstos.</div></div></div>
+        <div class="step"><div class="sn">4</div><div class="sb"><div class="st">Agendar as primeiras sessões</div><div class="sd">Em <strong>Agenda</strong>, clique em um dia no calendário ou "+ Nova Sessão". Defina paciente, terapeuta, horário, tipo e duração.</div></div></div>
+        <div class="step"><div class="sn">5</div><div class="sb"><div class="st">Convidar a equipe</div><div class="sd">Em <strong>Equipe</strong> → "+ Convidar Funcionário". O sistema envia email com link para o colaborador criar a senha e acessar com o perfil correto.</div></div></div>
+        <div class="step"><div class="sn">6</div><div class="sb"><div class="st">Monitorar pelo BI</div><div class="sd">Em <strong>BI da Clínica</strong> acompanhe em tempo real: pacientes ativos, taxa de presença, evolução de sessões e distribuição de avaliações. Filtre por terapeuta ou período.</div></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="dashboard">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">Dashboard</div><div class="sec-dsc">Visão geral ao entrar no sistema — diferente para cada perfil.</div></div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div><div class="mod-t">Dashboard Clínica</div><div class="mod-s">Central de atendimento</div></div></div><ul class="fl"><li>KPIs: pacientes ativos, sessões do dia, MRR</li><li>Próximas sessões agendadas</li><li>Atividades e tarefas pendentes</li><li>Alertas de inadimplência</li><li>Acesso rápido a todos os módulos</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="mod-t">Dashboard Família</div><div class="mod-s">Acompanhamento do filho</div></div></div><ul class="fl"><li>Próxima sessão agendada</li><li>Última atividade da equipe</li><li>Botão de emergência / registro de crise</li><li>Acesso direto ao chat</li><li>Notificações e avisos recentes</li></ul><div class="mod-ft"><span class="badge bf">Família</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="pacientes">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">Crianças & Pacientes</div><div class="sec-dsc">Cadastro completo, avaliações clínicas e metas terapêuticas (PEI).</div></div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="mod-t">Cadastro de Pacientes</div><div class="mod-s">Ficha clínica completa</div></div></div><ul class="fl"><li>Nome, data de nascimento, diagnóstico (CID)</li><li>Dados do responsável: nome, email, telefone</li><li>Terapeuta responsável vinculado</li><li>Status: ativo, pausado ou inativo</li><li>Busca, filtros e exportar CSV</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><div><div class="mod-t">Avaliações Clínicas</div><div class="mod-s">PEDI, PS, SPM e outros</div></div></div><ul class="fl"><li>Instrumentos: PEDI-CAT, Perfil Sensorial, SPM</li><li>Scores por domínio (autocuidado, mobilidade, função social)</li><li>Histórico de avaliações por paciente</li><li>Radar de perfil sensorial</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="mod-t">Metas / PEI</div><div class="mod-s">Plano de Ensino Individualizado</div></div></div><ul class="fl"><li>Criar metas por área terapêutica</li><li>Status: ativo, em progresso, concluído</li><li>Critério de alcance por meta</li><li>Salvas na tabela <code>metas</code> do banco</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="mod-t">Progresso</div><div class="mod-s">Evolução terapêutica</div></div></div><ul class="fl"><li>Gráficos de evolução por domínio</li><li>Comparação entre avaliações</li><li>Timeline de marcos alcançados</li><li>Visível para família e clínica</li></ul><div class="mod-ft"><span class="badge ba">Todos</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="agenda">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">Agenda & Sessões</div><div class="sec-dsc">Agendamento, controle de presença e histórico de atendimentos.</div></div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="mod-t">Agenda Visual</div><div class="mod-s">Calendário interativo</div></div></div><ul class="fl"><li>Calendário mensal e visão por dia</li><li>Sessões coloridas por status</li><li>Painel lateral com sessões do dia</li><li>Filtro por terapeuta</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="mod-t">Controle de Presença</div><div class="mod-s">Confirmar e cancelar sessões</div></div></div><ul class="fl"><li>Botão ✓ Concluir sessão direto na agenda</li><li>Botão ✗ Cancelar sessão</li><li>Status salvo no banco em tempo real</li><li>Exportar histórico em CSV</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="mod-t">Sala de Espera</div><div class="mod-s">Fluxo em tempo real</div></div></div><ul class="fl"><li>Ver quem está aguardando</li><li>Registrar chegada do paciente</li><li>Tempo de espera monitorado</li><li>Chamar paciente para sala</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="mod-t">Google Agenda</div><div class="mod-s">Sincronização opcional</div></div></div><ul class="fl"><li>Conectar via OAuth 2.0 (sem senha armazenada)</li><li>Importar/exportar eventos com Google Calendar</li><li>Admin configura o Client ID nas configurações</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="financeiro">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">Gestão Financeira</div><div class="sec-dsc">Contratos, pagamentos, receita prevista e recebida por mês.</div></div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="mod-t">Contratos</div><div class="mod-s">Vínculo financeiro com paciente</div></div></div><ul class="fl"><li>Tipo: particular ou convênio</li><li>Valor por sessão × sessões semanais</li><li>Dia de vencimento mensal</li><li>Ao criar, gera 12 meses de pagamentos automaticamente</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="mod-t">Pagamentos</div><div class="mod-s">Controle mensal por paciente</div></div></div><ul class="fl"><li>Receita prevista vs recebida por mês</li><li>Status: pendente, pago, inadimplente</li><li>% de inadimplência calculada automaticamente</li><li>Filtro por mês e tipo (particular/convênio)</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="mod-t">Gráficos Financeiros</div><div class="mod-s">Evolução do faturamento</div></div></div><ul class="fl"><li>Barras: previsto vs recebido (últimos 6 meses)</li><li>Donut: particular vs convênio</li><li>KPIs: MRR, horas faturadas, valor/hora</li><li>Filtros por mês e tipo de contrato</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="bi">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">BI & Relatórios</div><div class="sec-dsc">Indicadores clínicos e operacionais em tempo real, filtráveis.</div></div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="mod-t">BI da Clínica</div><div class="mod-s">Indicadores operacionais</div></div></div><ul class="fl"><li>Total de pacientes e avaliações realizadas</li><li>Taxa de presença real (concluídas / total agendadas)</li><li>Distribuição por instrumento de avaliação</li><li>Radar de perfil sensorial (PEDI)</li><li>Gráfico de evolução de sessões mês a mês</li><li>Filtro por terapeuta e por mês</li></ul><div class="mod-ft"><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="mod-t">BI da Família</div><div class="mod-s">Evolução do filho</div></div></div><ul class="fl"><li>Gráfico de progresso nas metas do PEI</li><li>Evolução por área terapêutica</li><li>Histórico de avaliações em linha do tempo</li><li>Comparativo entre períodos</li></ul><div class="mod-ft"><span class="badge bf">Família</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="equipe">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">Equipe & Funcionários</div><div class="sec-dsc">Cadastro, convites e controle de acesso por perfil.</div></div>
+      <div class="mods">
+        <div class="mod full"><div class="mod-hd"><div class="mi in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div><div class="mod-t">Gestão de Funcionários</div><div class="mod-s">Equipe com níveis de acesso diferenciados</div></div></div><ul class="fl"><li>Convidar por email — funcionário recebe link para criar senha</li><li>Perfis disponíveis: Administrador, Terapeuta, Secretaria, Financeiro</li><li>Cada perfil acessa apenas os módulos permitidos (isolamento por RLS no banco)</li><li>Ativar/desativar acesso sem excluir o cadastro</li></ul><div class="mod-ft"><span class="badge bc">Clínica · Admin</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="reavix">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">Reavix AI — Assistente Clínica</div><div class="sec-dsc">Inteligência artificial integrada para suporte à prática clínica.</div></div>
+      <div class="ib2"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>A Reavix usa o modelo <strong>Claude (Anthropic)</strong> com contexto clínico especializado em ABA/TEA. Requer <code>ANTHROPIC_API_KEY</code> configurada no ambiente do servidor.</div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div><div class="mod-t">Assistente Clínica IA</div><div class="mod-s">IA com contexto ABA/TEA</div></div></div><ul class="fl"><li>Chat com IA especializada em Terapia Ocupacional</li><li>Contexto do paciente carregado automaticamente</li><li>Sugestões de atividades por perfil sensorial</li><li>Chips de sugestões rápidas pré-formatadas</li><li>Consulta de protocolos ABA</li></ul><div class="mod-ft"><span class="bai badge">✦ IA</span><span class="badge bc">Clínica</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div><div class="mod-t">Chat 24/7</div><div class="mod-s">Família ↔ Clínica</div></div></div><ul class="fl"><li>Mensagens em tempo real entre família e equipe</li><li>Histórico de conversa preservado</li><li>Família acessa pelo portal deles</li><li>Clínica responde pelo painel interno</li></ul><div class="mod-ft"><span class="badge ba">Todos</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="familia">
+      <div class="sec-hdr"><div class="sec-tag">Módulo</div><div class="sec-ttl">Portal da Família</div><div class="sec-dsc">Área exclusiva para responsáveis acompanharem a evolução do filho.</div></div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="mod-t">Central de Crises</div><div class="mod-s">Protocolo de emergência</div></div></div><ul class="fl"><li>Botão de emergência visível no dashboard da família</li><li>Formulário com data, hora, comportamento e gatilho</li><li>Alertas enviados para a equipe clínica</li><li>Histórico de crises por paciente</li></ul><div class="mod-ft"><span class="badge bf">Família</span></div></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div><div class="mod-t">Biblioteca de Vídeos</div><div class="mod-s">Materiais por nível</div></div></div><ul class="fl"><li>Vídeos organizados por grau de dificuldade</li><li>Atividades práticas para fazer em casa</li><li>Materiais curados pela equipe clínica</li></ul><div class="mod-ft"><span class="badge bf">Família</span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="integracoes">
+      <div class="sec-hdr"><div class="sec-tag">Integrações</div><div class="sec-ttl">Conexões com serviços externos</div></div>
+      <div class="mods">
+        <div class="mod"><div class="mod-hd"><div class="mi ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="mod-t">Google Calendar</div><div class="mod-s">Opcional · Requer configuração</div></div></div><ul class="fl"><li>Sincronizar sessões com Google Agenda</li><li>Admin cola o Client ID nas configurações</li><li>OAuth 2.0 — nenhuma senha armazenada</li></ul></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="mod-t">Resend (Emails)</div><div class="mod-s">Requer API Key no Vercel</div></div></div><ul class="fl"><li>Boas-vindas, trial encerrando, pagamento confirmado</li><li>Convites para funcionários</li><li>Configurar <code>RESEND_API_KEY</code> no Vercel</li></ul></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="mod-t">Stripe</div><div class="mod-s">Cobrança da assinatura</div></div></div><ul class="fl"><li>Cobrança mensal/anual da clínica</li><li>Webhooks para ativar/bloquear acesso</li><li>Trocar para chaves live antes do lançamento</li></ul></div>
+        <div class="mod"><div class="mod-hd"><div class="mi ip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div><div class="mod-t">Anthropic (Claude)</div><div class="mod-s">IA clínica Reavix</div></div></div><ul class="fl"><li>Modelo Claude para suporte clínico ABA/TEA</li><li>Configurar <code>ANTHROPIC_API_KEY</code> no Vercel</li></ul></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="perfis">
+      <div class="sec-hdr"><div class="sec-tag">Referência</div><div class="sec-ttl">Perfis de Acesso</div><div class="sec-dsc">O que cada perfil pode ver e fazer no sistema.</div></div>
+      <div class="rg">
+        <div class="rc"><div class="rt">🔵 Administrador</div><ul class="rp"><li><span class="ok">✓</span>Todos os módulos</li><li><span class="ok">✓</span>Convidar equipe</li><li><span class="ok">✓</span>Excluir registros</li><li><span class="ok">✓</span>Financeiro completo</li><li><span class="ok">✓</span>Configurações</li></ul></div>
+        <div class="rc"><div class="rt">🟢 Terapeuta</div><ul class="rp"><li><span class="ok">✓</span>Agenda e sessões</li><li><span class="ok">✓</span>Pacientes e PEI</li><li><span class="ok">✓</span>Avaliações</li><li><span class="ok">✓</span>Reavix AI</li><li><span class="no">✗</span>Financeiro</li><li><span class="no">✗</span>Excluir dados</li></ul></div>
+        <div class="rc"><div class="rt">🟡 Secretaria</div><ul class="rp"><li><span class="ok">✓</span>Agenda</li><li><span class="ok">✓</span>Cadastro pacientes</li><li><span class="ok">✓</span>Sala de espera</li><li><span class="ok">✓</span>Chat</li><li><span class="no">✗</span>Avaliações clínicas</li><li><span class="no">✗</span>Financeiro completo</li></ul></div>
+        <div class="rc"><div class="rt">🟠 Financeiro</div><ul class="rp"><li><span class="ok">✓</span>Contratos</li><li><span class="ok">✓</span>Pagamentos</li><li><span class="ok">✓</span>BI financeiro</li><li><span class="no">✗</span>Prontuários</li><li><span class="no">✗</span>Avaliações</li></ul></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="faq">
+      <div class="sec-hdr"><div class="sec-tag">FAQ</div><div class="sec-ttl">Perguntas Frequentes</div></div>
+      <div class="faq">
+        <div class="fi"><div class="fq" onclick="tf(this)">Os dados ficam seguros?<span class="arr">▼</span></div><div class="fa">Sim. Todos os dados são armazenados no Supabase com Row Level Security (RLS) — cada clínica acessa apenas seus próprios dados. Comunicação sempre por HTTPS e senhas nunca armazenadas em texto puro.</div></div>
+        <div class="fi"><div class="fq" onclick="tf(this)">O que acontece quando crio um contrato?<span class="arr">▼</span></div><div class="fa">O sistema cria automaticamente 12 meses de pagamentos previstos, calculados com base no valor por sessão × sessões semanais × 4. Você só marca como pago quando receber — o previsto já está gerado.</div></div>
+        <div class="fi"><div class="fq" onclick="tf(this)">Como convidar um funcionário?<span class="arr">▼</span></div><div class="fa">Vá em <strong>Equipe</strong> → "+ Convidar Funcionário". Preencha nome, email e perfil. O sistema envia email com link de acesso. O funcionário clica, cria a senha e já acessa com o perfil correto.</div></div>
+        <div class="fi"><div class="fq" onclick="tf(this)">Como funciona o MFA (autenticação em 2 fatores)?<span class="arr">▼</span></div><div class="fa">Acesse <strong>Minha Conta</strong> → seção MFA. Clique em "Ativar MFA", escaneie o QR Code com o Google Authenticator ou Authy, e confirme o código de 6 dígitos. Todo login pedirá o código a partir daí.</div></div>
+        <div class="fi"><div class="fq" onclick="tf(this)">Posso exportar os dados do sistema?<span class="arr">▼</span></div><div class="fa">Sim. Em <strong>Minha Conta</strong> → Exportar Dados você pode baixar lista de pacientes e histórico de sessões em CSV, compatível com Excel e Google Sheets.</div></div>
+        <div class="fi"><div class="fq" onclick="tf(this)">A família vê dados financeiros da clínica?<span class="arr">▼</span></div><div class="fa">Não. O portal da família tem acesso apenas ao progresso do filho, agenda, chat, crises e vídeos. Dados financeiros e de equipe são exclusivos do perfil Clínica.</div></div>
+        <div class="fi"><div class="fq" onclick="tf(this)">O Google Calendar é obrigatório?<span class="arr">▼</span></div><div class="fa">Não. A agenda interna funciona de forma independente. O Google Calendar é uma integração opcional — configure se quiser sincronizar com o calendário pessoal dos terapeutas.</div></div>
+        <div class="fi"><div class="fq" onclick="tf(this)">Por que o BI não mostra dados?<span class="arr">▼</span></div><div class="fa">O BI lê diretamente do banco de dados carregado no login. Se a clínica é nova, os dados estarão vazios até que pacientes, sessões e avaliações sejam cadastrados. Não há dados de demonstração após o primeiro login.</div></div>
+      </div>
+    </div>
+    <div style="height:48px"></div>
+  </div>
+</main>
+</div>
+<script>
+function setA(el){document.querySelectorAll('.ni').forEach(function(i){i.classList.remove('active');});el.classList.add('active');}
+function tf(el){el.parentElement.classList.toggle('open');}
+var secs=document.querySelectorAll('.section[id]');
+var nis=document.querySelectorAll('.ni[href]');
+window.addEventListener('scroll',function(){
+  var sy=window.scrollY+100;
+  secs.forEach(function(s){
+    if(s.offsetTop<=sy&&s.offsetTop+s.offsetHeight>sy){
+      nis.forEach(function(n){n.classList.remove('active');});
+      var a=document.querySelector('.ni[href="#'+s.id+'"]');
+      if(a)a.classList.add('active');
+    }
+  });
+},{passive:true});
+</script>
+</body>
+</html>
