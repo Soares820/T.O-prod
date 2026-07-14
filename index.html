@@ -2894,13 +2894,11 @@ select.reg-inp option{background:#0F1829;color:#fff}
         <p style="font-size:13px;color:var(--t3);margin-top:6px">Receita, contratos e horas de faturamento da clínica</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select class="inp" id="fin-mes-sel" onchange="renderFinanceiro()" style="font-size:12px;padding:8px 12px;min-width:140px;margin:0">
-          <option value="2026-06">Junho 2026</option>
-          <option value="2026-05">Maio 2026</option>
-          <option value="2026-04">Abril 2026</option>
-          <option value="2026-03">Março 2026</option>
-          <option value="2026-02">Fevereiro 2026</option>
-          <option value="2026-01">Janeiro 2026</option>
+        <select class="inp" id="fin-mes-sel" onchange="renderFinanceiro()" style="font-size:12px;padding:8px 12px;min-width:140px;margin:0"></select>
+        <select class="inp" id="fin-tipo-sel" onchange="renderFinanceiro()" style="font-size:12px;padding:8px 12px;min-width:130px;margin:0">
+          <option value="">Todos os tipos</option>
+          <option value="particular">Particular</option>
+          <option value="convenio">Conv�nio</option>
         </select>
         <button class="btn bp" onclick="openNovoContrato()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -3109,15 +3107,25 @@ select.reg-inp option{background:#0F1829;color:#fff}
 <div id="v-clinic-bi" class="view">
   <div class="page-body anim">
     <div class="page-hero"><div class="ph-pre"><span></span>Gestão</div><h1 class="ph-title">BI da Clínica</h1><div class="ph-sub">Indicadores clínicos e operacionais para gestão e acompanhamento</div></div>
+    <!-- BI Filters -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center">
+      <select class="inp" id="bi-mes-sel" onchange="renderClinicBI()" style="font-size:12px;padding:8px 12px;min-width:140px;margin:0"></select>
+      <select class="inp" id="bi-terapeuta-sel" onchange="renderClinicBI()" style="font-size:12px;padding:8px 12px;min-width:160px;margin:0"><option value="">Todos os terapeutas</option></select>
+    </div>
     <div class="g4">
       <div class="kpi kpi-blue"><div class="kpi-top"><div class="kpi-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div></div><div class="kpi-val" id="bi-total">—</div><div class="kpi-lbl">Crianças cadastradas</div></div>
-      <div class="kpi kpi-green"><div class="kpi-top"><div class="kpi-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="kpi-val">93%</div><div class="kpi-lbl">Taxa de presença</div></div>
-      <div class="kpi kpi-purple"><div class="kpi-top"><div class="kpi-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div><div class="kpi-val">3m12s</div><div class="kpi-lbl">Resp. média</div></div>
+      <div class="kpi kpi-green"><div class="kpi-top"><div class="kpi-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div><div class="kpi-val" id="bi-presenca"></div><div class="kpi-lbl">Taxa de presença</div></div>
+      <div class="kpi kpi-purple"><div class="kpi-top"><div class="kpi-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div><div class="kpi-val" id="bi-sessoes"></div><div class="kpi-lbl">Sess�es realizadas</div></div>
       <div class="kpi kpi-yellow"><div class="kpi-top"><div class="kpi-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div><div class="kpi-val" id="bi-evals">—</div><div class="kpi-lbl">Avaliações</div></div>
     </div>
     <div class="g2">
       <div class="card"><div class="sec-hd"><div class="stitle">Perfil PEDI — Média geral</div><span class="tag tp">radar</span></div><div class="radar-wrap" id="bi-radar"><div class="empty-chart"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Carregando dados...</div></div></div>
       <div class="card"><div class="sec-hd"><div class="stitle">Distribuição de avaliações</div></div><div style="display:flex;flex-direction:column;gap:12px" id="bi-eval-dist"><div class="t2c">Calculando...</div></div><div class="card-divider"></div><div class="sec-hd mb3"><div class="stitle">Crescimento</div></div><div class="bc"><div class="bcc"><div class="bar" style="height:50px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.05s"></div><div class="blbl">Jan</div></div><div class="bcc"><div class="bar" style="height:58px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.1s"></div><div class="blbl">Fev</div></div><div class="bcc"><div class="bar" style="height:65px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.15s"></div><div class="blbl">Mar</div></div><div class="bcc"><div class="bar" style="height:72px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.2s"></div><div class="blbl">Abr</div></div><div class="bcc"><div class="bar" style="height:80px;background:linear-gradient(180deg,var(--v),#6D28D9);animation-delay:.25s"></div><div class="blbl">Mai</div></div><div class="bcc"><div class="bar bar-hi" style="height:100px;animation-delay:.3s"></div><div class="blbl">Jun</div></div></div></div>
+    </div>
+    <!-- Sessions Evolution Chart -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="sec-hd"><div class="stitle">Evolu��o de Sess�es</div><div class="ssub"><span style="color:#10b981;font-weight:600">�</span> Realizadas &nbsp;<span style="color:#3b82f6;font-weight:600">�</span> Agendadas</div></div>
+      <svg id="bi-sess-chart" viewBox="0 0 420 160" style="width:100%;height:160px"></svg>
     </div>
     <div class="card"><div class="sec-hd"><div class="stitle">Evolução média por área — PEDI</div></div><div style="display:flex;flex-direction:column;gap:14px" id="bi-areas"><div class="t2c">Calculando médias das avaliações...</div></div></div>
     <div class="card"><div class="sec-hd"><div class="stitle">Alertas e ações</div></div><div style="display:flex;flex-direction:column;gap:9px"><div class="al ald"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div class="f1"><div class="fw7">2 pacientes em situação crítica</div><div class="mt1" style="font-size:11px;opacity:.8">Requerem resposta imediata</div></div><button class="btn bd bsm" style="flex-shrink:0" onclick="goV('crisis-form')">Abrir</button></div><div class="al alw"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div class="f1"><div class="fw7">8 relatórios pendentes</div><div class="mt1" style="font-size:11px;opacity:.8">Famílias aguardam atualização</div></div><button class="btn bo bsm" style="flex-shrink:0" onclick="toast('Relatórios em breve','info')">Ver</button></div><div class="al als"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><div class="f1"><div class="fw7">3 pacientes com excelente evolução</div><div class="mt1" style="font-size:11px;opacity:.8">Reavaliar frequência das sessões</div></div></div></div></div>
@@ -4749,10 +4757,93 @@ function drawRadar(scores,containerId){
 // ══════════════════════════════
 // CLINIC BI
 // ══════════════════════════════
+function _renderBiSessChart(mesFiltered,terapeutaFiltered){
+  var svgEl=document.getElementById('bi-sess-chart');
+  if(!svgEl)return;
+  var _MNAMES4=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var _now4=new Date(),meses4=[],nomes4=[];
+  var numMeses=mesFiltered?6:6;
+  for(var _m4=numMeses-1;_m4>=0;_m4--){
+    var _d4=new Date(_now4.getFullYear(),_now4.getMonth()-_m4,1);
+    meses4.push(_d4.getFullYear()+'-'+String(_d4.getMonth()+1).padStart(2,'0'));
+    nomes4.push(_MNAMES4[_d4.getMonth()]);
+  }
+  var _childIdsFilt=terapeutaFiltered?db.children.filter(function(c){return c.therapist===terapeutaFiltered;}).map(function(c){return c.id;}):null;
+  var dados4=meses4.map(function(m){
+    var sess=db.sessoes.filter(function(s){
+      if(s.data&&s.data.slice(0,7)!==m)return false;
+      if(_childIdsFilt&&!_childIdsFilt.includes(s.childId))return false;
+      return true;
+    });
+    var conc=sess.filter(function(s){return s.status==='concluido'||s.status==='conclu�do';}).length;
+    var canc=sess.filter(function(s){return s.status==='cancelado';}).length;
+    var ag=sess.filter(function(s){return s.status==='agendado'||s.status==='agendada';}).length;
+    return{m:m,nome:_MNAMES4[new Date(m+'-01').getMonth()],conc:conc,canc:canc,ag:ag,total:sess.length};
+  });
+  var maxV4=Math.max.apply(null,dados4.map(function(d){return d.conc+d.ag;}));
+  if(!maxV4){svgEl.innerHTML='<text x="50%" y="50%" text-anchor="middle" font-size="12" fill="var(--t3)">Sem sess�es no per�odo</text>';return;}
+  var W4=420,H4=160,pad4=36,bW=24,gap4=14,cH=H4-pad4-20;
+  var html4='';
+  [0,0.5,1].forEach(function(t){
+    var y=pad4+cH*(1-t);
+    html4+='<line x1="'+pad4+'" y1="'+y+'" x2="'+(W4-10)+'" y2="'+y+'" stroke="var(--bdr)" stroke-width="0.8"/>';
+    html4+='<text x="'+(pad4-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="9" fill="var(--t3)">'+Math.round(maxV4*t)+'</text>';
+  });
+  dados4.forEach(function(d,i){
+    var x=pad4+i*(bW*2+gap4)+gap4;
+    var hConc=Math.round(d.conc/maxV4*cH);
+    var hAg=Math.round(d.ag/maxV4*cH);
+    html4+='<rect x="'+x+'" y="'+(pad4+cH-hConc)+'" width="'+bW+'" height="'+hConc+'" rx="3" fill="#10b981" opacity=".8"/>';
+    if(hAg>0)html4+='<rect x="'+x+'" y="'+(pad4+cH-hConc-hAg)+'" width="'+bW+'" height="'+hAg+'" rx="3" fill="#3b82f6" opacity=".5"/>';
+    html4+='<text x="'+(x+bW/2)+'" y="'+(H4-5)+'" text-anchor="middle" font-size="9" fill="var(--t3)">'+d.nome+'</text>';
+    if(d.total>0)html4+='<text x="'+(x+bW/2)+'" y="'+(pad4+cH-hConc-hAg-4)+'" text-anchor="middle" font-size="8" font-weight="700" fill="var(--t2)">'+d.total+'</text>';
+  });
+  svgEl.innerHTML=html4;
+}
+
 function renderClinicBI(){
-  var kpiEl=document.getElementById('bi-total');if(kpiEl)kpiEl.textContent=db.children.length;
-  var evEl=document.getElementById('bi-evals');if(evEl)evEl.textContent=db.evaluations.length;
-  var kpiEl2=document.getElementById('bi-kpi-total');if(kpiEl2)kpiEl2.textContent=db.children.length;
+  // Populate month selector
+  var _biMSel=document.getElementById('bi-mes-sel');
+  if(_biMSel&&_biMSel.options.length===0){
+    var _MNAMES3=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    var _biCur=new Date();
+    var _biOpts='<option value="">Todos os meses</option>';
+    for(var _bmi=0;_bmi<12;_bmi++){
+      var _bd=new Date(_biCur.getFullYear(),_biCur.getMonth()-_bmi,1);
+      var _bmv=_bd.getFullYear()+'-'+String(_bd.getMonth()+1).padStart(2,'0');
+      var _bmlbl=_MNAMES3[_bd.getMonth()]+' '+_bd.getFullYear();
+      _biOpts+='<option value="'+_bmv+'">'+_bmlbl+'</option>';
+    }
+    _biMSel.innerHTML=_biOpts;
+  }
+  // Populate therapist filter
+  var _biTSel=document.getElementById('bi-terapeuta-sel');
+  if(_biTSel&&_biTSel.options.length<=1){
+    var _terapeutas=[...new Set(db.children.map(function(c){return c.therapist;}).filter(Boolean))];
+    _terapeutas.forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=t;_biTSel.appendChild(o);});
+  }
+  var _biMes=_biMSel?_biMSel.value:'';
+  var _biTerapeuta=_biTSel?_biTSel.value:'';
+  // Apply filters
+  var _criancas=db.children.filter(function(c){return !_biTerapeuta||c.therapist===_biTerapeuta;});
+  var _childIds=_criancas.map(function(c){return c.id;});
+  var _sessoesFilt=db.sessoes.filter(function(s){
+    if(!_childIds.includes(s.childId))return false;
+    if(_biMes&&s.data&&s.data.slice(0,7)!==_biMes)return false;
+    return true;
+  });
+  var _sessConcluidas=_sessoesFilt.filter(function(s){return s.status==='concluido'||s.status==='conclu�do';});
+  var _sessAgendadas=_sessoesFilt.filter(function(s){return s.status==='agendado'||s.status==='agendada';});
+  var _totalSess=_sessConcluidas.length+_sessAgendadas.length;
+  var _taxaPresenca=_totalSess>0?Math.round(_sessConcluidas.length/_totalSess*100):0;
+  var kpiEl=document.getElementById('bi-total');if(kpiEl)kpiEl.textContent=_criancas.length;
+  var evEl=document.getElementById('bi-evals');if(evEl)evEl.textContent=db.evaluations.filter(function(e){return _childIds.includes(e.childId);}).length;
+  var kpiEl2=document.getElementById('bi-kpi-total');if(kpiEl2)kpiEl2.textContent=_criancas.length;
+  // Real attendance rate
+  var presEl=document.getElementById('bi-presenca');if(presEl)presEl.textContent=_taxaPresenca+'%';
+  var sessEl=document.getElementById('bi-sessoes');if(sessEl)sessEl.textContent=_sessConcluidas.length;
+  // Sessions evolution chart
+  _renderBiSessChart(_biMes,_biTerapeuta);
   var counts={PEDI:0,PS:0,SPM:0};
   db.evaluations.forEach(function(e){if(counts[e.type]!==undefined)counts[e.type]++;});
   var tot=db.evaluations.length||1;
@@ -5207,12 +5298,32 @@ function renderLearningCurve(childId){
 // FINANCEIRO
 // ══════════════════════════════
 function fmtBRL(v){return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function getMesAtual(){var s=document.getElementById('fin-mes-sel');return s?s.value:'2026-06';}
+function getMesAtual(){var s=document.getElementById('fin-mes-sel');if(s&&s.value)return s.value;var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 
 function renderFinanceiro(){
+  // Populate month selector dynamically (last 18 months)
+  var _mSel=document.getElementById('fin-mes-sel');
+  if(_mSel){_mSel.innerHTML="";
+    var _MNAMES2=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    var _curDate=new Date();
+    var _opts='';
+    for(var _mi2=0;_mi2<18;_mi2++){
+      var _d2=new Date(_curDate.getFullYear(),_curDate.getMonth()-_mi2,1);
+      var _mv=_d2.getFullYear()+'-'+String(_d2.getMonth()+1).padStart(2,'0');
+      var _mlbl=_MNAMES2[_d2.getMonth()]+' '+_d2.getFullYear();
+      _opts+='<option value="'+_mv+'"'+(_mi2===0?' selected':'')+'>'+_mlbl+'</option>';
+    }
+    _mSel.innerHTML=_opts;
+  }
+  var _tipoFiltro=(document.getElementById('fin-tipo-sel')||{}).value||'';
   var mes=getMesAtual();
   var contracts=db.contracts.filter(function(c){return c.status==='ativo';});
-  var pagMes=db.pagamentos.filter(function(p){return p.mes===mes;});
+  var pagMes=db.pagamentos.filter(function(p){
+    if(p.mes!==mes)return false;
+    if(!_tipoFiltro)return true;
+    var ct=db.contracts.find(function(c){return c.childId===p.childId;});
+    return ct&&ct.tipo===_tipoFiltro;
+  });
 
   // KPIs
   var previsto=pagMes.reduce(function(s,p){return s+p.valorPrevisto;},0);
@@ -5240,7 +5351,7 @@ function renderFinanceiro(){
   setEl('fin-ocupacao',totalSessoesMes+' sess.');
 
   // Gráfico de barras 6 meses
-  renderFinBarChart(mes);
+  renderFinBarChart(mes,_tipoFiltro);
 
   // Donut Particular vs Convênio
   renderFinDonut(mes);
@@ -5252,14 +5363,20 @@ function renderFinanceiro(){
   renderFinPagamentos(mes);
 }
 
-function renderFinBarChart(mesSel){
+function renderFinBarChart(mesSel,_tipoFiltro){
   var svg=document.getElementById('fin-bar-chart');
   if(!svg)return;
   var _nm=new Date(),meses=[],nomes=[],_MNAMES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   for(var _mi=5;_mi>=0;_mi--){var _d=new Date(_nm.getFullYear(),_nm.getMonth()-_mi,1);meses.push(_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0'));nomes.push(_MNAMES[_d.getMonth()]);}
   
   var dados=meses.map(function(m){
-    var pags=db.pagamentos.filter(function(p){return p.mes===m;});
+    var _tf=_tipoFiltro||(document.getElementById('fin-tipo-sel')||{}).value||'';
+    var pags=db.pagamentos.filter(function(p){
+      if(p.mes!==m)return false;
+      if(!_tf)return true;
+      var ct=db.contracts.find(function(c){return c.childId===p.childId;});
+      return ct&&ct.tipo===_tf;
+    });
     return{mes:m,prev:pags.reduce(function(s,p){return s+p.valorPrevisto;},0),rec:pags.reduce(function(s,p){return s+p.valorRecebido;},0)};
   });
   var maxV=Math.max.apply(null,dados.map(function(d){return d.prev;}));
@@ -5292,7 +5409,7 @@ function renderFinBarChart(mesSel){
   svg.innerHTML=html;
 }
 
-function renderFinDonut(mes){
+function renderFinDonut(mes,_tipoFiltro){
   var svg=document.getElementById('fin-donut');
   var leg=document.getElementById('fin-donut-legend');
   var ticket=document.getElementById('fin-ticket-comp');
