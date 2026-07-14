@@ -1189,6 +1189,25 @@ select.reg-inp option{background:#0F1829;color:#fff}
 .tb-sr-sub{font-size:11px;color:var(--t2);margin-top:1px}
 .tb-sr-empty{padding:20px;text-align:center;font-size:13px;color:var(--t2)}
 
+
+.legal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s}
+.legal-overlay.vis{opacity:1;pointer-events:all}
+.legal-box{background:var(--card,#111827);border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.legal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.legal-title{font-size:16px;font-weight:700;color:#fff}
+.legal-close{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.legal-tabs{display:flex;gap:4px;padding:12px 24px 0;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.legal-tab{padding:8px 16px;border-radius:8px 8px 0 0;border:none;background:transparent;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.legal-tab.active{background:rgba(59,130,246,.15);color:#60a5fa}
+.legal-body{overflow-y:auto;padding:24px;flex:1;color:rgba(255,255,255,.8);font-size:14px;line-height:1.7}
+.legal-body h3{color:#fff;font-size:14px;font-weight:700;margin:20px 0 8px}
+.legal-body p{margin:0 0 12px}
+.legal-body strong{color:#fff}
+.terms-accept-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;margin:0 24px 16px}
+.terms-accept-box input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#3b82f6;flex-shrink:0}
+.terms-accept-label{font-size:13px;color:rgba(255,255,255,.8);line-height:1.5}
+.terms-accept-btn{display:block;width:calc(100% - 48px);margin:0 24px 20px;padding:14px;background:linear-gradient(135deg,#2563eb,#7c3aed);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.terms-accept-btn:disabled{opacity:.4;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -3841,6 +3860,71 @@ function iniciarCheckout(plano){
   }).catch(function(e){toast('Erro de conexão','err');if(btn){btn.disabled=false;btn.textContent='Contratar';}});
 }
 
+
+var _legalRequireAccept=false;
+var _legalOnAccept=null;
+var _legalTermosContent='';
+var _legalPrivContent='';
+
+function _getLegalContent(tipo){
+  var v=document.getElementById('v-'+tipo);
+  if(v){
+    var inner=v.querySelector('[style*="line-height:1.7"]')||v.querySelector('.card>div:last-child');
+    if(inner)return inner.innerHTML;
+    var card=v.querySelector('.card');
+    if(card)return card.innerHTML;
+  }
+  return tipo==='termos'?'<p>Carregando termos de uso...</p>':'<p>Carregando pol&iacute;tica de privacidade...</p>';
+}
+
+function abrirLegal(tipo,requireAccept,onAccept){
+  _legalRequireAccept=!!requireAccept;
+  _legalOnAccept=onAccept||null;
+  legalTab(tipo||'termos');
+  var ov=document.getElementById('legal-overlay');
+  var closeBtn=document.getElementById('legal-close-btn');
+  var acceptRow=document.getElementById('legal-accept-row');
+  var cb=document.getElementById('legal-cb');
+  var okBtn=document.getElementById('legal-accept-ok');
+  if(closeBtn)closeBtn.style.display=requireAccept?'none':'';
+  if(acceptRow)acceptRow.style.display=requireAccept?'':'none';
+  if(cb)cb.checked=false;
+  if(okBtn)okBtn.disabled=true;
+  if(ov){ov.classList.add('vis');}
+  document.body.style.overflow='hidden';
+}
+
+function fecharLegal(){
+  if(_legalRequireAccept)return;
+  var ov=document.getElementById('legal-overlay');
+  if(ov)ov.classList.remove('vis');
+  document.body.style.overflow='';
+}
+
+function legalTab(tipo){
+  ['termos','privacidade'].forEach(function(t){
+    var tab=document.getElementById('ltab-'+t);
+    if(tab)tab.classList.toggle('active',t===tipo);
+  });
+  var body=document.getElementById('legal-body');
+  var title=document.getElementById('legal-title');
+  if(body)body.innerHTML=_getLegalContent(tipo);
+  if(title)title.textContent=tipo==='termos'?'Termos de Uso':'Pol\u00edtica de Privacidade';
+}
+
+function abrirLegalLogin(tipo){abrirLegal(tipo,false,null);}
+function abrirDocLegal(tipo){abrirLegal(tipo,false,null);}
+
+function aceitarTermos(){
+  var cb=document.getElementById('legal-cb');
+  if(!cb||!cb.checked)return;
+  var ov=document.getElementById('legal-overlay');
+  if(ov)ov.classList.remove('vis');
+  document.body.style.overflow='';
+  _legalRequireAccept=false;
+  if(_legalOnAccept){var fn=_legalOnAccept;_legalOnAccept=null;fn();}
+}
+
 function escapeHtml(s){if(s==null)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
 var _sb=supabase.createClient('https://sceqtztqdmflabdvrzwt.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjZXF0enRxZG1mbGFiZHZyend0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ1MTIsImV4cCI6MjA5ODA1MDUxMn0.6yfv8M5c347FLdJ6Sxvd8813vV-axeeGWNrUtzSErLE');
 function loadSupabaseData(){
@@ -4874,7 +4958,7 @@ function doRegister(){
               setTimeout(function(){
                 reg.classList.remove('active');reg.style.opacity='';reg.style.transition='';
                 fetch('/api/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'welcome',to:email,name:name,clinicName:clinicName})}).catch(function(){});
-                goV('dashboard');
+                abrirLegal('termos',true,function(){goV('dashboard');});
               },420);
             } else {
               btn.disabled=false;btn.innerHTML=btnOrig;
@@ -6364,5 +6448,27 @@ chkMob();
   observer.observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
 })();
 </script>
+
+<!--    LEGAL MODAL                           -->
+<div id="legal-overlay" class="legal-overlay" onclick="if(event.target===this&&!_legalRequireAccept)fecharLegal()">
+  <div class="legal-box">
+    <div class="legal-header">
+      <span class="legal-title" id="legal-title">Termos de Uso</span>
+      <button class="legal-close" id="legal-close-btn" onclick="fecharLegal()" title="Fechar">&#x2715;</button>
+    </div>
+    <div class="legal-tabs">
+      <button class="legal-tab active" id="ltab-termos" onclick="legalTab('termos')">Termos de Uso</button>
+      <button class="legal-tab" id="ltab-privacidade" onclick="legalTab('privacidade')">Privacidade</button>
+    </div>
+    <div class="legal-body" id="legal-body"></div>
+    <div id="legal-accept-row" style="display:none">
+      <div class="terms-accept-box">
+        <input type="checkbox" id="legal-cb" onchange="document.getElementById('legal-accept-ok').disabled=!this.checked">
+        <label class="terms-accept-label" for="legal-cb">Li e concordo com os <strong>Termos de Uso</strong> e a <strong>Pol&iacute;tica de Privacidade</strong> da T.O Plataforma</label>
+      </div>
+      <button class="terms-accept-btn" id="legal-accept-ok" disabled onclick="aceitarTermos()">Aceitar e acessar o sistema &rarr;</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
