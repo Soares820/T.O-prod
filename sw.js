@@ -1,4 +1,4 @@
-const CACHE = 'to-plataforma-v5';
+const CACHE = 'to-plataforma-v6';
 const OFFLINE = [
   '/manifest.json',
   '/icons/icon-192.png',
@@ -24,6 +24,10 @@ self.addEventListener('activate', e => {
 // Fetch strategy
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+
+  // Ignora requests de origens externas (CDNs, fonts, Google) —
+  // deixa o browser processar normalmente sem passar pelo SW
+  if (url.origin !== self.location.origin) return;
 
   // API: sempre rede
   if (url.pathname.startsWith('/api/')) {
