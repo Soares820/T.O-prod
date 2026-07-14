@@ -1190,6 +1190,10 @@ select.reg-inp option{background:#0F1829;color:#fff}
 .tb-sr-empty{padding:20px;text-align:center;font-size:13px;color:var(--t2)}
 
 
+.agenda-sess-acts{display:flex;gap:4px;margin-left:4px;flex-shrink:0;align-items:center}
+.ast-act-btn{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .15s;display:flex;align-items:center;justify-content:center;line-height:1}
+.ast-act-ok{background:rgba(5,150,105,.15);color:#10b981}.ast-act-ok:hover{background:rgba(5,150,105,.3)}
+.ast-act-x{background:rgba(220,38,38,.1);color:#dc2626}.ast-act-x:hover{background:rgba(220,38,38,.25)}
 .legal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s}
 .legal-overlay.vis{opacity:1;pointer-events:all}
 .legal-box{background:var(--card,#111827);border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
@@ -3934,31 +3938,28 @@ function loadSupabaseData(){
     _sb.from('contratos').select('*').order('id'),
     _sb.from('pagamentos').select('*').order('id'),
     _sb.from('funcionarios').select('*').order('id'),
-    _sb.from('sessoes').select('*').order('data').order('hora')
+    _sb.from('sessoes').select('*').order('data').order('hora'),
+    _sb.from('metas').select('*').order('id')
   ]).then(function(res){
-    var pac=res[0],av=res[1],cont=res[2],pag=res[3],func=res[4],sess=res[5];
-    if(pac.data&&pac.data.length){
-      db.children=pac.data.map(function(r){return{id:r.id,name:r.name,dob:r.dob,sex:r.sex,responsible:r.responsible,diagnosis:r.diagnosis,therapist:r.therapist,notes:r.notes,status:r.status||'ativo'};});
-      db.nextChildId=Math.max.apply(null,db.children.map(function(c){return c.id;}))+1;
-    }
-    if(av.data&&av.data.length){
-      db.evaluations=av.data.map(function(r){return{id:r.id,childId:r.child_id,type:r.type,date:r.date,scores:r.scores||{},notes:r.notes};});
-      db.nextEvalId=Math.max.apply(null,db.evaluations.map(function(e){return e.id;}))+1;
-    }
-    if(cont.data&&cont.data.length){
-      db.contracts=cont.data.map(function(r){return{id:r.id,childId:r.child_id,tipo:r.tipo,convenio:r.convenio,valorSessao:r.valor_sessao,sessoesSemanais:r.sessoes_semanais,duracaoMin:r.duracao_min,diaVencimento:r.dia_vencimento,status:r.status};});
-      db.nextContractId=Math.max.apply(null,db.contracts.map(function(c){return c.id;}))+1;
-    }
-    if(pag.data&&pag.data.length){
-      db.pagamentos=pag.data.map(function(r){return{id:r.id,childId:r.child_id,mes:r.mes,valorPrevisto:r.valor_previsto,valorRecebido:r.valor_recebido||0,status:r.status,dataPag:r.data_pag};});
-      db.nextPagId=Math.max.apply(null,db.pagamentos.map(function(p){return p.id;}))+1;
-    }
+    var pac=res[0],av=res[1],cont=res[2],pag=res[3],func=res[4],sess=res[5],met=res[6];
+    // Sempre limpa arrays
+    db.children=(pac.data||[]).map(function(r){return{id:r.id,name:r.name,dob:r.dob,sex:r.sex,responsible:r.responsible,diagnosis:r.diagnosis,therapist:r.therapist,notes:r.notes,status:r.status||'ativo'};});
+    db.nextChildId=db.children.length?Math.max.apply(null,db.children.map(function(c){return c.id;}))+1:1;
+    db.evaluations=(av.data||[]).map(function(r){return{id:r.id,childId:r.child_id,type:r.type,date:r.date,scores:r.scores||{},notes:r.notes};});
+    db.nextEvalId=db.evaluations.length?Math.max.apply(null,db.evaluations.map(function(e){return e.id;}))+1:1;
+    db.contracts=(cont.data||[]).map(function(r){return{id:r.id,childId:r.child_id,tipo:r.tipo,convenio:r.convenio,valorSessao:r.valor_sessao,sessoesSemanais:r.sessoes_semanais,duracaoMin:r.duracao_min,diaVencimento:r.dia_vencimento,status:r.status};});
+    db.nextContractId=db.contracts.length?Math.max.apply(null,db.contracts.map(function(c){return c.id;}))+1:1;
+    db.pagamentos=(pag.data||[]).map(function(r){return{id:r.id,childId:r.child_id,mes:r.mes,valorPrevisto:r.valor_previsto,valorRecebido:r.valor_recebido||0,status:r.status,dataPag:r.data_pag};});
+    db.nextPagId=db.pagamentos.length?Math.max.apply(null,db.pagamentos.map(function(p){return p.id;}))+1:1;
     if(func.data&&func.data.length){
       db.funcionarios=func.data.map(function(r){return{id:r.id,nome:r.nome,email:r.email,cargo:r.cargo,nivel:r.nivel,status:r.status,tel:r.telefone};});
     }
     if(sess.data&&sess.data.length){
       db.sessoes=sess.data.map(function(r){return{id:r.id,childId:r.child_id,funcionarioId:r.funcionario_id,data:r.data,hora:r.hora,tipo:r.tipo,status:r.status,duracaoMin:r.duracao_min,notas:r.notas,pacienteNome:r.paciente_nome};});
     }
+    // Carregar metas/PEI
+    db.goals=(met&&met.data||[]).map(function(r){return{id:r.id,childId:r.child_id,desc:r.descricao,area:r.area,status:r.status,criteria:r.criterio,date:r.created_at?new Date(r.created_at).getTime():Date.now()};});
+    db.nextGoalId=db.goals.length?Math.max.apply(null,db.goals.map(function(g){return g.id;}))+1:1;
     // Se a clínica está ativa no Supabase mas não tem dados ainda, limpa os mocks
     if(_clinicId&&(!pac.data||!pac.data.length)){db.children=[];db.evaluations=[];db.contracts=[];db.pagamentos=[];}
   }).catch(function(e){console.warn('Supabase indisponível, usando dados de demonstração',e);});
@@ -5065,7 +5066,13 @@ function saveGoal(){
   if(!desc){toast('Descreva a meta','error');return;}
   var goal={id:db.nextGoalId++,childId:currentChildId,desc:desc,area:document.getElementById('goal-area').value,status:document.getElementById('goal-status').value,criteria:(document.getElementById('goal-criteria').value||'').trim(),date:Date.now()};
   db.goals.push(goal);
-  if(_clinicId){_sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'META_PEI',tabela:'metas',record_id:goal.childId||null,detalhes:JSON.stringify({descricao:goal.desc,area:goal.area,status:goal.status,criterio:goal.criteria})}]).then(function(r){if(r.error)console.warn('goal sb',r.error);});}
+  if(_clinicId){
+    _sb.from('metas').insert([{clinic_id:_clinicId,child_id:goal.childId||null,descricao:goal.desc,area:goal.area||'',status:goal.status||'ativo',criterio:goal.criteria||''}]).select().then(function(r){
+      if(r.error)console.warn('saveGoal metas',r.error);
+      else if(r.data&&r.data[0])goal.id=r.data[0].id;
+    });
+    _sb.from('audit_logs').insert([{clinic_id:_clinicId,action:'META_PEI',tabela:'metas',detalhes:JSON.stringify({descricao:goal.desc,area:goal.area})}]).then(function(){});
+  }}
   document.getElementById('modal-goal').classList.remove('open');
   renderPEI();
   toast('Meta adicionada ao PEI','check');
@@ -5436,7 +5443,24 @@ function saveContrato(){
   if(existing>=0){db.contracts[existing].tipo=tipo;db.contracts[existing].convenio=document.getElementById('ct-convenio').value;db.contracts[existing].valorSessao=valor;db.contracts[existing].sessoesSemanais=sess;db.contracts[existing].duracaoMin=parseInt(document.getElementById('ct-duracao').value)||50;db.contracts[existing].diaVencimento=parseInt(document.getElementById('ct-venc').value)||10;}
   else{db.contracts.push({id:db.nextContractId++,childId:childId,tipo:tipo,convenio:document.getElementById('ct-convenio').value,valorSessao:valor,sessoesSemanais:sess,duracaoMin:parseInt(document.getElementById('ct-duracao').value)||50,diaVencimento:parseInt(document.getElementById('ct-venc').value)||10,status:'ativo'});}
   var ct=existing>=0?db.contracts[existing]:db.contracts[db.contracts.length-1];
-  var _ctPayload={clinic_id:_clinicId,child_id:ct.childId,tipo:ct.tipo,convenio:ct.convenio||'',valor_sessao:ct.valorSessao,sessoes_semanais:ct.sessoesSemanais,duracao_min:ct.duracaoMin,dia_vencimento:ct.diaVencimento,status:ct.status||'ativo'};if(existing>=0&&ct.id){_sb.from('contratos').update(_ctPayload).eq('id',ct.id).then(function(r){if(r.error)console.warn('updateContrato sb',r.error);});}else{_sb.from('contratos').insert([_ctPayload]).select().then(function(r){if(r.error)console.warn('insertContrato sb',r.error);else if(r.data&&r.data[0])ct.id=r.data[0].id;});}
+  var _ctPayload={clinic_id:_clinicId,child_id:ct.childId,tipo:ct.tipo,convenio:ct.convenio||'',valor_sessao:ct.valorSessao,sessoes_semanais:ct.sessoesSemanais,duracao_min:ct.duracaoMin,dia_vencimento:ct.diaVencimento,status:ct.status||'ativo'};if(existing>=0&&ct.id){_sb.from('contratos').update(_ctPayload).eq('id',ct.id).then(function(r){if(r.error)console.warn('updateContrato sb',r.error);});}else{_sb.from('contratos').insert([_ctPayload]).select().then(function(r){
+      if(r.error){console.warn('insertContrato sb',r.error);return;}
+      if(r.data&&r.data[0]){
+        ct.id=r.data[0].id;
+        var _now=new Date(),_pagRows=[];
+        for(var _m=0;_m<12;_m++){
+          var _d=new Date(_now.getFullYear(),_now.getMonth()+_m,1);
+          var _mes=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0');
+          var _vMes=(_ctPayload.valor_sessao||0)*(_ctPayload.sessoes_semanais||4)*4;
+          _pagRows.push({clinic_id:_clinicId,child_id:_ctPayload.child_id,mes:_mes,valor_previsto:_vMes,valor_recebido:0,status:'pendente'});
+        }
+        _sb.from('pagamentos').insert(_pagRows).then(function(pr){
+          if(pr.error)console.warn('pagamentos auto-insert',pr.error);
+          else{(pr.data||[]).forEach(function(row){db.pagamentos.push({id:row.id,childId:row.child_id,mes:row.mes,valorPrevisto:row.valor_previsto,valorRecebido:0,status:'pendente'});});}
+          renderFinanceiro();
+        });
+      }
+    });}
   document.getElementById('modal-contrato').classList.remove('open');
   renderFinanceiro();
   var child=db.children.find(function(x){return x.id===childId;})||{name:'Paciente'};
@@ -6151,6 +6175,17 @@ function agendaHoje(){
 }
 
 var _agDaySelected=false;
+function atualizarStatusSessao(id,novoStatus){
+  var all=_allSessoes();
+  var s=all?all.find(function(x){return x.id===id;}):null;
+  if(s)s.status=novoStatus;
+  _sb.from('sessoes').update({status:novoStatus}).eq('id',id).then(function(r){
+    if(r.error)console.warn('updateSessaoStatus',r.error);
+    renderAgendaSidePanel(true);
+    renderAgendaCalendar();
+  });
+}
+
 function renderAgendaSidePanel(fromClick){
   var dateEl=document.getElementById('agenda-side-date');
   var subEl=document.getElementById('agenda-side-sub');
@@ -6195,6 +6230,10 @@ function renderAgendaSidePanel(fromClick){
         '<div class="agenda-sess-meta">'+(s.terapeuta||'')+(s.duracao?' · '+s.duracao+' min':'')+(s.tipo?' · '+s.tipo:'')+'</div>'+
       '</div>'+
       '<span class="agenda-sess-tag '+st.cls+'">'+st.lbl+'</span>'+
+      (s.status==='agendado'||s.status==='agendada'?'<div class="agenda-sess-acts">'+
+        '<button class="ast-act-btn ast-act-ok" onclick="atualizarStatusSessao('+s.id+',\'concluido\')" title="Concluir">&#10003;</button>'+
+        '<button class="ast-act-btn ast-act-x" onclick="atualizarStatusSessao('+s.id+',\'cancelado\')" title="Cancelar">&#10005;</button>'+
+        '</div>':'')+
     '</div>';
   }).join('');
 }
