@@ -1,0 +1,752 @@
+<title>T.O Plataforma — Visão Geral do Produto</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@import url('data:text/css,');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  background:#F1F5F9;
+  color:#0F172A;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── PDF HINT ── */
+.hint{
+  background:#1E40AF;color:#fff;
+  font-size:13px;padding:11px 40px;
+  display:flex;align-items:center;justify-content:flex-end;gap:16px;
+}
+.hint span{opacity:.75}
+.hint button{
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+  color:#fff;font-size:12px;font-weight:700;
+  padding:5px 14px;border-radius:5px;cursor:pointer;
+  letter-spacing:.02em;
+}
+.hint button:hover{background:rgba(255,255,255,.28)}
+
+/* ── COVER ── */
+.cover{
+  background:#fff;
+  border-bottom:1px solid #E2E8F0;
+  padding:64px 64px 56px;
+}
+.cover-top{
+  max-width:780px;margin:0 auto;
+  display:flex;align-items:flex-start;
+  justify-content:space-between;gap:40px;flex-wrap:wrap;
+  margin-bottom:48px;
+}
+.cover-logo{
+  font-size:22px;font-weight:800;letter-spacing:-0.03em;
+  color:#0F172A;
+}
+.cover-logo span{color:#1E40AF}
+.cover-meta{
+  text-align:right;
+  font-size:13px;color:#94A3B8;line-height:1.8;
+}
+.cover-body{max-width:780px;margin:0 auto}
+.cover-kicker{
+  font-size:12px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:#1E40AF;
+  margin-bottom:20px;
+}
+.cover h1{
+  font-size:clamp(36px,5.5vw,58px);
+  font-weight:800;letter-spacing:-0.04em;
+  line-height:1.08;color:#0F172A;
+  margin-bottom:20px;text-wrap:balance;
+}
+.cover-tagline{
+  font-size:19px;line-height:1.7;color:#475569;
+  max-width:560px;margin-bottom:48px;
+}
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;background:#E2E8F0;
+  border:1px solid #E2E8F0;border-radius:12px;
+  overflow:hidden;
+}
+@media(max-width:580px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{
+  background:#fff;padding:24px 28px;
+}
+.kpi .k{
+  font-size:36px;font-weight:900;letter-spacing:-0.05em;
+  color:#0F172A;line-height:1;
+  font-variant-numeric:tabular-nums;margin-bottom:6px;
+}
+.kpi .v{
+  font-size:12px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:#94A3B8;
+}
+
+/* ── NAV ── */
+.nav{
+  background:#fff;border-bottom:1px solid #E2E8F0;
+  position:sticky;top:0;z-index:99;
+  overflow-x:auto;scrollbar-width:none;
+}
+.nav::-webkit-scrollbar{display:none}
+.nav-inner{
+  display:flex;max-width:900px;margin:0 auto;
+  padding:0 48px;
+}
+.nav-inner a{
+  display:block;padding:14px 16px;
+  font-size:13px;font-weight:600;color:#64748B;
+  text-decoration:none;white-space:nowrap;
+  border-bottom:2px solid transparent;
+  transition:color .1s,border-color .1s;
+}
+.nav-inner a:hover,.nav-inner a.on{color:#1E40AF;border-color:#1E40AF}
+
+/* ── LAYOUT ── */
+.page{max-width:900px;margin:0 auto;padding:64px 48px 120px}
+
+section{margin-bottom:80px;scroll-margin-top:48px}
+
+/* ── SECTION HEAD ── */
+.sh{margin-bottom:40px}
+.sh .label{
+  font-size:11px;font-weight:800;letter-spacing:.2em;
+  text-transform:uppercase;color:#1E40AF;margin-bottom:8px;
+}
+.sh h2{
+  font-size:30px;font-weight:800;letter-spacing:-0.03em;
+  color:#0F172A;line-height:1.2;margin-bottom:10px;
+}
+.sh p{font-size:16px;color:#64748B;line-height:1.65;max-width:560px}
+
+/* ── DIVIDER ── */
+.divider{
+  border:none;border-top:1px solid #E2E8F0;
+  margin:0 0 80px;
+}
+
+/* ── MODULE GROUP ── */
+.mg{margin-bottom:48px}
+.mg-label{
+  font-size:11px;font-weight:800;letter-spacing:.18em;
+  text-transform:uppercase;color:#94A3B8;
+  padding-bottom:16px;margin-bottom:0;
+  border-bottom:2px solid #F1F5F9;
+}
+.feat-list{border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;overflow:hidden;background:#fff}
+.feat-row{
+  display:flex;gap:0;
+  border-bottom:1px solid #F1F5F9;
+}
+.feat-row:last-child{border-bottom:none}
+.feat-row:hover{background:#F8FAFC}
+.feat-n{
+  font-size:15px;font-weight:700;color:#0F172A;
+  padding:18px 20px;
+  width:260px;flex-shrink:0;
+  border-right:1px solid #F1F5F9;
+  line-height:1.4;display:flex;align-items:flex-start;gap:10px;
+}
+.feat-d{
+  font-size:15px;color:#475569;
+  padding:18px 24px;line-height:1.65;flex:1;
+}
+.pill{
+  flex-shrink:0;margin-top:2px;
+  font-size:10px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;padding:2px 7px;border-radius:4px;
+  line-height:1.6;
+}
+.p-live{background:#DCFCE7;color:#166534}
+.p-ai{background:#DBEAFE;color:#1E40AF}
+
+/* ── PORTALS ── */
+.portals{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:560px){.portals{grid-template-columns:1fr}}
+.portal-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden}
+.pc-head{padding:24px 28px;border-bottom:1px solid #E2E8F0}
+.pc-eyebrow{
+  font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:#94A3B8;margin-bottom:8px;
+}
+.pc-name{
+  font-size:20px;font-weight:800;letter-spacing:-0.02em;
+  color:#0F172A;margin-bottom:3px;
+}
+.pc-sub{font-size:14px;color:#64748B}
+.pc-items{list-style:none}
+.pc-items li{
+  padding:11px 28px;font-size:15px;color:#334155;
+  border-bottom:1px solid #F1F5F9;line-height:1.5;
+}
+.pc-items li:last-child{border:none}
+.pc-items li b{color:#0F172A}
+
+/* ── PRICING ── */
+.pricing-scroll{overflow-x:auto;border:1px solid #E2E8F0;border-radius:12px}
+.ptable{width:100%;min-width:540px;border-collapse:collapse;background:#fff}
+.ptable thead tr{border-bottom:2px solid #E2E8F0}
+.ptable th{
+  padding:24px 20px;text-align:left;
+}
+.ptable th.row-label{
+  font-size:12px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#94A3B8;
+  width:34%;
+}
+.ptable th.col{
+  text-align:center;border-left:1px solid #E2E8F0;
+}
+.ptable th.col.pop{background:#EFF6FF}
+.plan-name{display:block;font-size:14px;font-weight:800;color:#0F172A;margin-bottom:4px}
+.plan-price{
+  display:block;font-size:28px;font-weight:900;color:#0F172A;
+  letter-spacing:-0.04em;font-variant-numeric:tabular-nums;margin-bottom:3px;
+}
+.plan-note{display:block;font-size:12px;color:#94A3B8;font-weight:400}
+.ptable td{
+  padding:14px 20px;font-size:15px;color:#475569;
+  border-bottom:1px solid #F1F5F9;border-left:1px solid #E2E8F0;
+  font-weight:400;
+}
+.ptable td:first-child{border-left:none}
+.ptable tr:last-child td{border-bottom:none}
+.ptable td.c{text-align:center;font-weight:700;color:#0F172A}
+.ptable td.c.pop{background:#EFF6FF}
+.ptable td.c .yes{color:#166534;font-size:17px}
+.ptable td.c .no{color:#CBD5E1;font-weight:400}
+
+/* ── TECH ── */
+.tech-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:#E2E8F0;border:1px solid #E2E8F0;
+  border-radius:12px;overflow:hidden;
+}
+@media(max-width:580px){.tech-grid{grid-template-columns:1fr}}
+.tech-cell{
+  background:#fff;padding:28px 28px;
+}
+.tech-cell-name{
+  font-size:16px;font-weight:800;color:#0F172A;
+  margin-bottom:8px;
+}
+.tech-cell-desc{font-size:15px;color:#475569;line-height:1.65}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:32px}
+.tl::before{
+  content:'';position:absolute;
+  left:6px;top:8px;bottom:28px;
+  width:2px;background:#E2E8F0;border-radius:2px;
+}
+.tli{position:relative;margin-bottom:44px}
+.tli:last-child{margin-bottom:0}
+.tli-dot{
+  position:absolute;left:-32px;top:5px;
+  width:14px;height:14px;border-radius:50%;
+}
+.d-now{background:#1E40AF;box-shadow:0 0 0 4px #DBEAFE}
+.d-future{background:#F1F5F9;border:2px solid #CBD5E1}
+.tli-when{
+  font-size:11px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:#94A3B8;margin-bottom:6px;
+}
+.tli-h{
+  font-size:19px;font-weight:800;letter-spacing:-0.02em;
+  color:#0F172A;margin-bottom:7px;
+}
+.tli-p{font-size:15px;color:#475569;line-height:1.7}
+
+/* ── SECURITY ── */
+.sec-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:#E2E8F0;border:1px solid #E2E8F0;
+  border-radius:12px;overflow:hidden;
+}
+@media(max-width:580px){.sec-grid{grid-template-columns:1fr}}
+.sec-cell{background:#fff;padding:24px 28px}
+.sec-cell-name{
+  font-size:15px;font-weight:800;color:#0F172A;
+  margin-bottom:7px;display:flex;align-items:center;gap:8px;
+}
+.sec-cell-name::before{
+  content:'';width:8px;height:8px;
+  border-radius:50%;background:#22C55E;flex-shrink:0;
+}
+.sec-cell-desc{font-size:14px;color:#475569;line-height:1.65}
+
+/* ── FOOTER ── */
+footer{
+  background:#0F172A;padding:40px 64px;
+  display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:12px;
+}
+footer .fn{font-size:16px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:-0.02em}
+footer .fm{font-size:13px;color:rgba(255,255,255,.2)}
+
+/* ── MOBILE ── */
+@media(max-width:560px){
+  .cover{padding:40px 24px 40px}
+  .page{padding:40px 20px 80px}
+  footer,.hint{padding-left:24px;padding-right:24px}
+  .feat-row{flex-direction:column}
+  .feat-n{width:auto;border-right:none;border-bottom:1px solid #F1F5F9;padding-bottom:12px}
+  .feat-d{padding-top:8px}
+}
+
+/* ── PRINT ── */
+@media print{
+  body{background:#fff;font-size:11pt}
+  .hint,.nav{display:none!important}
+  .cover{
+    border:none;padding:0 0 32pt;
+    background:#fff;
+  }
+  .page{padding:20pt 0 40pt;max-width:none}
+  section{page-break-inside:avoid;margin-bottom:24pt}
+  .mg,.feat-row,.tli,.tech-cell,.sec-cell,.portal-card{page-break-inside:avoid}
+  .kpis{border-color:#ccc;background:#ccc}
+  .kpi{border:1px solid #ccc}
+  footer{
+    background:#0F172A;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .pricing-scroll,.tech-grid,.sec-grid{border-color:#ccc;background:#ccc}
+  .ptable td,.ptable th,.tech-cell,.sec-cell,.portal-card,.feat-list,.feat-row{
+    border-color:#ccc!important;
+  }
+  .ptable th.col.pop,.ptable td.c.pop{background:#EFF6FF!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sec-cell-name::before{background:#22C55E!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+
+<div class="hint" id="hint">
+  <span>Documento pronto para PDF — Ctrl + P → Salvar como PDF</span>
+  <button onclick="window.print()">Exportar PDF</button>
+</div>
+
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-logo">T.O<span>.</span>Plataforma</div>
+    <div class="cover-meta">
+      Documento Confidencial<br>
+      Julho de 2026
+    </div>
+  </div>
+  <div class="cover-body">
+    <div class="cover-kicker">Visão Geral do Produto</div>
+    <h1>Software SaaS para<br>Clínicas de Terapia ABA</h1>
+    <p class="cover-tagline">Plataforma completa de gestão clínica para clínicas de Terapia Ocupacional e ABA — multi-tenant, segura e pronta para lançamento em agosto de 2026.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="k">24</div><div class="v">Módulos ativos</div></div>
+      <div class="kpi"><div class="k">2</div><div class="v">Portais de acesso</div></div>
+      <div class="kpi"><div class="k">3</div><div class="v">Planos comerciais</div></div>
+      <div class="kpi"><div class="k">Ago/26</div><div class="v">Data de lançamento</div></div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#modulos">Módulos</a>
+    <a href="#portais">Portais</a>
+    <a href="#planos">Planos</a>
+    <a href="#tech">Tecnologia</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#seguranca">Segurança</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ── MÓDULOS ── -->
+  <section id="modulos">
+    <div class="sh">
+      <div class="label">Funcionalidades</div>
+      <h2>Módulos do Sistema</h2>
+      <p>Todos os módulos abaixo estão ativos em produção. <span style="background:#DCFCE7;color:#166534;font-size:11px;font-weight:800;padding:1px 6px;border-radius:3px">ATIVO</span> = entregue · <span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:800;padding:1px 6px;border-radius:3px">IA</span> = alimentado por inteligência artificial</p>
+    </div>
+
+    <!-- Gestão de Pacientes -->
+    <div class="mg">
+      <div class="mg-label">Gestão de Pacientes</div>
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-n">Cadastro de Pacientes <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Nome, data de nascimento, diagnóstico TEA, responsável legal, terapeuta vinculado e campo livre para observações clínicas.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Ficha Individual <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Página dedicada por paciente com histórico completo — avaliações, contratos, sessões e metas em um único lugar.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Avaliações Clínicas <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Registro estruturado de PEDI, PS, SPM, ABLLS e VBMAPP com scores e notas por data de aplicação.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Contratos Terapêuticos <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Valor da sessão, frequência semanal, duração, tipo (particular/convênio) e status. Base do cálculo de MRR.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Busca e Filtros <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Filtragem por terapeuta e status ativo/inativo. Busca por nome em tempo real.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agenda -->
+    <div class="mg">
+      <div class="mg-label">Agenda e Sessões</div>
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-n">Agendamento <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Sessões por data, hora, paciente e terapeuta. Status: agendado, realizado, cancelado ou falta.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Histórico de Sessões <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Registro completo com notas de evolução clínica, duração e tipo de terapia por atendimento.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Sala de Espera <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Check-in de chegada com nome do paciente e terapeuta. Fila em tempo real para a recepção.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Google Calendar <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Sincronização bidirecional — sessões aparecem automaticamente na agenda pessoal do terapeuta.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terapia -->
+    <div class="mg">
+      <div class="mg-label">Terapia e Evolução Clínica</div>
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-n">PEI — Plano de Ensino Individual <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Metas terapêuticas por categorias, com objetivos específicos e critério de domínio definido por paciente.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">DTT — Treino por Tentativas <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Registro de ensaios com acerto, erro ou prompt. Porcentagem de acerto calculada automaticamente.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Atividades Terapêuticas <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Planejamento e registro de atividades por sessão com tipo e observações do terapeuta.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Gráficos de Progresso <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Evolução por meta ao longo do tempo. Linha do tempo de desenvolvimento com marcos de conquista.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Registro de Crises <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Severidade (1–5), descrição, duração e estratégia utilizada. Registro imutável — não pode ser editado ou excluído.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financeiro -->
+    <div class="mg">
+      <div class="mg-label">Financeiro</div>
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-n">Controle de Pagamentos <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Status por paciente e mês: pendente, recebido, parcial ou inadimplente. Valor previsto vs. recebido.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">MRR em Tempo Real <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Receita Mensal Recorrente calculada dos contratos ativos (valor × sessões semanais × 4).</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Assinatura via Stripe <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Checkout com 3 planos e trial de 14 dias. Pagamento confirma e ativa a conta da clínica automaticamente.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Dashboard de BI <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Receita por período, taxa de inadimplência, crescimento mês a mês e projeções.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Equipe -->
+    <div class="mg">
+      <div class="mg-label">Gestão de Equipe</div>
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-n">Cadastro de Funcionários <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Nome, cargo, email, nível de acesso (admin, terapeuta, recepção, financeiro) e status.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Convites por Email <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Link de convite com validade de 7 dias. O funcionário define sua própria senha ao aceitar.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Controle de Acesso <span class="pill p-live">Ativo</span></div>
+          <div class="feat-d">Cada perfil de cargo acessa apenas o que lhe é pertinente. Família, por exemplo, não vê dados administrativos.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reavix -->
+    <div class="mg">
+      <div class="mg-label">Reavix AI — Inteligência Artificial Clínica</div>
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-n">Chat Clínico Especializado <span class="pill p-ai">IA</span></div>
+          <div class="feat-d">Assistente em português brasileiro para dúvidas sobre TEA, ABA e Terapia Ocupacional. Disponível para todos os usuários da clínica.</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-n">Suporte à Decisão Clínica <span class="pill p-ai">IA</span></div>
+          <div class="feat-d">Auxilia na formulação de metas PEI, estratégias de intervenção e interpretação de avaliações. Amplia a capacidade do terapeuta sem substituir o julgamento clínico.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── PORTAIS ── -->
+  <section id="portais">
+    <div class="sh">
+      <div class="label">Acesso</div>
+      <h2>Dois Portais Independentes</h2>
+      <p>A plataforma oferece interfaces separadas para a clínica e para as famílias, com login e acesso restritos ao que é pertinente a cada perfil.</p>
+    </div>
+    <div class="portals">
+      <div class="portal-card">
+        <div class="pc-head">
+          <div class="pc-eyebrow">Portal da Clínica</div>
+          <div class="pc-name">Gestores e Terapeutas</div>
+          <div class="pc-sub">Controle administrativo e clínico completo</div>
+        </div>
+        <ul class="pc-items">
+          <li><b>Dashboard</b> — sessões do dia, equipe e MRR</li>
+          <li><b>Pacientes</b> — fichas, avaliações e contratos</li>
+          <li><b>Agenda</b> — agendamento e sala de espera</li>
+          <li><b>Terapia</b> — PEI, DTT, atividades e crises</li>
+          <li><b>Equipe</b> — cadastro e convites</li>
+          <li><b>Financeiro</b> — pagamentos e BI</li>
+          <li><b>Reavix AI</b> — assistente clínico</li>
+          <li><b>Google Calendar</b> — agenda sincronizada</li>
+        </ul>
+      </div>
+      <div class="portal-card">
+        <div class="pc-head">
+          <div class="pc-eyebrow">Portal da Família</div>
+          <div class="pc-name">Pais e Responsáveis</div>
+          <div class="pc-sub">Acompanhamento do filho em tempo real</div>
+        </div>
+        <ul class="pc-items">
+          <li><b>Dashboard</b> — resumo do filho</li>
+          <li><b>Progresso</b> — evolução terapêutica</li>
+          <li><b>Gráficos</b> — BI simplificado para pais</li>
+          <li><b>Chat</b> — comunicação com a clínica</li>
+          <li><b>Vídeos</b> — biblioteca de recursos educativos</li>
+          <li><b>Login independente</b> — sem acesso ao portal clínico</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── PLANOS ── -->
+  <section id="planos">
+    <div class="sh">
+      <div class="label">Modelo Comercial</div>
+      <h2>Planos e Preços</h2>
+      <p>Assinatura mensal via cartão. Todos os planos incluem 14 dias de trial gratuito, sem compromisso.</p>
+    </div>
+    <div class="pricing-scroll">
+      <table class="ptable">
+        <thead>
+          <tr>
+            <th class="row-label">Recurso</th>
+            <th class="col">
+              <span class="plan-name">Básico</span>
+              <span class="plan-price">R$ 297</span>
+              <span class="plan-note">por mês</span>
+            </th>
+            <th class="col pop">
+              <span class="plan-name">Profissional ★</span>
+              <span class="plan-price">R$ 697</span>
+              <span class="plan-note">mais popular</span>
+            </th>
+            <th class="col">
+              <span class="plan-name">Enterprise</span>
+              <span class="plan-price">R$ 1.497</span>
+              <span class="plan-note">por mês</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Pacientes</td><td class="c">Até 30</td><td class="c pop">Ilimitados</td><td class="c">Ilimitados</td></tr>
+          <tr><td>Terapeutas</td><td class="c">1</td><td class="c pop">Até 5</td><td class="c">Ilimitados</td></tr>
+          <tr><td>Agenda e sessões</td><td class="c"><span class="yes">✓</span></td><td class="c pop"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+          <tr><td>Financeiro e MRR</td><td class="c"><span class="yes">✓</span></td><td class="c pop"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+          <tr><td>Portal da família</td><td class="c"><span class="yes">✓</span></td><td class="c pop"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+          <tr><td>PEI, DTT e Terapia</td><td class="c"><span class="no">—</span></td><td class="c pop"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+          <tr><td>Reavix AI</td><td class="c"><span class="no">—</span></td><td class="c pop"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+          <tr><td>BI avançado</td><td class="c"><span class="no">—</span></td><td class="c pop"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
+          <tr><td>API e integrações</td><td class="c"><span class="no">—</span></td><td class="c pop"><span class="no">—</span></td><td class="c"><span class="yes">✓</span></td></tr>
+          <tr><td>SLA 99,9% + onboarding</td><td class="c"><span class="no">—</span></td><td class="c pop"><span class="no">—</span></td><td class="c"><span class="yes">✓</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── TECNOLOGIA ── -->
+  <section id="tech">
+    <div class="sh">
+      <div class="label">Infraestrutura</div>
+      <h2>Stack Tecnológico</h2>
+      <p>Ferramentas consolidadas de mercado — sem dependências proprietárias ou experimentais.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-cell">
+        <div class="tech-cell-name">Supabase (PostgreSQL)</div>
+        <p class="tech-cell-desc">Banco de dados com autenticação nativa e Row Level Security. Isolamento multi-tenant garantido em nível de banco — não de código.</p>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-cell-name">Vercel</div>
+        <p class="tech-cell-desc">Hospedagem com CDN global e funções serverless. Deploy automático a cada atualização no GitHub.</p>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-cell-name">Stripe</div>
+        <p class="tech-cell-desc">Assinaturas recorrentes, checkout seguro e trial de 14 dias. Confirmação via webhook ativa a clínica automaticamente.</p>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-cell-name">Anthropic Claude</div>
+        <p class="tech-cell-desc">Motor da Reavix AI. A chave da API fica exclusivamente no servidor — nunca exposta ao navegador.</p>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-cell-name">Resend</div>
+        <p class="tech-cell-desc">E-mails transacionais: boas-vindas, aviso de trial encerrando e confirmação de pagamento.</p>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-cell-name">GitHub + CI/CD</div>
+        <p class="tech-cell-desc">Controle de versão com pipeline de entrega contínua. Preview em pull requests, produção ao mergear em main.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── ROADMAP ── -->
+  <section id="roadmap">
+    <div class="sh">
+      <div class="label">Evolução do Produto</div>
+      <h2>Roadmap de Integrações</h2>
+      <p>Próximas funcionalidades ordenadas por impacto direto em receita e retenção de clientes.</p>
+    </div>
+    <div class="tl">
+      <div class="tli">
+        <div class="tli-dot d-now"></div>
+        <div class="tli-when">Agosto 2026</div>
+        <div class="tli-h">PIX e Boleto — Asaas</div>
+        <p class="tli-p">Cobrança nativa brasileira. A ausência de PIX e boleto é o principal bloqueio comercial com clínicas que não operam cartão de crédito.</p>
+      </div>
+      <div class="tli">
+        <div class="tli-dot d-now"></div>
+        <div class="tli-when">Setembro 2026</div>
+        <div class="tli-h">NFS-e — Nota Fiscal de Serviço</div>
+        <p class="tli-p">Emissão automática ao confirmar pagamento, cobrindo todos os municípios do Brasil. Obrigação legal para prestadores de serviço.</p>
+      </div>
+      <div class="tli">
+        <div class="tli-dot d-now"></div>
+        <div class="tli-when">Setembro 2026</div>
+        <div class="tli-h">WhatsApp Business — Lembretes Automáticos</div>
+        <p class="tli-p">Confirmação de sessão 24h antes, aviso de inadimplência e link de teleconsulta. Reduz faltas em aproximadamente 30–35%.</p>
+      </div>
+      <div class="tli">
+        <div class="tli-dot d-now"></div>
+        <div class="tli-when">Outubro 2026</div>
+        <div class="tli-h">ClickSign — Assinatura Digital de Contratos</div>
+        <p class="tli-p">Contrato gerado no sistema, assinado digitalmente pelo responsável via link. Validade jurídica plena. Elimina papel e arquivamento físico.</p>
+      </div>
+      <div class="tli">
+        <div class="tli-dot d-now"></div>
+        <div class="tli-when">Novembro 2026</div>
+        <div class="tli-h">Teleconsulta — Daily.co</div>
+        <p class="tli-p">Atendimento ABA online dentro da plataforma. Sala gerada automaticamente, evolução preenchida durante a chamada.</p>
+      </div>
+      <div class="tli">
+        <div class="tli-dot d-future"></div>
+        <div class="tli-when">1º trimestre 2027</div>
+        <div class="tli-h">Whisper AI — Transcrição de Sessões</div>
+        <p class="tli-p">IA transcreve a sessão gravada e gera rascunho de evolução clínica. Reduz documentação de 30 minutos para aproximadamente 5. Diferencial sem par no mercado.</p>
+      </div>
+      <div class="tli">
+        <div class="tli-dot d-future"></div>
+        <div class="tli-when">2º trimestre 2027</div>
+        <div class="tli-h">BI Avançado (Metabase) e Automações (n8n)</div>
+        <p class="tli-p">Dashboard analítico profundo para enterprise e conexão com sistemas externos: convênios, ERPs e planilhas financeiras.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── SEGURANÇA ── -->
+  <section id="seguranca">
+    <div class="sh">
+      <div class="label">Compliance</div>
+      <h2>Segurança e LGPD</h2>
+      <p>Auditoria completa realizada em julho de 2026. Todos os pontos críticos identificados foram corrigidos antes do lançamento.</p>
+    </div>
+    <div class="sec-grid">
+      <div class="sec-cell">
+        <div class="sec-cell-name">Isolamento multi-tenant</div>
+        <p class="sec-cell-desc">Row Level Security no PostgreSQL. Separação de dados entre clínicas ocorre no banco — não no código — tornando o vazamento tecnicamente impossível.</p>
+      </div>
+      <div class="sec-cell">
+        <div class="sec-cell-name">Autenticação JWT + MFA</div>
+        <p class="sec-cell-desc">Tokens JWT assinados. Perfis administrativos podem ativar autenticação em dois fatores.</p>
+      </div>
+      <div class="sec-cell">
+        <div class="sec-cell-name">Audit log imutável</div>
+        <p class="sec-cell-desc">Crises, sessões e exclusões registradas automaticamente. Políticas de banco bloqueiam qualquer edição ou deleção dos logs.</p>
+      </div>
+      <div class="sec-cell">
+        <div class="sec-cell-name">APIs 100% autenticadas</div>
+        <p class="sec-cell-desc">Todo endpoint exige JWT válido. Rate limiting por IP. CORS restrito ao domínio da aplicação.</p>
+      </div>
+      <div class="sec-cell">
+        <div class="sec-cell-name">Zero chaves secretas no frontend</div>
+        <p class="sec-cell-desc">Apenas chaves públicas chegam ao navegador (anon key do Supabase e publishable key do Stripe — seguras por design). Segredos ficam exclusivamente no servidor.</p>
+      </div>
+      <div class="sec-cell">
+        <div class="sec-cell-name">Conformidade LGPD</div>
+        <p class="sec-cell-desc">Termos e política de privacidade integrados ao cadastro. Consentimento registrado com timestamp no banco de dados.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="fn">T.O Plataforma</div>
+  <div class="fm">Documento confidencial · Julho 2026</div>
+</footer>
+
+<script>
+(function(){
+  var ls=[].slice.call(document.querySelectorAll('.nav-inner a'));
+  var ss=ls.map(function(a){return{a:a,s:document.querySelector(a.getAttribute('href'))}}).filter(function(x){return x.s});
+  function t(){
+    var y=scrollY+60,c=null;
+    ss.forEach(function(x){if(x.s.offsetTop<=y)c=x});
+    ss.forEach(function(x){x.a.classList.remove('on')});
+    if(c)c.a.classList.add('on');
+  }
+  addEventListener('scroll',t,{passive:true});t();
+  addEventListener('beforeprint',function(){document.getElementById('hint').style.display='none'});
+  addEventListener('afterprint',function(){document.getElementById('hint').style.display=''});
+})();
+</script>
