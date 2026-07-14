@@ -3773,7 +3773,7 @@ function buscaGlobal(q){
     }
   });
   if(items.length===0){
-    res.innerHTML='<div class="tb-sr-empty">Nenhum resultado para "'+q+'"</div>';
+    res.innerHTML='<div class="tb-sr-empty">Nenhum resultado para '+escapeHtml(q)+'</div>';
   } else {
     res.innerHTML=items.slice(0,8).map(function(it,i){
       return '<div class="tb-sr-item" onmousedown="buscaAcao('+i+')">'
@@ -3841,6 +3841,7 @@ function iniciarCheckout(plano){
   }).catch(function(e){toast('Erro de conexão','err');if(btn){btn.disabled=false;btn.textContent='Contratar';}});
 }
 
+function escapeHtml(s){if(s==null)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
 var _sb=supabase.createClient('https://sceqtztqdmflabdvrzwt.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjZXF0enRxZG1mbGFiZHZyend0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ1MTIsImV4cCI6MjA5ODA1MDUxMn0.6yfv8M5c347FLdJ6Sxvd8813vV-axeeGWNrUtzSErLE');
 function loadSupabaseData(){
   return Promise.all([
@@ -4710,7 +4711,7 @@ function submitCrisis(){var txt=document.getElementById('cr-txt').value.trim();i
 var aiR=['Obrigada pelo contato! Verificarei com a Dra. Ana.','Entendido, anotamos aqui. Ela responderá até o fim do dia.','Perfeito! Vamos abordar isso na sessão de hoje.','Informação registrada. A equipe está acompanhando.','Ótimo! Continue anotando esses progressos — são muito importantes.'];
 var aiI=0;
 function sendMsg(){var inp=document.getElementById('cinput'),txt=inp.value.trim();if(!txt)return;addB('me',txt);inp.value='';setTimeout(function(){addB('ot',aiR[aiI%aiR.length]);aiI++;},1000+Math.random()*500);}
-function addB(side,txt){var el=document.getElementById('cmsg'),row=document.createElement('div');row.className='cr '+side;var t=nowT();row.innerHTML=side==='ot'?'<div class="cav">TO</div><div><div class="bubble ot">'+txt+'</div><div class="cts">'+t+'</div></div>':'<div><div class="bubble me">'+txt+'</div><div class="cts">'+t+'</div></div>';el.appendChild(row);el.scrollTop=el.scrollHeight;}
+function addB(side,txt){var el=document.getElementById('cmsg'),row=document.createElement('div');row.className='cr '+side;var t=nowT();row.innerHTML=side==='ot'?'<div class="cav">TO</div><div><div class="bubble ot">'+escapeHtml(txt)+'</div><div class="cts">'+t+'</div></div>':'<div><div class="bubble me">'+escapeHtml(txt)+'</div><div class="cts">'+t+'</div></div>';el.appendChild(row);el.scrollTop=el.scrollHeight;}
 
 function fv(g){['all','1','2','3'].forEach(function(x){document.getElementById('vt-'+x).classList.remove('active');});document.getElementById('vt-'+g).classList.add('active');document.querySelectorAll('.vi').forEach(function(el){el.classList.toggle('hidden',g!=='all'&&el.dataset.g!==g);});}
 
@@ -5307,7 +5308,7 @@ function marcarRecebido(childId,mes){
 
 function openNovoContrato(){
   var sel=document.getElementById('ct-child');
-  if(sel){sel.innerHTML=db.children.map(function(c){return'<option value="'+c.id+'">'+c.name+'</option>';}).join('');}
+  if(sel){sel.innerHTML=db.children.map(function(c){return'<option value="'+escapeHtml(c.id)+'">'+escapeHtml(c.name)+'</option>';}).join('');}
   document.getElementById('ct-tipo').value='particular';
   document.getElementById('ct-conv-wrap').style.display='none';
   document.getElementById('ct-valor').value='';
@@ -5614,7 +5615,7 @@ function rvMsgBemVindo(){
 function renderReavixSugestoes(){
   var el=document.getElementById('rv-suggestions');if(!el)return;
   var sugs=role==='clinic'?_rvSugestoesCli:_rvSugestoesFam;
-  el.innerHTML=sugs.map(function(s){return '<div class="rv-chip" onclick="rvEnviarTexto(\''+s.replace(/'/g,"\\'")+'\')">' +s+'</div>';}).join('');
+  el.innerHTML=sugs.map(function(s){return '<div class="rv-chip" onclick="rvEnviarTexto(this.getAttribute(\'data-v\'))" data-v="'+escapeHtml(s)+'">'+escapeHtml(s)+'</div>';}).join('');
 }
 
 function rvAddMsg(tipo,texto){

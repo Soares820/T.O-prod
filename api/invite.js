@@ -6,6 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+}
+
+const VALID_ROLES = ['admin', 'terapeuta', 'secretaria', 'financeiro'];
+const VALID_CARGOS = ['Terapeuta', 'Secretária', 'Administrador', 'Financeiro', 'Coordenador', 'Supervisor'];
+
 const _handler = async (req, res) => {
   const origin = process.env.APP_URL || 'https://to-plataforma.vercel.app';
   res.setHeader('Access-Control-Allow-Origin', origin);
@@ -23,6 +31,16 @@ const _handler = async (req, res) => {
   if (!clinic_id || !email || !nome) {
     return res.status(400).json({ error: 'clinic_id, email e nome são obrigatórios' });
   }
+
+  // Input validation
+  if (typeof nome !== 'string' || nome.length > 100)
+    return res.status(400).json({ error: 'nome inválido (máx 100 chars)' });
+  if (invited_by && (typeof invited_by !== 'string' || invited_by.length > 100))
+    return res.status(400).json({ error: 'invited_by inválido (máx 100 chars)' });
+  if (cargo && !VALID_CARGOS.includes(cargo))
+    return res.status(400).json({ error: 'cargo inválido' });
+  if (role && !VALID_ROLES.includes(role))
+    return res.status(400).json({ error: 'role inválido' });
 
   try {
     // Check if user already exists in this clinic
@@ -65,9 +83,9 @@ const _handler = async (req, res) => {
             <div style="font-size:13px;opacity:.8;margin-top:4px">Você foi convidado!</div>
           </div>
           <div style="padding:32px 28px">
-            <h2 style="font-size:20px;font-weight:800;margin:0 0 12px">Olá, ${nome.split(' ')[0]}!</h2>
+            <h2 style="font-size:20px;font-weight:800;margin:0 0 12px">Olá, ${escapeHtml(nome.split(' ')[0])}!</h2>
             <p style="color:rgba(255,255,255,.75);line-height:1.6;margin:0 0 20px">
-              <strong>${invited_by || 'Sua clínica'}</strong> convidou você para acessar a T.O Plataforma como <strong>${cargo || 'Terapeuta'}</strong>.
+              <strong>${escapeHtml(invited_by || 'Sua clínica')}</strong> convidou você para acessar a T.O Plataforma como <strong>${escapeHtml(cargo || 'Terapeuta')}</strong>.
             </p>
             <p style="color:rgba(255,255,255,.6);font-size:13px;margin-bottom:24px">
               Este link expira em 7 dias. Clique abaixo para criar sua senha e acessar o sistema.

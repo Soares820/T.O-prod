@@ -1,4 +1,10 @@
 ﻿const { withRateLimit } = require('./_middleware');
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+}
+
 const _handler = async (req, res) => {
   const origin = process.env.APP_URL || 'https://to-plataforma.vercel.app';
   res.setHeader('Access-Control-Allow-Origin', origin);
@@ -26,6 +32,18 @@ const _handler = async (req, res) => {
   if (!RESEND_KEY) return res.status(500).json({ error: 'RESEND_API_KEY not configured' });
   if (!to || !type) return res.status(400).json({ error: 'Missing to or type' });
 
+  // Input length validation
+  if (name && (typeof name !== 'string' || name.length > 100))
+    return res.status(400).json({ error: 'name inválido' });
+  if (clinicName && (typeof clinicName !== 'string' || clinicName.length > 100))
+    return res.status(400).json({ error: 'clinicName inválido' });
+  if (plano && (typeof plano !== 'string' || plano.length > 50))
+    return res.status(400).json({ error: 'plano inválido' });
+
+  const safeName = escapeHtml(name);
+  const safeClinic = escapeHtml(clinicName);
+  const safePlano = escapeHtml(plano);
+
   const templates = {
     welcome: {
       subject: `Bem-vindo(a) à T.O Plataforma, ${name ? name.split(' ')[0] : ''}! 🎉`,
@@ -36,8 +54,8 @@ const _handler = async (req, res) => {
             <div style="font-size:13px;opacity:.8;margin-top:4px">Software para Terapia ABA</div>
           </div>
           <div style="padding:32px 28px">
-            <h2 style="font-size:22px;font-weight:800;margin:0 0 12px">Olá, ${name ? name.split(' ')[0] : 'terapeuta'}! 👋</h2>
-            <p style="color:rgba(255,255,255,.75);line-height:1.6;margin:0 0 20px">Sua conta em <strong>${clinicName || 'sua clínica'}</strong> foi criada com sucesso. Você tem <strong>14 dias grátis</strong> para explorar tudo que o sistema oferece.</p>
+            <h2 style="font-size:22px;font-weight:800;margin:0 0 12px">Olá, ${safeName ? escapeHtml(safeName.split(' ')[0]) : 'terapeuta'}! 👋</h2>
+            <p style="color:rgba(255,255,255,.75);line-height:1.6;margin:0 0 20px">Sua conta em <strong>${safeClinic || 'sua clínica'}</strong> foi criada com sucesso. Você tem <strong>14 dias grátis</strong> para explorar tudo que o sistema oferece.</p>
             <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:24px">
               <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:10px">O que você pode fazer agora</div>
               <div style="font-size:14px;color:rgba(255,255,255,.85);line-height:2">
@@ -57,7 +75,7 @@ const _handler = async (req, res) => {
       `,
     },
     trial_ending: {
-      subject: `Seu trial acaba em 3 dias — garanta seu plano, ${name ? name.split(' ')[0] : ''}`,
+      subject: `Seu trial acaba em 3 dias — garanta seu plano, ${name ? escapeHtml(name.split(' ')[0]) : ''}`,
       html: `
         <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#0D1526;color:#fff;border-radius:16px;overflow:hidden">
           <div style="background:linear-gradient(135deg,#f59e0b,#ef4444);padding:32px 28px;text-align:center">
@@ -73,7 +91,7 @@ const _handler = async (req, res) => {
       `,
     },
     payment_confirmed: {
-      subject: `Pagamento confirmado! Bem-vindo ao plano ${plano || 'escolhido'} 🎊`,
+      subject: `Pagamento confirmado! Bem-vindo ao plano ${escapeHtml(plano || 'escolhido')} 🎊`,
       html: `
         <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#0D1526;color:#fff;border-radius:16px;overflow:hidden">
           <div style="background:linear-gradient(135deg,#10b981,#2563EB);padding:32px 28px;text-align:center">
@@ -81,7 +99,7 @@ const _handler = async (req, res) => {
             <div style="font-size:22px;font-weight:900;margin-top:8px">Pagamento confirmado!</div>
           </div>
           <div style="padding:32px 28px">
-            <p style="color:rgba(255,255,255,.75);line-height:1.6;margin:0 0 20px">Obrigado por assinar o plano <strong>${plano || ''}</strong>. Sua assinatura está ativa e você tem acesso completo à plataforma.</p>
+            <p style="color:rgba(255,255,255,.75);line-height:1.6;margin:0 0 20px">Obrigado por assinar o plano <strong>${safePlano || ''}</strong>. Sua assinatura está ativa e você tem acesso completo à plataforma.</p>
             <a href="${process.env.APP_URL || 'https://to-plataforma.vercel.app'}" style="display:block;background:linear-gradient(135deg,#10b981,#2563EB);color:#fff;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none">Acessar o sistema →</a>
           </div>
         </div>
