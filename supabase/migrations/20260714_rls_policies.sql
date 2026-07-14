@@ -1,192 +1,121 @@
 -- ============================================================
--- Row Level Security (RLS) — T.O Plataforma
--- Roda no Supabase SQL Editor (Project → SQL Editor → New Query)
+-- RLS extra: restrições por role (admin/terapeuta)
+-- Roda APÓS o schema.sql já ter sido executado
+-- ============================================================
+-- O schema.sql já habilita RLS e cria as políticas básicas de
+-- isolamento por clínica (minha_clinica()). Este arquivo adiciona
+-- restrições mais granulares baseadas no role do usuário.
 -- ============================================================
 
--- ── Habilitar RLS em todas as tabelas ────────────────────────
-ALTER TABLE clinics         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE users           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pacientes       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sessoes         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE avaliacoes      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE contratos       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pagamentos      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE funcionarios    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit_logs      ENABLE ROW LEVEL SECURITY;
-
--- ── Dropar políticas antigas (idempotente) ────────────────────
-DO $$ DECLARE r RECORD; BEGIN
-  FOR r IN SELECT policyname, tablename FROM pg_policies
-           WHERE schemaname = 'public' LOOP
-    EXECUTE 'DROP POLICY IF EXISTS '||quote_ident(r.policyname)||' ON '||quote_ident(r.tablename);
-  END LOOP;
-END $$;
-
--- ── Helper: clinic_id do usuário autenticado ──────────────────
--- A tabela users associa auth.uid() ao clinic_id da clínica.
--- Usamos uma função para evitar subquery repetida e garantir segurança.
-CREATE OR REPLACE FUNCTION auth_clinic_id()
-RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT clinic_id FROM public.users
-  WHERE id = auth.uid()
-  LIMIT 1;
+-- Função auxiliar: retorna o role do usuário autenticado
+CREATE OR REPLACE FUNCTION public.meu_role()
+RETURNS TEXT
+LANGUAGE SQL
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT role FROM public.users WHERE auth_id = auth.uid() LIMIT 1;
 $$;
 
-CREATE OR REPLACE FUNCTION auth_role()
-RETURNS text LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT role FROM public.users
-  WHERE id = auth.uid()
-  LIMIT 1;
-$$;
+-- ── pacientes: só admin pode deletar ─────────────────────────
+-- Substitui a política genérica iso_pacientes por versões split
+DROP POLICY IF EXISTS "iso_pacientes" ON public.pacientes;
 
--- ── clinics ───────────────────────────────────────────────────
--- Cada usuário vê/edita apenas sua própria clínica.
-CREATE POLICY "clinics: read own"
-  ON clinics FOR SELECT
-  USING (id = auth_clinic_id());
+CREATE POLICY "pac_select"
+  ON public.pacientes FOR SELECT
+  USING (clinic_id = public.minha_clinica());
 
-CREATE POLICY "clinics: update own"
-  ON clinics FOR UPDATE
-  USING (id = auth_clinic_id())
-  WITH CHECK (id = auth_clinic_id());
+CREATE POLICY "pac_insert"
+  ON public.pacientes FOR INSERT
+  WITH CHECK (clinic_id = public.minha_clinica());
 
--- Somente admins criam clínicas (via service role na API)
--- INSERT bloqueado para usuários normais.
+CREATE POLICY "pac_update"
+  ON public.pacientes FOR UPDATE
+  USING (clinic_id = public.minha_clinica())
+  WITH CHECK (clinic_id = public.minha_clinica());
 
--- ── users ─────────────────────────────────────────────────────
-CREATE POLICY "users: read same clinic"
-  ON users FOR SELECT
-  USING (clinic_id = auth_clinic_id());
+CREATE POLICY "pac_delete"
+  ON public.pacientes FOR DELETE
+  USING (clinic_id = public.minha_clinica() AND public.meu_role() = 'admin');
 
-CREATE POLICY "users: update own profile"
-  ON users FOR UPDATE
-  USING (id = auth.uid())
-  WITH CHECK (id = auth.uid() AND clinic_id = auth_clinic_id());
+-- ── contratos: só admin pode deletar ─────────────────────────
+DROP POLICY IF EXISTS "iso_contratos" ON public.contratos;
 
--- Só admins podem inserir/remover usuários na clínica
-CREATE POLICY "users: admin insert"
-  ON users FOR INSERT
-  WITH CHECK (clinic_id = auth_clinic_id() AND auth_role() = 'admin');
+CREATE POLICY "cont_select"
+  ON public.contratos FOR SELECT
+  USING (clinic_id = public.minha_clinica());
 
-CREATE POLICY "users: admin delete"
-  ON users FOR DELETE
-  USING (clinic_id = auth_clinic_id() AND auth_role() = 'admin');
+CREATE POLICY "cont_insert"
+  ON public.contratos FOR INSERT
+  WITH CHECK (clinic_id = public.minha_clinica());
 
--- ── pacientes ─────────────────────────────────────────────────
-CREATE POLICY "pacientes: read same clinic"
-  ON pacientes FOR SELECT
-  USING (clinic_id = auth_clinic_id());
+CREATE POLICY "cont_update"
+  ON public.contratos FOR UPDATE
+  USING (clinic_id = public.minha_clinica())
+  WITH CHECK (clinic_id = public.minha_clinica());
 
-CREATE POLICY "pacientes: write same clinic"
-  ON pacientes FOR INSERT
-  WITH CHECK (clinic_id = auth_clinic_id());
+CREATE POLICY "cont_delete"
+  ON public.contratos FOR DELETE
+  USING (clinic_id = public.minha_clinica() AND public.meu_role() = 'admin');
 
-CREATE POLICY "pacientes: update same clinic"
-  ON pacientes FOR UPDATE
-  USING (clinic_id = auth_clinic_id())
-  WITH CHECK (clinic_id = auth_clinic_id());
+-- ── pagamentos: ninguém deleta (imutabilidade financeira) ─────
+DROP POLICY IF EXISTS "iso_pagamentos" ON public.pagamentos;
 
-CREATE POLICY "pacientes: delete admin only"
-  ON pacientes FOR DELETE
-  USING (clinic_id = auth_clinic_id() AND auth_role() = 'admin');
+CREATE POLICY "pag_select"
+  ON public.pagamentos FOR SELECT
+  USING (clinic_id = public.minha_clinica());
 
--- ── sessoes ───────────────────────────────────────────────────
-CREATE POLICY "sessoes: read same clinic"
-  ON sessoes FOR SELECT
-  USING (clinic_id = auth_clinic_id());
+CREATE POLICY "pag_insert"
+  ON public.pagamentos FOR INSERT
+  WITH CHECK (clinic_id = public.minha_clinica());
 
-CREATE POLICY "sessoes: write same clinic"
-  ON sessoes FOR INSERT
-  WITH CHECK (clinic_id = auth_clinic_id());
+CREATE POLICY "pag_update"
+  ON public.pagamentos FOR UPDATE
+  USING (clinic_id = public.minha_clinica())
+  WITH CHECK (clinic_id = public.minha_clinica());
 
-CREATE POLICY "sessoes: update same clinic"
-  ON sessoes FOR UPDATE
-  USING (clinic_id = auth_clinic_id())
-  WITH CHECK (clinic_id = auth_clinic_id());
+-- DELETE bloqueado: nenhuma política de DELETE = bloqueado por padrão.
 
-CREATE POLICY "sessoes: delete same clinic"
-  ON sessoes FOR DELETE
-  USING (clinic_id = auth_clinic_id());
+-- ── funcionarios: só admin deleta ────────────────────────────
+DROP POLICY IF EXISTS "iso_funcionarios" ON public.funcionarios;
 
--- ── avaliacoes ────────────────────────────────────────────────
-CREATE POLICY "avaliacoes: read same clinic"
-  ON avaliacoes FOR SELECT
-  USING (clinic_id = auth_clinic_id());
+CREATE POLICY "func_select"
+  ON public.funcionarios FOR SELECT
+  USING (clinic_id = public.minha_clinica());
 
-CREATE POLICY "avaliacoes: write same clinic"
-  ON avaliacoes FOR INSERT
-  WITH CHECK (clinic_id = auth_clinic_id());
+CREATE POLICY "func_insert"
+  ON public.funcionarios FOR INSERT
+  WITH CHECK (clinic_id = public.minha_clinica()
+              AND public.meu_role() IN ('admin', 'recepcao'));
 
-CREATE POLICY "avaliacoes: update same clinic"
-  ON avaliacoes FOR UPDATE
-  USING (clinic_id = auth_clinic_id())
-  WITH CHECK (clinic_id = auth_clinic_id());
+CREATE POLICY "func_update"
+  ON public.funcionarios FOR UPDATE
+  USING (clinic_id = public.minha_clinica())
+  WITH CHECK (clinic_id = public.minha_clinica());
 
-CREATE POLICY "avaliacoes: delete same clinic"
-  ON avaliacoes FOR DELETE
-  USING (clinic_id = auth_clinic_id());
+CREATE POLICY "func_delete"
+  ON public.funcionarios FOR DELETE
+  USING (clinic_id = public.minha_clinica() AND public.meu_role() = 'admin');
 
--- ── contratos ─────────────────────────────────────────────────
-CREATE POLICY "contratos: read same clinic"
-  ON contratos FOR SELECT
-  USING (clinic_id = auth_clinic_id());
+-- ── users: só admin insere/deleta outros usuários ────────────
+DROP POLICY IF EXISTS "iso_users" ON public.users;
 
-CREATE POLICY "contratos: write same clinic"
-  ON contratos FOR INSERT
-  WITH CHECK (clinic_id = auth_clinic_id());
+CREATE POLICY "usr_select"
+  ON public.users FOR SELECT
+  USING (clinic_id = public.minha_clinica());
 
-CREATE POLICY "contratos: update same clinic"
-  ON contratos FOR UPDATE
-  USING (clinic_id = auth_clinic_id())
-  WITH CHECK (clinic_id = auth_clinic_id());
+CREATE POLICY "usr_update_own"
+  ON public.users FOR UPDATE
+  USING (auth_id = auth.uid())
+  WITH CHECK (auth_id = auth.uid() AND clinic_id = public.minha_clinica());
 
-CREATE POLICY "contratos: delete admin only"
-  ON contratos FOR DELETE
-  USING (clinic_id = auth_clinic_id() AND auth_role() = 'admin');
+CREATE POLICY "usr_insert_admin"
+  ON public.users FOR INSERT
+  WITH CHECK (clinic_id = public.minha_clinica() AND public.meu_role() = 'admin');
 
--- ── pagamentos ────────────────────────────────────────────────
-CREATE POLICY "pagamentos: read same clinic"
-  ON pagamentos FOR SELECT
-  USING (clinic_id = auth_clinic_id());
-
-CREATE POLICY "pagamentos: write same clinic"
-  ON pagamentos FOR INSERT
-  WITH CHECK (clinic_id = auth_clinic_id());
-
-CREATE POLICY "pagamentos: update same clinic"
-  ON pagamentos FOR UPDATE
-  USING (clinic_id = auth_clinic_id())
-  WITH CHECK (clinic_id = auth_clinic_id());
-
--- Pagamentos não podem ser deletados (imutabilidade financeira)
--- DELETE bloqueado para todos.
-
--- ── funcionarios ──────────────────────────────────────────────
-CREATE POLICY "funcionarios: read same clinic"
-  ON funcionarios FOR SELECT
-  USING (clinic_id = auth_clinic_id());
-
-CREATE POLICY "funcionarios: write same clinic"
-  ON funcionarios FOR INSERT
-  WITH CHECK (clinic_id = auth_clinic_id() AND auth_role() IN ('admin', 'secretaria'));
-
-CREATE POLICY "funcionarios: update same clinic"
-  ON funcionarios FOR UPDATE
-  USING (clinic_id = auth_clinic_id())
-  WITH CHECK (clinic_id = auth_clinic_id());
-
-CREATE POLICY "funcionarios: delete admin only"
-  ON funcionarios FOR DELETE
-  USING (clinic_id = auth_clinic_id() AND auth_role() = 'admin');
-
--- ── audit_logs ────────────────────────────────────────────────
--- Somente admins leem. Inserções via service role (API backend).
-CREATE POLICY "audit_logs: admin read"
-  ON audit_logs FOR SELECT
-  USING (clinic_id = auth_clinic_id() AND auth_role() = 'admin');
-
--- Ninguém no frontend pode inserir/deletar audit_logs diretamente.
--- A API usa a service role key que bypassa RLS.
+CREATE POLICY "usr_delete_admin"
+  ON public.users FOR DELETE
+  USING (clinic_id = public.minha_clinica() AND public.meu_role() = 'admin');
 
 -- ============================================================
 -- IMPORTANTE: As APIs do backend (api/*.js) usam SUPABASE_SERVICE_KEY
