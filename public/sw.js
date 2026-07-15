@@ -25,8 +25,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Ignora requests de origens externas (CDNs, fonts, Google) —
-  // deixa o browser processar normalmente sem passar pelo SW
+  // Só intercepta GET — Cache API não suporta PUT de POST/PATCH/DELETE
+  if (e.request.method !== 'GET') return;
+
+  // Ignora requests de origens externas (CDNs, fonts, Supabase, etc.)
   if (url.origin !== self.location.origin) return;
 
   // API: sempre rede
