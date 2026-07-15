@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
-type Step = 'tipo' | 'dados' | 'senha';
+type Step = 'tipo' | 'dados' | 'senha' | 'confirmar';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -53,8 +53,12 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push('/dashboard');
-    } catch (e) {
+      if (data.session) {
+        router.push('/dashboard');
+      } else {
+        setStep('confirmar');
+      }
+    } catch {
       setError('Erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);
@@ -69,8 +73,8 @@ export default function RegisterPage() {
             <Image src="/logo.svg" alt="T.O Plataforma" width={44} height={44} style={{ objectFit: 'contain' }} />
           </div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--t1)' }}>T.O Plataforma</div>
-            <div style={{ fontSize: 10, color: 'var(--t3)', letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>Sistema Clínico</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>T.O Plataforma</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.5)', letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>Sistema Clínico</div>
           </div>
         </div>
 
@@ -78,7 +82,6 @@ export default function RegisterPage() {
           <h1 className="auth-title">Criar conta grátis</h1>
           <p className="auth-sub">14 dias gratuitos · Sem cartão de crédito</p>
 
-          {/* Tipo de conta */}
           {step === 'tipo' && (
             <div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '28px 0' }}>
@@ -90,16 +93,20 @@ export default function RegisterPage() {
                     key={t.key}
                     type="button"
                     onClick={() => setTipo(t.key as typeof tipo)}
-                    className={`reg-type-card${tipo === t.key ? ' active' : ''}`}
                     style={{
-                      background: tipo === t.key ? 'var(--ps)' : 'var(--sf2)',
-                      border: `2px solid ${tipo === t.key ? 'var(--p)' : 'var(--bdr)'}`,
-                      borderRadius: 12, padding: '20px 16px', textAlign: 'center', cursor: 'pointer',
+                      background: tipo === t.key ? 'rgba(37,99,235,.25)' : 'rgba(255,255,255,.05)',
+                      border: `2px solid ${tipo === t.key ? '#3B82F6' : 'rgba(255,255,255,.1)'}`,
+                      borderRadius: 12,
+                      padding: '20px 16px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all .18s',
+                      boxShadow: tipo === t.key ? '0 0 0 3px rgba(59,130,246,.15)' : 'none',
                     }}
                   >
                     <div style={{ fontSize: 32, marginBottom: 10 }}>{t.icon}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--t1)', marginBottom: 6 }}>{t.label}</div>
-                    <div style={{ fontSize: 11, color: 'var(--t3)', lineHeight: 1.5 }}>{t.desc}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 6 }}>{t.label}</div>
+                    <div style={{ fontSize: 11, color: tipo === t.key ? 'rgba(255,255,255,.65)' : 'rgba(255,255,255,.38)', lineHeight: 1.5 }}>{t.desc}</div>
                   </button>
                 ))}
               </div>
@@ -152,13 +159,13 @@ export default function RegisterPage() {
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  style={{ marginTop: 3, accentColor: 'var(--p)', width: 16, height: 16 }}
+                  style={{ marginTop: 3, accentColor: '#3B82F6', width: 16, height: 16 }}
                 />
-                <span style={{ fontSize: 12, color: 'var(--t2)', lineHeight: 1.6 }}>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,.55)', lineHeight: 1.6 }}>
                   Li e aceito os{' '}
-                  <Link href="/termos" target="_blank" style={{ color: 'var(--p)', fontWeight: 600 }}>Termos de Uso</Link>
+                  <Link href="/termos" target="_blank" style={{ color: '#60A5FA', fontWeight: 600 }}>Termos de Uso</Link>
                   {' '}e a{' '}
-                  <Link href="/privacidade" target="_blank" style={{ color: 'var(--p)', fontWeight: 600 }}>Política de Privacidade</Link>
+                  <Link href="/privacidade" target="_blank" style={{ color: '#60A5FA', fontWeight: 600 }}>Política de Privacidade</Link>
                 </span>
               </label>
 
@@ -180,9 +187,51 @@ export default function RegisterPage() {
             </form>
           )}
 
-          <p className="auth-switch">
-            Já tem conta? <Link href="/login">Entrar</Link>
-          </p>
+          {step === 'confirmar' && (
+            <div style={{ marginTop: 32, textAlign: 'center' }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                background: 'linear-gradient(135deg,rgba(59,130,246,.25),rgba(139,92,246,.25))',
+                border: '2px solid rgba(59,130,246,.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 24px', fontSize: 32,
+              }}>
+                ✉️
+              </div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 12 }}>
+                Confirme seu e-mail
+              </h2>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', lineHeight: 1.7, marginBottom: 28 }}>
+                Enviamos um link de confirmação para<br />
+                <strong style={{ color: '#60A5FA' }}>{form.email}</strong>
+                <br /><br />
+                Verifique sua caixa de entrada (e a pasta spam)
+                e clique no link para ativar sua conta.
+              </p>
+              <Link href="/login" className="af-btn" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+                Ir para o login
+              </Link>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,.35)', marginTop: 16 }}>
+                Não recebeu?{' '}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await supabase.auth.resend({ type: 'signup', email: form.email });
+                    alert('E-mail reenviado!');
+                  }}
+                  style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: 12, padding: 0 }}
+                >
+                  Reenviar e-mail
+                </button>
+              </p>
+            </div>
+          )}
+
+          {step !== 'confirmar' && (
+            <p className="auth-switch">
+              Já tem conta? <Link href="/login">Entrar</Link>
+            </p>
+          )}
         </div>
 
         <div className="auth-footer">
@@ -196,24 +245,44 @@ export default function RegisterPage() {
 
       <div className="auth-right">
         <div className="auth-right-content">
-          <div style={{ fontSize: 28, marginBottom: 20 }}>🚀</div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 16 }}>
-            Comece hoje, sem compromisso
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: 'rgba(59,130,246,.15)', border: '1px solid rgba(59,130,246,.3)',
+              borderRadius: 20, padding: '6px 14px', marginBottom: 24,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', display: 'inline-block' }} />
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,.8)', fontWeight: 600 }}>Trial gratuito · Sem cartão</span>
+            </div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', lineHeight: 1.25, marginBottom: 20 }}>
+              Tudo que sua clínica<br />precisa em um só lugar
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 36 }}>
             {[
-              '✓ 14 dias gratuitos, sem cartão de crédito',
-              '✓ Configuração em menos de 5 minutos',
-              '✓ Todos os recursos do plano Clínica disponíveis',
-              '✓ Suporte dedicado durante o período trial',
-              '✓ Cancele quando quiser, sem multa',
-            ].map((item) => (
-              <div key={item} style={{ fontSize: 14, color: 'rgba(255,255,255,.72)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                {item}
+              { icon: '📋', title: 'Prontuários digitais', desc: 'PEDI, SPM e avaliações completas' },
+              { icon: '📅', title: 'Agenda inteligente', desc: 'Sessões, confirmações automáticas' },
+              { icon: '👨‍👩‍👦', title: 'Portal da família', desc: 'Evolução em tempo real para os pais' },
+              { icon: '📊', title: 'BI e relatórios', desc: 'Insights clínicos e financeiros' },
+            ].map((f) => (
+              <div key={f.title} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                  background: 'rgba(59,130,246,.15)', border: '1px solid rgba(59,130,246,.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                }}>
+                  {f.icon}
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{f.title}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)' }}>{f.desc}</div>
+                </div>
               </div>
             ))}
           </div>
-          <div className="auth-stats" style={{ marginTop: 36 }}>
+
+          <div className="auth-stats">
             {[['1.200+', 'clínicas ativas'], ['98%', 'satisfação'], ['5★', 'avaliação']].map(([n, l]) => (
               <div key={l} className="auth-stat">
                 <div className="auth-stat-n">{n}</div>

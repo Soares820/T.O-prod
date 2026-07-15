@@ -1185,6 +1185,30 @@ select.reg-inp option{background:#0F1829;color:#fff}
 .auth-stat-l{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;font-weight:500}
 
 /* ═══════════════════════════════════════════════════════
+   AUTH RIGHT — Elementos visuais animados
+   ═══════════════════════════════════════════════════════ */
+@keyframes authFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(3deg)}}
+@keyframes authPulse{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:.5;transform:scale(1.08)}}
+@keyframes authOrbit{from{transform:rotate(0deg) translateX(130px) rotate(0deg)}to{transform:rotate(360deg) translateX(130px) rotate(-360deg)}}
+@keyframes authOrbit2{from{transform:rotate(180deg) translateX(90px) rotate(-180deg)}to{transform:rotate(540deg) translateX(90px) rotate(-540deg)}}
+@keyframes authGlow{0%,100%{box-shadow:0 0 30px rgba(59,130,246,.3),0 0 60px rgba(59,130,246,.1)}50%{box-shadow:0 0 60px rgba(59,130,246,.6),0 0 120px rgba(139,92,246,.2)}}
+@keyframes authCard{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(-1deg)}}
+@keyframes authCard2{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+.auth-visual{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.auth-orb{position:absolute;border-radius:50%}
+.auth-orb-1{width:320px;height:320px;top:-80px;right:-60px;background:radial-gradient(circle,rgba(59,130,246,.18) 0%,transparent 70%);animation:authPulse 6s ease-in-out infinite}
+.auth-orb-2{width:240px;height:240px;bottom:-40px;left:-40px;background:radial-gradient(circle,rgba(139,92,246,.14) 0%,transparent 70%);animation:authPulse 8s ease-in-out infinite reverse}
+.auth-orb-3{width:160px;height:160px;top:40%;left:30%;background:radial-gradient(circle,rgba(14,165,233,.1) 0%,transparent 70%);animation:authPulse 5s ease-in-out infinite 2s}
+.auth-grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.07) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse 60% 60% at 50% 50%,black,transparent)}
+.auth-float-card{position:absolute;background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 18px;white-space:nowrap}
+.auth-float-card-1{top:18%;right:8%;animation:authCard 7s ease-in-out infinite}
+.auth-float-card-2{bottom:22%;left:6%;animation:authCard2 9s ease-in-out infinite 1s}
+.auth-fc-icon{font-size:18px;margin-bottom:6px}
+.auth-fc-val{font-size:20px;font-weight:800;color:#fff;line-height:1}
+.auth-fc-lbl{font-size:10px;color:rgba(255,255,255,.45);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.auth-fc-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:20px;padding:3px 8px;font-size:10px;color:#4ADE80;font-weight:700;margin-top:6px}
+
+/* ═══════════════════════════════════════════════════════
    DASHBOARD — Botões primário / secundário
    ═══════════════════════════════════════════════════════ */
 .btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;font-size:13px;font-weight:700;border-radius:var(--rsm,10px);padding:9px 16px;transition:all .2s;font-family:inherit;white-space:nowrap;background:var(--grd);color:#fff;box-shadow:var(--sh-p)}

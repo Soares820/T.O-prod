@@ -129,7 +129,33 @@ export default function LoginPage() {
       </div>
 
       <div className="auth-right">
+        <div className="auth-visual">
+          <div className="auth-orb auth-orb-1" />
+          <div className="auth-orb auth-orb-2" />
+          <div className="auth-orb auth-orb-3" />
+          <div className="auth-grid-lines" />
+          <div className="auth-float-card auth-float-card-1">
+            <div className="auth-fc-icon">📋</div>
+            <div className="auth-fc-val">247</div>
+            <div className="auth-fc-lbl">sessões este mês</div>
+            <div className="auth-fc-badge">↑ 12% vs anterior</div>
+          </div>
+          <div className="auth-float-card auth-float-card-2">
+            <div className="auth-fc-icon">👨‍👩‍👦</div>
+            <div className="auth-fc-val">98%</div>
+            <div className="auth-fc-lbl">satisfação das famílias</div>
+            <div className="auth-fc-badge">✓ Verificado</div>
+          </div>
+        </div>
         <div className="auth-right-content">
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'rgba(59,130,246,.12)', border: '1px solid rgba(59,130,246,.25)',
+            borderRadius: 20, padding: '6px 14px', marginBottom: 24,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', display: 'inline-block', boxShadow: '0 0 8px #22C55E' }} />
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,.75)', fontWeight: 600, letterSpacing: '.04em' }}>+1.200 clínicas ativas hoje</span>
+          </div>
           <div className="auth-quote">
             &quot;A T.O Plataforma transformou como gerenciamos nossa clínica. O BI em tempo real e o Portal da Família são simplesmente incríveis.&quot;
           </div>
