@@ -1,0 +1,108 @@
+/* ═══════════════════════════════════════════════════════════
+   T.O Plataforma — Design System Global CSS
+   Tokens, reset, animations, typography
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Brand colors */
+  --p: #2563EB;  --pd: #1D4ED8;  --pl: #3B82F6;
+  --ps: rgba(37,99,235,.07);  --pb: rgba(37,99,235,.15);
+  --s: #059669;  --ss: rgba(5,150,105,.07);  --sb: rgba(5,150,105,.15);
+  --w: #D97706;  --ws: rgba(217,119,6,.07);  --wb: rgba(217,119,6,.15);
+  --d: #DC2626;  --ds: rgba(220,38,38,.07);  --db: rgba(220,38,38,.15);
+  --v: #7C3AED;  --vs: rgba(124,58,237,.07);  --vb: rgba(124,58,237,.15);
+  --o: #EA580C;  --os: rgba(234,88,12,.07);   --ob: rgba(234,88,12,.15);
+
+  /* Surfaces */
+  --bg: #F4F7FD;
+  --sf: #FFFFFF;
+  --sf2: #F7F9FF;
+  --sf3: #EEF3FF;
+  --bdr: rgba(15,23,42,.07);
+  --bdr2: rgba(15,23,42,.12);
+
+  /* Text */
+  --t1: #0D1526;
+  --t2: #4B5880;
+  --t3: #94A3B8;
+
+  /* Shadows */
+  --sh-xs: 0 1px 3px rgba(0,0,0,.07);
+  --sh-sm: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06);
+  --sh: 0 2px 6px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+  --sh-lg: 0 4px 12px rgba(0,0,0,.06), 0 16px 40px rgba(0,0,0,.09);
+  --sh-xl: 0 8px 20px rgba(0,0,0,.08), 0 28px 60px rgba(0,0,0,.12);
+  --sh-p: 0 8px 28px rgba(14,165,233,.38);
+  --sh-d: 0 8px 28px rgba(220,38,38,.32);
+  --sh-s: 0 8px 28px rgba(5,150,105,.32);
+
+  /* Layout */
+  --sw: 260px;  --r: 16px;  --rsm: 10px;  --rxs: 7px;
+  --grd: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%);
+
+  /* Font */
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #0D1117;  --sf: #161B27;  --sf2: #1C2335;  --sf3: #212840;
+  --bdr: rgba(255,255,255,.08);  --bdr2: rgba(255,255,255,.13);
+  --t1: #E2E8F8;  --t2: #7E8FA8;  --t3: #334155;
+  --sh-xs: 0 1px 3px rgba(0,0,0,.4);
+  --sh-sm: 0 2px 8px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
+  --sh: 0 4px 16px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+  --sh-lg: 0 8px 32px rgba(0,0,0,.6), 0 4px 10px rgba(0,0,0,.35);
+  --sh-xl: 0 16px 48px rgba(0,0,0,.7), 0 8px 16px rgba(0,0,0,.4);
+}
+
+/* ─── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--t1);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button { cursor: pointer; font-family: inherit; border: none; background: none; }
+input, textarea, select { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeUp    { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:none } }
+@keyframes fadeIn    { from { opacity:0 } to { opacity:1 } }
+@keyframes spin      { to { transform:rotate(360deg) } }
+@keyframes shake     { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+@keyframes barGrow   { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+@keyframes toastIn   { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
+@keyframes toastOut  { from{transform:translateX(0);opacity:1} to{transform:translateX(120%);opacity:0} }
+@keyframes pulse     { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+@keyframes blobA     { 0%,100%{transform:translate(0,0) scale(1)} 35%{transform:translate(80px,60px) scale(1.12)} 70%{transform:translate(-50px,90px) scale(.9)} }
+@keyframes blobB     { 0%,100%{transform:translate(0,0) scale(1)} 35%{transform:translate(-70px,-55px) scale(.88)} 70%{transform:translate(60px,-90px) scale(1.1)} }
+@keyframes blobC     { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(50px,-70px) scale(1.15)} }
+
+/* ─── Utility ────────────────────────────────────────────── */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.fade-up  { animation: fadeUp .6s cubic-bezier(.22,1,.36,1) both; }
+.spin-anim { animation: spin .7s linear infinite; }
+
+/* ─── Toast notifications ────────────────────────────────── */
+#toast-container {
+  position: fixed; top: 20px; right: 20px;
+  z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  box-shadow: var(--sh-lg); pointer-events: all; max-width: 320px;
+  animation: toastIn .35s cubic-bezier(.22,1,.36,1) both;
+}
+.toast.out { animation: toastOut .3s ease forwards; }
+.toast-check { background: var(--sf); border: 1px solid var(--sb); color: var(--s); }
+.toast-error { background: var(--sf); border: 1px solid var(--db); color: var(--d); }
+.toast-info  { background: var(--sf); border: 1px solid var(--pb); color: var(--p); }
+.toast-warn  { background: var(--sf); border: 1px solid var(--wb); color: var(--w); }

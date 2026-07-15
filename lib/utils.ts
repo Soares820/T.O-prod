@@ -1,0 +1,57 @@
+// Utilitários gerais do sistema
+
+export function formatCurrency(value: number): string {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export function formatDate(iso: string | null | undefined, opts?: Intl.DateTimeFormatOptions): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', opts ?? { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+export function formatAge(dob: string | null | undefined): string {
+  if (!dob) return '';
+  const birth = new Date(dob);
+  const now = new Date();
+  const years = now.getFullYear() - birth.getFullYear();
+  const months = now.getMonth() - birth.getMonth();
+  const totalMonths = years * 12 + months;
+  if (totalMonths < 24) return `${totalMonths} meses`;
+  return `${Math.floor(totalMonths / 12)} anos`;
+}
+
+export function generateId(): string {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+export function escHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+export const MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+export const MONTH_NAMES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+// Returns array of 'YYYY-MM' strings for the last N months (oldest first)
+export function getLastNMonths(n: number): string[] {
+  const now = new Date();
+  const result: string[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    result.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return result;
+}

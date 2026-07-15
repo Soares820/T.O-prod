@@ -1,0 +1,206 @@
+'use client';
+
+import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { AppUser, AppData, Paciente, Sessao, Contrato, Pagamento, Meta, Avaliacao, Funcionario, Usuario } from '@/lib/types';
+
+// ─── State ────────────────────────────────────────────────
+
+interface AppState {
+  user: AppUser | null;
+  data: AppData;
+  loading: boolean;
+  initialized: boolean;
+}
+
+const EMPTY_DATA: AppData = {
+  children: [],
+  sessions: [],
+  contracts: [],
+  payments: [],
+  goals: [],
+  evaluations: [],
+  team: [],
+  profiles: [],
+};
+
+const initialState: AppState = {
+  user: null,
+  data: EMPTY_DATA,
+  loading: true,
+  initialized: false,
+};
+
+// ─── Actions ──────────────────────────────────────────────
+
+type Action =
+  | { type: 'SET_USER'; payload: AppUser | null }
+  | { type: 'SET_DATA'; payload: Partial<AppData> }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_INITIALIZED' }
+  | { type: 'ADD_CHILD'; payload: Paciente }
+  | { type: 'UPDATE_CHILD'; payload: Paciente }
+  | { type: 'ADD_SESSION'; payload: Sessao }
+  | { type: 'UPDATE_SESSION'; payload: Sessao }
+  | { type: 'ADD_CONTRACT'; payload: Contrato }
+  | { type: 'ADD_PAYMENT'; payload: Pagamento }
+  | { type: 'UPDATE_PAYMENT'; payload: Pagamento }
+  | { type: 'ADD_GOAL'; payload: Meta }
+  | { type: 'UPDATE_GOAL'; payload: Meta }
+  | { type: 'LOGOUT' };
+
+function reducer(state: AppState, action: Action): AppState {
+  switch (action.type) {
+    case 'SET_USER':
+      return { ...state, user: action.payload };
+    case 'SET_DATA':
+      return { ...state, data: { ...state.data, ...action.payload } };
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
+    case 'SET_INITIALIZED':
+      return { ...state, initialized: true, loading: false };
+    case 'ADD_CHILD':
+      return { ...state, data: { ...state.data, children: [...state.data.children, action.payload] } };
+    case 'UPDATE_CHILD':
+      return { ...state, data: { ...state.data, children: state.data.children.map((c) => c.id === action.payload.id ? action.payload : c) } };
+    case 'ADD_SESSION':
+      return { ...state, data: { ...state.data, sessions: [action.payload, ...state.data.sessions] } };
+    case 'UPDATE_SESSION':
+      return { ...state, data: { ...state.data, sessions: state.data.sessions.map((s) => s.id === action.payload.id ? action.payload : s) } };
+    case 'ADD_CONTRACT':
+      return { ...state, data: { ...state.data, contracts: [...state.data.contracts, action.payload] } };
+    case 'ADD_PAYMENT':
+      return { ...state, data: { ...state.data, payments: [...state.data.payments, action.payload] } };
+    case 'UPDATE_PAYMENT':
+      return { ...state, data: { ...state.data, payments: state.data.payments.map((p) => p.id === action.payload.id ? action.payload : p) } };
+    case 'ADD_GOAL':
+      return { ...state, data: { ...state.data, goals: [...state.data.goals, action.payload] } };
+    case 'UPDATE_GOAL':
+      return { ...state, data: { ...state.data, goals: state.data.goals.map((g) => g.id === action.payload.id ? action.payload : g) } };
+    case 'LOGOUT':
+      return { ...initialState, loading: false, initialized: true };
+    default:
+      return state;
+  }
+}
+
+// ─── Context ──────────────────────────────────────────────
+
+interface AppContextValue {
+  state: AppState;
+  dispatch: React.Dispatch<Action>;
+  loadUserData: (clinicId: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AppContext = createContext<AppContextValue | null>(null);
+
+export function useApp() {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useApp must be used inside AppProvider');
+  return ctx;
+}
+
+// ─── Provider ─────────────────────────────────────────────
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const loadUserData = useCallback(async (clinicId: string) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      const [pac, sess, cont, pag, met, aval, func, usuarios] = await Promise.all([
+        supabase.from('pacientes').select('*').eq('clinic_id', clinicId).order('name'),
+        supabase.from('sessoes').select('*').eq('clinic_id', clinicId).order('data', { ascending: false }),
+        supabase.from('contratos').select('*').eq('clinic_id', clinicId).order('id'),
+        supabase.from('pagamentos').select('*').eq('clinic_id', clinicId).order('mes_ref', { ascending: false }),
+        supabase.from('metas').select('*').eq('clinic_id', clinicId).order('id'),
+        supabase.from('avaliacoes').select('*').eq('clinic_id', clinicId).order('data', { ascending: false }),
+        supabase.from('funcionarios').select('*').eq('clinic_id', clinicId).order('nome'),
+        supabase.from('users').select('*').eq('clinic_id', clinicId).order('nome'),
+      ]);
+
+      dispatch({
+        type: 'SET_DATA',
+        payload: {
+          children: pac.data ?? [],
+          sessions: sess.data ?? [],
+          contracts: cont.data ?? [],
+          payments: pag.data ?? [],
+          goals: met.data ?? [],
+          evaluations: aval.data ?? [],
+          team: func.data ?? [],
+          profiles: usuarios.data ?? [],
+        },
+      });
+    } catch (e) {
+      console.error('loadUserData error', e);
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    dispatch({ type: 'LOGOUT' });
+  }, []);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        // Busca o usuário pelo auth_id
+        const { data: userRow } = await supabase
+          .from('users')
+          .select('*, clinics(*)')
+          .eq('auth_id', session.user.id)
+          .single();
+
+        if (userRow) {
+          const clinic = (userRow as any).clinics;
+          dispatch({
+            type: 'SET_USER',
+            payload: {
+              id: userRow.id,
+              auth_id: session.user.id,
+              email: session.user.email ?? '',
+              clinicId: userRow.clinic_id,
+              clinicName: clinic?.nome ?? '',
+              role: userRow.role,
+              name: userRow.nome,
+              plan: clinic?.plano ?? 'trial',
+              trialEndsAt: clinic?.trial_ends ?? null,
+            },
+          });
+          await loadUserData(userRow.clinic_id);
+        } else {
+          // Fallback: usuário autenticado mas sem perfil no banco ainda
+          dispatch({
+            type: 'SET_USER',
+            payload: {
+              id: session.user.id,
+              auth_id: session.user.id,
+              email: session.user.email ?? '',
+              clinicId: '',
+              clinicName: session.user.user_metadata?.clinic_name ?? 'Minha Clínica',
+              role: session.user.user_metadata?.role ?? 'admin',
+              name: session.user.user_metadata?.full_name ?? session.user.email ?? '',
+              plan: 'trial',
+              trialEndsAt: null,
+            },
+          });
+        }
+      } else {
+        dispatch({ type: 'SET_USER', payload: null });
+      }
+      dispatch({ type: 'SET_INITIALIZED' });
+    });
+
+    return () => subscription.unsubscribe();
+  }, [loadUserData]);
+
+  return (
+    <AppContext.Provider value={{ state, dispatch, loadUserData, logout }}>
+      {children}
+    </AppContext.Provider>
+  );
+}

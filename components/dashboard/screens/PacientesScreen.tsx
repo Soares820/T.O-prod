@@ -1,0 +1,205 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useApp } from '@/contexts/AppContext';
+import { formatDate } from '@/lib/utils';
+import type { Paciente } from '@/lib/types';
+
+type FilterStatus = 'todos' | 'ativo' | 'inativo';
+
+export default function PacientesScreen() {
+  const { state, dispatch } = useApp();
+  const { data } = state;
+
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<FilterStatus>('todos');
+  const [showModal, setShowModal] = useState(false);
+  const [selected, setSelected] = useState<Paciente | null>(null);
+  const [form, setForm] = useState({ name: '', dob: '', diagnosis: '', responsible: '', notes: '' });
+  const [saving, setSaving] = useState(false);
+
+  const filtered = useMemo(() => {
+    return data.children.filter((c) => {
+      const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.responsible ?? '').toLowerCase().includes(search.toLowerCase());
+      const matchFilter = filter === 'todos' || c.status === filter;
+      return matchSearch && matchFilter;
+    });
+  }, [data.children, search, filter]);
+
+  function openNew() {
+    setSelected(null);
+    setForm({ name: '', dob: '', diagnosis: '', responsible: '', notes: '' });
+    setShowModal(true);
+  }
+
+  function openEdit(p: Paciente) {
+    setSelected(p);
+    setForm({ name: p.name, dob: p.dob ?? '', diagnosis: p.diagnosis ?? '', responsible: p.responsible ?? '', notes: p.notes ?? '' });
+    setShowModal(true);
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    setSaving(true);
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) return;
+
+      const { data: userRow } = await supabase.from('users').select('clinic_id').eq('auth_id', uid).single();
+      const clinic_id = userRow?.clinic_id;
+
+      if (selected) {
+        const { data: updated } = await supabase.from('pacientes')
+          .update({ name: form.name, dob: form.dob || null, diagnosis: form.diagnosis || null, responsible: form.responsible || null, notes: form.notes || null })
+          .eq('id', selected.id)
+          .select()
+          .single();
+        if (updated) dispatch({ type: 'UPDATE_CHILD', payload: updated });
+      } else {
+        const { data: created } = await supabase.from('pacientes')
+          .insert({ name: form.name, dob: form.dob || null, diagnosis: form.diagnosis || null, responsible: form.responsible || null, notes: form.notes || null, status: 'ativo', clinic_id })
+          .select()
+          .single();
+        if (created) dispatch({ type: 'ADD_CHILD', payload: created });
+      }
+      setShowModal(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const calcAge = (dob: string) => {
+    if (!dob) return null;
+    const d = new Date(dob);
+    const now = new Date();
+    let y = now.getFullYear() - d.getFullYear();
+    if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) y--;
+    return y;
+  };
+
+  const initials = (name: string) => name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
+
+  return (
+    <div className="view show" id="v-criancas">
+      <div className="page-body">
+        <div className="page-hero">
+          <div className="ph-pre"><span></span>Gestão</div>
+          <h1 className="ph-title">Pacientes</h1>
+          <div className="ph-sub">{data.children.length} paciente(s) cadastrado(s)</div>
+        </div>
+
+        {/* Toolbar */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Buscar paciente ou responsável..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px 10px 38px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }}
+            />
+            <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--t3)' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['todos', 'ativo', 'inativo'] as FilterStatus[]).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid', borderColor: filter === f ? 'var(--p)' : 'var(--bdr)', background: filter === f ? 'var(--ps)' : 'none', color: filter === f ? 'var(--p)' : 'var(--t2)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize' }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <button className="btn-p" onClick={openNew}>+ Novo paciente</button>
+        </div>
+
+        {/* Grid */}
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--t3)' }}>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>👶</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>Nenhum paciente encontrado</div>
+            <div style={{ fontSize: 13, marginBottom: 24 }}>Adicione o primeiro paciente para começar</div>
+            <button className="btn-p" onClick={openNew}>+ Novo paciente</button>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 14 }}>
+            {filtered.map((p) => (
+              <div
+                key={p.id}
+                onClick={() => openEdit(p)}
+                style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: 18, cursor: 'pointer', transition: '.15s' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg,var(--p),var(--v))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>
+                    {initials(p.name)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, color: 'var(--t1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
+                    {p.dob && <div style={{ fontSize: 12, color: 'var(--t3)' }}>{calcAge(p.dob)} anos</div>}
+                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: p.status === 'ativo' ? 'rgba(16,185,129,.12)' : 'var(--sf2)', color: p.status === 'ativo' ? '#10b981' : 'var(--t3)' }}>
+                    {p.status}
+                  </span>
+                </div>
+                {p.diagnosis && <div style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 8 }}><strong>Diagnóstico:</strong> {p.diagnosis}</div>}
+                {p.responsible && <div style={{ fontSize: 12, color: 'var(--t3)' }}>👤 {p.responsible}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowModal(false)}>
+          <div style={{ background: 'var(--bg)', borderRadius: 20, padding: 28, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontWeight: 800, fontSize: 18, color: 'var(--t1)', margin: 0 }}>{selected ? 'Editar paciente' : 'Novo paciente'}</h2>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: 20 }}>×</button>
+            </div>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {[
+                { label: 'Nome completo *', field: 'name', type: 'text', placeholder: 'Ex: Maria Eduarda Silva' },
+                { label: 'Data de nascimento', field: 'dob', type: 'date', placeholder: '' },
+                { label: 'Diagnóstico', field: 'diagnosis', type: 'text', placeholder: 'Ex: TEA nível 1' },
+                { label: 'Responsável', field: 'responsible', type: 'text', placeholder: 'Nome do responsável' },
+              ].map(({ label, field, type, placeholder }) => (
+                <div key={field}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>{label}</label>
+                  <input
+                    type={type}
+                    placeholder={placeholder}
+                    value={form[field as keyof typeof form]}
+                    onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
+                    required={field === 'name'}
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
+                </div>
+              ))}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Observações</label>
+                <textarea
+                  placeholder="Informações adicionais..."
+                  value={form.notes}
+                  onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                  rows={3}
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: 12, border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
+                <button type="submit" disabled={saving} className="btn-p" style={{ flex: 2 }}>{saving ? 'Salvando...' : selected ? 'Salvar alterações' : 'Cadastrar paciente'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
