@@ -178,13 +178,23 @@
 .lp-fck.y{background:rgba(5,150,105,.2);color:#34D399}
 .lp-fck.n{background:rgba(255,255,255,.06);color:rgba(255,255,255,.2)}
 
-.lp-foot{border-top:1px solid rgba(255,255,255,.06);padding:30px max(5%,28px);position:relative;z-index:1}
-.lp-foot-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.lp-foot{border-top:1px solid rgba(255,255,255,.06);padding:52px max(5%,28px) 28px;position:relative;z-index:1}
+.lp-foot-in{max-width:1200px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:40px;margin-bottom:36px}
+.lp-foot-brand{flex:1;min-width:220px;max-width:300px}
+.lp-foot-logo{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.lp-foot-txt{font-size:14px;font-weight:800;color:#fff;letter-spacing:-.2px}
+.lp-foot-desc{font-size:12px;color:rgba(255,255,255,.28);line-height:1.75;font-weight:400}
+.lp-foot-links{display:flex;gap:48px;flex-wrap:wrap}
+.lp-foot-links>div{display:flex;flex-direction:column}
+.lp-foot-ttl{font-size:10px;font-weight:800;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px}
+.lp-foot-links a{display:block;font-size:13px;color:rgba(255,255,255,.35);font-weight:500;margin-bottom:10px;cursor:pointer;transition:color .18s;text-decoration:none}
+.lp-foot-links a:hover{color:rgba(255,255,255,.75)}
+.lp-foot-bot{max-width:1200px;margin:0 auto;border-top:1px solid rgba(255,255,255,.07);padding-top:22px;display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:12px;color:rgba(255,255,255,.22);font-weight:500;flex-wrap:wrap}
+.lp-foot-cert{display:flex;align-items:center;gap:6px}
 .lp-foot-l{display:flex;align-items:center;gap:10px}
-.lp-foot-txt{font-size:12px;color:rgba(255,255,255,.25);font-weight:500}
-.lp-foot-links{display:flex;gap:22px}
 .lp-foot-link{font-size:12px;color:rgba(255,255,255,.22);cursor:pointer;transition:color .18s;font-weight:500;background:none;border:none;font-family:inherit}
 .lp-foot-link:hover{color:rgba(255,255,255,.55)}
+@media(max-width:680px){.lp-foot-in{flex-direction:column;gap:28px}.lp-foot-brand{max-width:100%}.lp-foot-links{gap:28px}}
 
   .lp-price-grid{grid-template-columns:1fr;max-width:440px;margin-left:auto;margin-right:auto}
   .lp-navlinks{display:none}
