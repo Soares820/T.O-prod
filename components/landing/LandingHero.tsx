@@ -2,9 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 
-const BAR_HEIGHTS = [35, 52, 42, 68, 55, 72];
-const BAR_COLORS = ['#2563EB88', '#2563EBbb', '#2563EB99', '#2563EB', '#2563EBcc', '#2563EB'];
-
 export default function LandingHero() {
   const router = useRouter();
 
@@ -31,55 +28,43 @@ export default function LandingHero() {
 
           <div className="lp-hero-btns">
             <button className="lp-btn-p" onClick={() => router.push('/register')}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7" />
+              Começar grátis → sem cartão
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
               </svg>
-              Começar gratuitamente
             </button>
-            <button className="lp-btn-s" onClick={() => document.getElementById('lp-features')?.scrollIntoView({ behavior: 'smooth' })}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" />
+            <button className="lp-btn-s" onClick={() => document.getElementById('lp-pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
               </svg>
-              Ver funcionalidades
+              Ver planos e preços
             </button>
           </div>
 
           <div className="lp-hero-hint">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
             </svg>
             Sem cartão de crédito · 14 dias grátis · Cancele quando quiser
           </div>
         </div>
 
         {/* Right — dashboard visual */}
-        <div className="lp-visual" style={{ animation: 'fadeUp .9s .15s cubic-bezier(.22,1,.36,1) both' }}>
-          <div className="lp-float lp-float1">
-            <div className="lp-float-row">
-              <div className="lp-float-av" style={{ background: 'linear-gradient(135deg,#2563EB,#7C3AED)' }}>AI</div>
-              <div>
-                <div className="lp-float-t">Reavix analisou o progresso</div>
-                <div className="lp-float-s">Meta PEDI atingida · Área motora</div>
-              </div>
-            </div>
-          </div>
-
+        <div className="lp-visual" style={{ animation: 'fadeUp .85s cubic-bezier(.22,1,.36,1) .15s both' }}>
           <div className="lp-dash">
             <div className="lp-dash-bar">
               <div className="lp-win-dot" style={{ background: '#FF5F57' }} />
               <div className="lp-win-dot" style={{ background: '#FFBD2E' }} />
-              <div className="lp-win-dot" style={{ background: '#28C840' }} />
-              <div style={{ marginLeft: '8px', fontSize: '11px', color: 'rgba(255,255,255,.2)', fontWeight: 600 }}>
-                T.O Plataforma · Dashboard
-              </div>
+              <div className="lp-win-dot" style={{ background: '#28CA41' }} />
+              <div style={{ flex: 1, height: 5, background: 'rgba(255,255,255,.06)', borderRadius: 99, marginLeft: 8 }} />
             </div>
 
             <div className="lp-kpis">
               {[
-                { val: '24', lbl: 'Pacientes ativos', color: '#2563EB', grad: 'linear-gradient(90deg,#2563EB,#7C3AED)' },
-                { val: '93%', lbl: 'Taxa de presença', color: '#059669', grad: 'linear-gradient(90deg,#059669,#0EA5E9)' },
-                { val: '18', lbl: 'Sessões esta semana', color: '#7C3AED', grad: 'linear-gradient(90deg,#7C3AED,#EC4899)' },
-                { val: 'A+', lbl: 'Progresso médio PEDI', color: '#D97706', grad: 'linear-gradient(90deg,#D97706,#EF4444)' },
+                { val: '73%',  lbl: 'Progresso',    color: '#60A5FA', grad: 'linear-gradient(90deg,#2563EB,#60A5FA)' },
+                { val: '+18%', lbl: 'Comunicação',  color: '#34D399', grad: 'linear-gradient(90deg,#059669,#34D399)' },
+                { val: '+9%',  lbl: 'Autonomia',    color: '#A78BFA', grad: 'linear-gradient(90deg,#7C3AED,#A78BFA)' },
+                { val: '84%',  lbl: 'Rotina',       color: '#FBBF24', grad: 'linear-gradient(90deg,#D97706,#FBBF24)' },
               ].map((kpi) => (
                 <div key={kpi.lbl} className="lp-kc">
                   <div className="lp-kc-bar" style={{ background: kpi.grad }} />
@@ -90,26 +75,40 @@ export default function LandingHero() {
             </div>
 
             <div className="lp-chart-area">
-              <div className="lp-chart-title">Evolução mensal · Sessões realizadas</div>
+              <div className="lp-chart-title">Evolução · 6 meses</div>
               <div className="lp-bars">
-                {BAR_HEIGHTS.map((h, i) => (
+                {[
+                  { h: 36, bg: 'linear-gradient(180deg,#2563EB,#1D4ED8)', op: .55 },
+                  { h: 42, bg: 'linear-gradient(180deg,#2563EB,#1D4ED8)', op: .62 },
+                  { h: 46, bg: 'linear-gradient(180deg,#2563EB,#1D4ED8)', op: .70 },
+                  { h: 48, bg: 'linear-gradient(180deg,#2563EB,#1D4ED8)', op: .78 },
+                  { h: 52, bg: 'linear-gradient(180deg,#2563EB,#1D4ED8)', op: .86 },
+                  { h: 58, bg: 'linear-gradient(135deg,#2563EB,#7C3AED)',  op: 1,  shadow: '0 -4px 14px rgba(37,99,235,.5)' },
+                ].map((b, i) => (
                   <div
                     key={i}
                     className="lp-bar-c"
-                    style={{ height: `${h}%`, background: BAR_COLORS[i], opacity: i === BAR_HEIGHTS.length - 1 ? 1 : 0.6 }}
+                    style={{ height: b.h, background: b.bg, opacity: b.op, boxShadow: b.shadow }}
                   />
                 ))}
               </div>
             </div>
           </div>
 
+          <div className="lp-float lp-float1">
+            <div className="lp-float-row">
+              <div className="lp-float-av" style={{ background: 'linear-gradient(135deg,#059669,#10B981)' }}>L</div>
+              <div>
+                <div className="lp-float-t">Nova avaliação PEDI</div>
+                <div className="lp-float-s">Lucas · há 2 min</div>
+              </div>
+            </div>
+          </div>
+
           <div className="lp-float lp-float2">
             <div className="lp-float-row">
-              <div className="lp-float-av" style={{ background: 'linear-gradient(135deg,#059669,#0EA5E9)' }}>✓</div>
-              <div>
-                <div className="lp-float-t">Meta atingida</div>
-                <div className="lp-float-s">Contato visual intencional · Lucas M.</div>
-              </div>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px #10B981', flexShrink: 0 }} />
+              <div className="lp-float-t">Evolução acima da meta <span style={{ color: '#34D399' }}>↑ 11%</span></div>
             </div>
           </div>
         </div>

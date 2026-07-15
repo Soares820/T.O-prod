@@ -24,34 +24,16 @@ const FEATURES = [
     text: 'Protocolo de 3 graus de severidade com registro estruturado, notificação imediata e orientações de emergência.',
   },
   {
-    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
     iconBg: 'rgba(217,119,6,.14)', iconColor: '#FBBF24',
-    title: 'Agenda inteligente',
-    text: 'Visualização semanal e diária, confirmação de presença familiar, registro de status de sessão e lembretes automáticos.',
+    title: 'Agenda e sessões',
+    text: 'Gestão completa de sessões, confirmações automáticas, histórico de atendimentos e relatórios por profissional.',
   },
   {
-    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>,
-    iconBg: 'rgba(14,165,233,.14)', iconColor: '#38BDF8',
-    title: 'Financeiro completo',
-    text: 'Contratos por paciente, cobrança mensal automática, controle particular/convênio e relatórios de recebimento.',
-  },
-  {
-    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
-    iconBg: 'rgba(236,72,153,.14)', iconColor: '#F472B6',
-    title: 'PEI com banco de atividades',
-    text: 'Plano de Ensino Individualizado com mais de 120 atividades ABA categorizadas, critérios de domínio e histórico de progresso.',
-  },
-  {
-    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-    iconBg: 'rgba(124,58,237,.14)', iconColor: '#C084FC',
-    title: 'Reavix — IA para terapeutas',
-    text: 'Assistente de IA especializado em ABA e TEA para orientação clínica, sugestão de estratégias e análise de progresso.',
-  },
-  {
-    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>,
-    iconBg: 'rgba(5,150,105,.14)', iconColor: '#4ADE80',
-    title: 'Gestão de equipe',
-    text: 'Perfis de acesso por função, administrador, terapeuta e secretaria. Visibilidade controlada por clínica.',
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>,
+    iconBg: 'rgba(234,88,12,.14)', iconColor: '#FB923C',
+    title: 'Biblioteca de materiais',
+    text: 'Vídeos e orientações práticas por grau de crise, técnicas de regulação sensorial e rotinas por nível TEA.',
   },
 ];
 

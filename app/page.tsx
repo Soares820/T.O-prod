@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 const STATS = [
-  { n: '1.200+', l: 'Pacientes acompanhados' },
-  { n: '98%', l: 'Satisfação das famílias' },
-  { n: '4.8★', l: 'Avaliação média' },
-  { n: '24/7', l: 'Suporte disponível' },
+  { n: '+1.800', l: 'Famílias atendidas' },
+  { n: '+420',   l: 'Clínicas parceiras' },
+  { n: '+28.000', l: 'Avaliações realizadas' },
+  { n: '4.9★',  l: 'Avaliação média' },
 ];
 
 export default function HomePage() {
