@@ -1,4 +1,4 @@
-const CACHE = 'to-plataforma-v6';
+const CACHE = 'to-plataforma-v8';
 const OFFLINE = [
   '/manifest.json',
   '/icons/icon-192.png',
