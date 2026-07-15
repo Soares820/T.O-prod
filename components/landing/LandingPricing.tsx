@@ -84,14 +84,14 @@ export default function LandingPricing() {
 
         <div className="lp-price-grid">
           {PLANS.map((plan) => (
-            <div key={plan.name} className={`lp-plan${plan.highlight ? ' lp-plan-hi' : ''}`}>
+            <div key={plan.name} className={`lp-plan${plan.highlight ? ' pop' : ''}`}>
               {plan.badge && (
                 <div className="lp-plan-badge">{plan.badge}</div>
               )}
               <div className="lp-plan-name" style={{ color: plan.nameColor }}>{plan.name}</div>
               <div className="lp-plan-desc">{plan.desc}</div>
               <button
-                className={`lp-plan-cta ${plan.ctaStyle}`}
+                className={`lp-plan-cta ${plan.ctaStyle === 'lp-cta-p' ? 'lp-cta-prim' : plan.ctaStyle}`}
                 onClick={() => handleCta(plan)}
               >
                 {plan.cta}
