@@ -17,47 +17,49 @@ const PLANS = [
   {
     name: 'Starter', nameColor: 'rgba(255,255,255,.4)',
     desc: 'Para clínicas que estão começando',
-    cta: 'Criar conta grátis', ctaStyle: 'lp-cta-out',
+    cta: 'Criar conta grátis', ctaClass: 'lp-cta-out',
+    popular: false,
     features: [
-      { ok: true, text: 'Até 5 pacientes' },
-      { ok: true, text: 'Avaliações PEDI/PS/SPM' },
-      { ok: true, text: 'Registro de atividades' },
-      { ok: true, text: 'Central de crises' },
-      { ok: true, text: 'Dashboard familiar incluso' },
+      { ok: true,  text: 'Até 5 pacientes' },
+      { ok: true,  text: 'Avaliações PEDI/PS/SPM' },
+      { ok: true,  text: 'Registro de atividades' },
+      { ok: true,  text: 'Central de crises' },
+      { ok: true,  text: 'Dashboard familiar incluso' },
       { ok: false, text: 'PEI e folha de registro' },
       { ok: false, text: 'BI avançado' },
-      { ok: false, text: 'Reavix AI' },
+      { ok: false, text: 'Multi-terapeuta' },
     ],
   },
   {
-    name: 'Clínica', nameColor: '#60A5FA', badge: 'MAIS POPULAR',
-    desc: 'Para clínicas em crescimento',
-    cta: 'Começar grátis', ctaStyle: 'lp-cta-p',
-    highlight: true,
+    name: 'Clínica Pro', nameColor: '#60A5FA',
+    desc: 'Para clínicas em crescimento que precisam de gestão completa',
+    cta: 'Falar com consultor →', ctaClass: 'lp-cta-prim',
+    popular: true,
     features: [
-      { ok: true, text: 'Pacientes ilimitados' },
-      { ok: true, text: 'Avaliações PEDI/PS/SPM' },
-      { ok: true, text: 'PEI com 120+ atividades ABA' },
-      { ok: true, text: 'Folha de registro DTT' },
-      { ok: true, text: 'Agenda e financeiro completo' },
-      { ok: true, text: 'BI clínico avançado' },
-      { ok: true, text: 'Portal da família' },
-      { ok: false, text: 'Reavix AI (add-on)' },
+      { ok: true, text: 'Até 30 pacientes', bold: true },
+      { ok: true, text: 'PEI + Folha de registro DTT/NET' },
+      { ok: true, text: 'BI clínico avançado + radar' },
+      { ok: true, text: 'Sala de espera virtual' },
+      { ok: true, text: 'Multi-terapeuta (até 10)' },
+      { ok: true, text: 'Agenda inteligente' },
+      { ok: true, text: 'Relatórios PDF' },
+      { ok: true, text: 'Notificações de crise 24h' },
     ],
   },
   {
     name: 'Enterprise', nameColor: '#A78BFA',
-    desc: 'Para redes e grupos clínicos',
-    cta: 'Falar com consultor', ctaStyle: 'lp-cta-out',
+    desc: 'Para redes e grandes clínicas com múltiplas unidades',
+    cta: 'Começar 14 dias grátis', ctaClass: 'lp-cta-out',
+    popular: false,
     features: [
-      { ok: true, text: 'Tudo do plano Clínica' },
-      { ok: true, text: 'Multi-unidades / franquias' },
-      { ok: true, text: 'Reavix AI incluso' },
+      { ok: true, text: 'Pacientes ilimitados', bold: true },
+      { ok: true, text: 'Tudo do Pro +' },
+      { ok: true, text: 'Multi-profissional ilimitado' },
+      { ok: true, text: 'White-label com logo da clínica' },
+      { ok: true, text: 'Integração com convênios' },
       { ok: true, text: 'Onboarding dedicado' },
-      { ok: true, text: 'SLA garantido' },
-      { ok: true, text: 'Integrações via API' },
-      { ok: true, text: 'Relatórios personalizados' },
-      { ok: true, text: 'Suporte prioritário 24/7' },
+      { ok: true, text: 'SLA 99.9%' },
+      { ok: true, text: 'API de integração' },
     ],
   },
 ];
@@ -66,8 +68,8 @@ export default function LandingPricing() {
   const router = useRouter();
 
   function handleCta(plan: typeof PLANS[0]) {
-    if (plan.name === 'Enterprise') {
-      window.open('https://wa.me/5511999999999?text=Olá!%20Quero%20conhecer%20o%20plano%20Enterprise%20da%20T.O%20Plataforma', '_blank');
+    if (plan.name === 'Clínica Pro') {
+      window.open('https://wa.me/5511999999999?text=Olá!%20Quero%20conhecer%20o%20plano%20Clínica%20Pro%20da%20T.O%20Plataforma', '_blank');
     } else {
       router.push('/register');
     }
@@ -84,14 +86,12 @@ export default function LandingPricing() {
 
         <div className="lp-price-grid">
           {PLANS.map((plan) => (
-            <div key={plan.name} className={`lp-plan${plan.highlight ? ' pop' : ''}`}>
-              {plan.badge && (
-                <div className="lp-plan-badge">{plan.badge}</div>
-              )}
+            <div key={plan.name} className={`lp-plan${plan.popular ? ' pop' : ''}`}>
+              {plan.popular && <div className="lp-pop-tag">Mais popular</div>}
               <div className="lp-plan-name" style={{ color: plan.nameColor }}>{plan.name}</div>
               <div className="lp-plan-desc">{plan.desc}</div>
               <button
-                className={`lp-plan-cta ${plan.ctaStyle === 'lp-cta-p' ? 'lp-cta-prim' : plan.ctaStyle}`}
+                className={`lp-plan-cta ${plan.ctaClass}`}
                 onClick={() => handleCta(plan)}
               >
                 {plan.cta}
@@ -103,12 +103,24 @@ export default function LandingPricing() {
                     <span className={`lp-fck ${f.ok ? 'y' : 'n'}`}>
                       {f.ok ? CHECK : CROSS}
                     </span>
-                    {f.text}
+                    {f.bold ? <strong>{f.text}</strong> : f.text}
                   </div>
                 ))}
               </div>
             </div>
           ))}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,.28)', fontWeight: 500 }}>
+            Tem dúvidas sobre qual plano escolher?{' '}
+          </span>
+          <button
+            style={{ background: 'none', border: 'none', fontSize: 13, color: 'rgba(255,255,255,.5)', cursor: 'pointer', fontFamily: 'inherit' }}
+            onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+          >
+            Falar com consultor →
+          </button>
         </div>
       </div>
     </section>
