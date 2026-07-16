@@ -24,6 +24,22 @@ function AppShell() {
   const router = useRouter();
   const [screen, setScreen] = useState<Screen>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dark, setDark] = useState(true);
+
+  // Apply theme to body
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    const isDark = saved !== 'light';
+    setDark(isDark);
+    document.body.setAttribute('data-theme', isDark ? 'dark' : '');
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    document.body.setAttribute('data-theme', next ? 'dark' : '');
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
 
   // Redirect unauthenticated users
   useEffect(() => {
@@ -69,7 +85,7 @@ function AppShell() {
       )}
 
       {/* Sidebar */}
-      <Sidebar active={screen} onNav={(s) => { setScreen(s); setSidebarOpen(false); }} />
+      <Sidebar active={screen} onNav={(s) => { setScreen(s); setSidebarOpen(false); }} dark={dark} onToggleTheme={toggleTheme} />
 
       {/* Main content */}
       <main className="main-area">

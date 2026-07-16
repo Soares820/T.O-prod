@@ -39,9 +39,11 @@ const ALL_NAV = [
 interface SidebarProps {
   active: Screen;
   onNav: (screen: Screen) => void;
+  dark?: boolean;
+  onToggleTheme?: () => void;
 }
 
-export default function Sidebar({ active, onNav }: SidebarProps) {
+export default function Sidebar({ active, onNav, dark, onToggleTheme }: SidebarProps) {
   const { state, logout } = useApp();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -115,15 +117,31 @@ export default function Sidebar({ active, onNav }: SidebarProps) {
           </div>
         </button>
 
-        <button
-          onClick={logout}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 16px', borderRadius: 10, background: 'none', border: 'none', color: 'var(--t3)', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          Sair
-        </button>
+        <div style={{ display: 'flex', gap: 4, padding: '4px 16px 8px' }}>
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              title={dark ? 'Modo claro' : 'Modo escuro'}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', borderRadius: 10, background: 'none', border: '1px solid var(--bdr)', color: 'var(--t3)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              {dark
+                ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+              }
+              {dark ? 'Claro' : 'Escuro'}
+            </button>
+          )}
+          <button
+            onClick={logout}
+            title="Sair"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', borderRadius: 10, background: 'none', border: '1px solid var(--bdr)', color: 'var(--t3)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sair
+          </button>
+        </div>
       </div>
     </aside>
   );
