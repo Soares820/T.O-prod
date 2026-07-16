@@ -2,48 +2,67 @@
 
 import { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { formatDate } from '@/lib/utils';
 import type { Sessao } from '@/lib/types';
 
-const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const WDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const SESSION_TYPES = ['ABA', 'TO', 'Fonoaudiologia', 'Psicologia', 'Avaliação', 'Outro'];
 const STATUS_OPTS = [
-  { val: 'agendado', label: 'Agendado', color: 'var(--p)' },
-  { val: 'realizado', label: 'Realizado', color: '#10b981' },
-  { val: 'cancelado', label: 'Cancelado', color: 'var(--d)' },
-  { val: 'falta', label: 'Falta', color: 'var(--w)' },
+  { val: 'agendado',  label: 'Agendado',  color: 'var(--p)',   dot: '#3B82F6' },
+  { val: 'realizado', label: 'Realizado', color: '#10b981',   dot: '#10b981' },
+  { val: 'cancelado', label: 'Cancelado', color: 'var(--d)',   dot: '#ef4444' },
+  { val: 'falta',     label: 'Falta',     color: 'var(--w)',  dot: '#f59e0b' },
 ];
+
+function statusDot(s: string) { return STATUS_OPTS.find(o => o.val === s)?.dot ?? '#94a3b8'; }
+function statusLabel(s: string) { return STATUS_OPTS.find(o => o.val === s)?.label ?? s; }
+function statusTagClass(s: string) {
+  if (s === 'realizado') return 'ast-green';
+  if (s === 'agendado') return 'ast-blue';
+  if (s === 'cancelado' || s === 'falta') return 'ast-orange';
+  return 'ast-gray';
+}
 
 export default function AgendaScreen() {
   const { state, dispatch } = useApp();
   const { data } = state;
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [selectedDate, setSelectedDate] = useState(todayStr);
   const [showModal, setShowModal] = useState(false);
-  const [selected, setSelected] = useState<Sessao | null>(null);
-  const [form, setForm] = useState({ child_id: '', data: todayStr, hora: '09:00', duracao_min: '50', tipo: 'ABA', status: 'agendado', notas: '' });
+  const [editing, setEditing] = useState<Sessao | null>(null);
+  const [form, setForm] = useState({
+    child_id: '', data: todayStr, hora: '09:00',
+    duracao_min: '50', tipo: 'ABA', status: 'agendado', notas: '',
+  });
   const [saving, setSaving] = useState(false);
-  const [view, setView] = useState<'semana' | 'lista'>('semana');
 
-  const weekDates = useMemo(() => {
-    const now = new Date();
-    now.setDate(now.getDate() + weekOffset * 7);
-    const day = now.getDay();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - day + (day === 0 ? -6 : 1));
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      return d.toISOString().slice(0, 10);
-    });
-  }, [weekOffset]);
-
-  const weekLabel = useMemo(() => {
-    const f = new Date(weekDates[0] + 'T12:00:00');
-    const l = new Date(weekDates[6] + 'T12:00:00');
-    return `${f.getDate()}/${f.getMonth() + 1} – ${l.getDate()}/${l.getMonth() + 1}/${l.getFullYear()}`;
-  }, [weekDates]);
+  /* ── Calendar grid ── */
+  const calDays = useMemo(() => {
+    const first = new Date(calYear, calMonth, 1);
+    const last  = new Date(calYear, calMonth + 1, 0);
+    const startWd = first.getDay();  // 0=Sun
+    const days: { date: string; otherMonth: boolean }[] = [];
+    // pad from previous month
+    for (let i = startWd - 1; i >= 0; i--) {
+      const d = new Date(calYear, calMonth, -i);
+      days.push({ date: d.toISOString().slice(0, 10), otherMonth: true });
+    }
+    for (let d = 1; d <= last.getDate(); d++) {
+      const dt = new Date(calYear, calMonth, d);
+      days.push({ date: dt.toISOString().slice(0, 10), otherMonth: false });
+    }
+    // pad to complete last row
+    while (days.length % 7 !== 0) {
+      const last = days[days.length - 1];
+      const d = new Date(last.date + 'T12:00:00');
+      d.setDate(d.getDate() + 1);
+      days.push({ date: d.toISOString().slice(0, 10), otherMonth: true });
+    }
+    return days;
+  }, [calYear, calMonth]);
 
   const sessionsByDate = useMemo(() => {
     const map: Record<string, Sessao[]> = {};
@@ -54,29 +73,43 @@ export default function AgendaScreen() {
     return map;
   }, [data.sessions]);
 
-  const childName = (id: number) =>
-    data.children.find((c) => c.id === id)?.name ?? '—';
+  const daySessions = useMemo(() =>
+    (sessionsByDate[selectedDate] ?? []).sort((a, b) => a.hora.localeCompare(b.hora)),
+  [sessionsByDate, selectedDate]);
 
-  function openNew(date?: string) {
-    setSelected(null);
-    setForm({ child_id: '', data: date ?? todayStr, hora: '09:00', duracao_min: '50', tipo: 'ABA', status: 'agendado', notas: '' });
-    setShowModal(true);
+  const selectedDateFmt = useMemo(() => {
+    const d = new Date(selectedDate + 'T12:00:00');
+    return `${WDAYS[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+  }, [selectedDate]);
+
+  function prevMonth() {
+    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
+    else setCalMonth(m => m - 1);
+  }
+  function nextMonth() {
+    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0); }
+    else setCalMonth(m => m + 1);
   }
 
+  function openNew(date?: string) {
+    setEditing(null);
+    setForm({ child_id: '', data: date ?? selectedDate, hora: '09:00', duracao_min: '50', tipo: 'ABA', status: 'agendado', notas: '' });
+    setShowModal(true);
+  }
   function openEdit(s: Sessao) {
-    setSelected(s);
+    setEditing(s);
     setForm({ child_id: String(s.child_id), data: s.data, hora: s.hora, duracao_min: String(s.duracao_min ?? 50), tipo: s.tipo, status: s.status, notas: s.notas ?? '' });
     setShowModal(true);
   }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.child_id || !form.data) return;
+    if (!form.child_id) return;
     setSaving(true);
     try {
       const { supabase } = await import('@/lib/supabase');
       const childId = Number(form.child_id);
-      const paciente = data.children.find((c) => c.id === childId);
+      const paciente = data.children.find(c => c.id === childId);
       const payload = {
         clinic_id: state.user?.clinicId,
         child_id: childId,
@@ -88,149 +121,238 @@ export default function AgendaScreen() {
         notas: form.notas || null,
         paciente_nome: paciente?.name ?? null,
       };
-
-      if (selected) {
-        const { data: updated } = await supabase.from('sessoes').update(payload).eq('id', selected.id).select().single();
-        if (updated) dispatch({ type: 'UPDATE_SESSION', payload: updated });
+      if (editing) {
+        const { data: up } = await supabase.from('sessoes').update(payload).eq('id', editing.id).select().single();
+        if (up) dispatch({ type: 'UPDATE_SESSION', payload: up });
       } else {
-        const { data: created } = await supabase.from('sessoes').insert(payload).select().single();
-        if (created) dispatch({ type: 'ADD_SESSION', payload: created });
+        const { data: cr } = await supabase.from('sessoes').insert(payload).select().single();
+        if (cr) dispatch({ type: 'ADD_SESSION', payload: cr });
       }
       setShowModal(false);
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   }
 
-  const statusColor = (s: string) => STATUS_OPTS.find((o) => o.val === s)?.color ?? 'var(--t3)';
-  const statusLabel = (s: string) => STATUS_OPTS.find((o) => o.val === s)?.label ?? s;
+  async function handleDelete() {
+    if (!editing) return;
+    const { supabase } = await import('@/lib/supabase');
+    await supabase.from('sessoes').delete().eq('id', editing.id);
+    dispatch({ type: 'DELETE_SESSION', payload: editing.id });
+    setShowModal(false);
+  }
+
+  const childName = (id: number) => data.children.find(c => c.id === id)?.name ?? '—';
 
   return (
     <div className="view show" id="v-agenda">
       <div className="page-body">
-        <div className="page-hero">
-          <div className="ph-pre"><span></span>Gestão</div>
-          <h1 className="ph-title">Agenda</h1>
-          <div className="ph-sub">Semana de {weekLabel}</div>
-        </div>
 
-        <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => setWeekOffset(w => w - 1)} style={{ padding: '8px 12px', border: '1px solid var(--bdr)', borderRadius: 8, background: 'none', color: 'var(--t2)', cursor: 'pointer', fontFamily: 'inherit' }}>← Ant.</button>
-            <button onClick={() => setWeekOffset(0)} style={{ padding: '8px 12px', border: '1px solid', borderColor: weekOffset === 0 ? 'var(--p)' : 'var(--bdr)', borderRadius: 8, background: weekOffset === 0 ? 'var(--ps)' : 'none', color: weekOffset === 0 ? 'var(--p)' : 'var(--t2)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>Hoje</button>
-            <button onClick={() => setWeekOffset(w => w + 1)} style={{ padding: '8px 12px', border: '1px solid var(--bdr)', borderRadius: 8, background: 'none', color: 'var(--t2)', cursor: 'pointer', fontFamily: 'inherit' }}>Próx. →</button>
-          </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['semana', 'lista'] as const).map((v) => (
-              <button key={v} onClick={() => setView(v)} style={{ padding: '8px 14px', border: '1px solid', borderColor: view === v ? 'var(--p)' : 'var(--bdr)', borderRadius: 8, background: view === v ? 'var(--ps)' : 'none', color: view === v ? 'var(--p)' : 'var(--t2)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, textTransform: 'capitalize' }}>{v}</button>
-            ))}
-          </div>
-          <button className="btn-p" onClick={() => openNew()} style={{ marginLeft: 'auto' }}>+ Agendar sessão</button>
-        </div>
-
-        {view === 'semana' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 6 }}>
-            {weekDates.map((date) => {
-              const sessions = (sessionsByDate[date] ?? []).sort((a, b) => a.hora.localeCompare(b.hora));
-              const isToday = date === todayStr;
-              return (
-                <div key={date} style={{ background: isToday ? 'var(--ps)' : 'var(--sf)', border: `1px solid ${isToday ? 'var(--p)' : 'var(--bdr)'}`, borderRadius: 'var(--r)', padding: 10, minHeight: 120 }}>
-                  <div style={{ fontWeight: 700, fontSize: 11, color: isToday ? 'var(--p)' : 'var(--t3)', textTransform: 'uppercase', marginBottom: 4 }}>{WEEKDAYS[new Date(date + 'T12:00:00').getDay()]}</div>
-                  <div style={{ fontWeight: 800, fontSize: 18, color: isToday ? 'var(--p)' : 'var(--t1)', marginBottom: 8 }}>{new Date(date + 'T12:00:00').getDate()}</div>
-                  {sessions.map((s) => (
-                    <div key={s.id} onClick={() => openEdit(s)} style={{ background: 'var(--bg)', border: `2px solid ${statusColor(s.status)}`, borderRadius: 6, padding: '4px 6px', marginBottom: 4, cursor: 'pointer', fontSize: 11 }}>
-                      <div style={{ fontWeight: 700, color: 'var(--t1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {s.paciente_nome || childName(s.child_id)}
-                      </div>
-                      <div style={{ color: 'var(--t3)' }}>{s.hora} · {s.tipo}</div>
-                    </div>
-                  ))}
-                  <button onClick={() => openNew(date)} style={{ width: '100%', marginTop: 4, padding: '3px 0', background: 'none', border: '1px dashed var(--bdr)', borderRadius: 6, color: 'var(--t3)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}>+ Sessão</button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {view === 'lista' && (
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
           <div>
-            {weekDates.map((date) => {
-              const sessions = (sessionsByDate[date] ?? []).sort((a, b) => a.hora.localeCompare(b.hora));
-              if (sessions.length === 0 && date !== todayStr) return null;
-              return (
-                <div key={date} style={{ marginBottom: 16 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13, color: date === todayStr ? 'var(--p)' : 'var(--t2)', padding: '6px 0', borderBottom: '1px solid var(--bdr)', marginBottom: 8 }}>
-                    {WEEKDAYS[new Date(date + 'T12:00:00').getDay()]}, {formatDate(date)}
-                    {date === todayStr && <span style={{ marginLeft: 8, fontSize: 10, background: 'var(--p)', color: '#fff', padding: '2px 8px', borderRadius: 20 }}>Hoje</span>}
-                  </div>
-                  {sessions.length === 0
-                    ? <div style={{ fontSize: 12, color: 'var(--t3)', padding: '4px 0' }}>Nenhuma sessão</div>
-                    : sessions.map((s) => (
-                      <div key={s.id} onClick={() => openEdit(s)} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 14px', background: 'var(--sf)', border: '1px solid var(--bdr)', borderLeft: `4px solid ${statusColor(s.status)}`, borderRadius: 10, marginBottom: 6, cursor: 'pointer' }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)' }}>{s.paciente_nome || childName(s.child_id)}</div>
-                          <div style={{ fontSize: 12, color: 'var(--t3)' }}>{s.hora} · {s.duracao_min}min · {s.tipo}</div>
-                        </div>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: statusColor(s.status) }}>{statusLabel(s.status)}</span>
-                      </div>
-                    ))}
-                </div>
-              );
-            })}
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--p)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 18, height: 2, background: 'var(--p)', borderRadius: 2, display: 'inline-block' }} />
+              Gestão
+            </div>
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: 'var(--t1)', margin: 0, letterSpacing: '-.5px' }}>Agenda</h1>
+            <div style={{ fontSize: 13, color: 'var(--t2)', marginTop: 4 }}>{MONTHS[calMonth]} {calYear}</div>
           </div>
-        )}
+          <button className="btn-p" onClick={() => openNew()}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agendar sessão
+          </button>
+        </div>
+
+        {/* Main layout */}
+        <div className="agenda-layout">
+          {/* LEFT: Monthly calendar */}
+          <div className="agenda-cal-wrap">
+            <div className="agenda-cal-nav">
+              <button className="agenda-cal-arrow" onClick={prevMonth}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span className="agenda-cal-month">{MONTHS[calMonth]} {calYear}</span>
+              <button className="agenda-cal-arrow" onClick={nextMonth}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+
+            <div className="agenda-cal-wd">
+              {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => (
+                <div key={d} className="agenda-cal-wdlbl">{d}</div>
+              ))}
+            </div>
+
+            <div className="agenda-cal-grid">
+              {calDays.map(({ date, otherMonth }) => {
+                const isToday    = date === todayStr;
+                const isSelected = date === selectedDate;
+                const hasEvents  = (sessionsByDate[date]?.length ?? 0) > 0;
+                let cls = 'agenda-day';
+                if (otherMonth) cls += ' other-month';
+                if (isToday && !isSelected) cls += ' today';
+                if (isSelected) cls += ' selected';
+                if (hasEvents) cls += ' has-events';
+                return (
+                  <div key={date} className={cls} onClick={() => setSelectedDate(date)}>
+                    {new Date(date + 'T12:00:00').getDate()}
+                    <div className="agenda-day-dot" />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Weekly summary below calendar */}
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--bdr)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>Esta semana</div>
+              {(() => {
+                const today = new Date();
+                const day = today.getDay();
+                const monday = new Date(today);
+                monday.setDate(today.getDate() - day + (day === 0 ? -6 : 1));
+                const weekDates = Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date(monday);
+                  d.setDate(monday.getDate() + i);
+                  return d.toISOString().slice(0, 10);
+                });
+                const total = weekDates.reduce((sum, d) => sum + (sessionsByDate[d]?.length ?? 0), 0);
+                const done = weekDates.reduce((sum, d) =>
+                  sum + (sessionsByDate[d]?.filter(s => s.status === 'realizado').length ?? 0), 0);
+                return (
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <div>
+                      <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--p)', lineHeight: 1 }}>{total}</div>
+                      <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600 }}>Agendadas</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 22, fontWeight: 900, color: '#10b981', lineHeight: 1 }}>{done}</div>
+                      <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600 }}>Realizadas</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--w)', lineHeight: 1 }}>{total - done}</div>
+                      <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600 }}>Pendentes</div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* RIGHT: Session list for selected day */}
+          <div className="agenda-side">
+            <div className="agenda-side-hd">
+              <div>
+                <div className="agenda-side-date">{selectedDateFmt}</div>
+                <div className="agenda-side-sub">{daySessions.length} {daySessions.length === 1 ? 'sessão' : 'sessões'}</div>
+              </div>
+              <button className="btn-p" onClick={() => openNew(selectedDate)} style={{ fontSize: 12, padding: '7px 13px' }}>
+                + Nova
+              </button>
+            </div>
+
+            {daySessions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>📅</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--t2)', marginBottom: 6 }}>Sem sessões</div>
+                <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 16 }}>Nenhuma sessão para este dia</div>
+                <button className="btn-s" onClick={() => openNew(selectedDate)} style={{ fontSize: 12 }}>+ Agendar sessão</button>
+              </div>
+            ) : (
+              <div>
+                {daySessions.map(s => (
+                  <div key={s.id} className="agenda-sess" onClick={() => openEdit(s)} style={{ cursor: 'pointer' }}>
+                    <div className="agenda-sess-time">{s.hora}</div>
+                    <div className="agenda-sess-dot" style={{ background: statusDot(s.status) }} />
+                    <div className="agenda-sess-body">
+                      <div className="agenda-sess-name">{s.paciente_nome || childName(s.child_id)}</div>
+                      <div className="agenda-sess-meta">{s.tipo} · {s.duracao_min ?? 50}min</div>
+                    </div>
+                    <span className={`agenda-sess-tag ${statusTagClass(s.status)}`}>{statusLabel(s.status)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowModal(false)}>
-          <div style={{ background: 'var(--bg)', borderRadius: 20, padding: 28, width: '100%', maxWidth: 440 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ fontWeight: 800, fontSize: 18, color: 'var(--t1)', margin: 0 }}>{selected ? 'Editar sessão' : 'Nova sessão'}</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: 20 }}>×</button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowModal(false)}>
+          <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 22, padding: 28, width: '100%', maxWidth: 450, boxShadow: 'var(--sh-xl)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+              <h2 style={{ fontWeight: 900, fontSize: 20, color: 'var(--t1)', margin: 0 }}>{editing ? 'Editar sessão' : 'Nova sessão'}</h2>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: 22, lineHeight: 1 }}>×</button>
             </div>
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Paciente *</label>
-                <select value={form.child_id} onChange={(e) => setForm(f => ({ ...f, child_id: e.target.value }))} required style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
-                  <option value="">Selecione...</option>
-                  {data.children.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Paciente *</label>
+                <select value={form.child_id} onChange={e => setForm(f => ({ ...f, child_id: e.target.value }))} required
+                  style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
+                  <option value="">Selecione o paciente...</option>
+                  {data.children.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Data *</label>
-                  <input type="date" value={form.data} onChange={(e) => setForm(f => ({ ...f, data: e.target.value }))} required style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Data *</label>
+                  <input type="date" value={form.data} onChange={e => setForm(f => ({ ...f, data: e.target.value }))} required
+                    style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Horário *</label>
-                  <input type="time" value={form.hora} onChange={(e) => setForm(f => ({ ...f, hora: e.target.value }))} required style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Horário *</label>
+                  <input type="time" value={form.hora} onChange={e => setForm(f => ({ ...f, hora: e.target.value }))} required
+                    style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 </div>
               </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Tipo</label>
-                  <select value={form.tipo} onChange={(e) => setForm(f => ({ ...f, tipo: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
-                    {SESSION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Tipo</label>
+                  <select value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))}
+                    style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
+                    {SESSION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Status</label>
-                  <select value={form.status} onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
-                    {STATUS_OPTS.map((o) => <option key={o.val} value={o.val}>{o.label}</option>)}
-                  </select>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Duração (min)</label>
+                  <input type="number" value={form.duracao_min} onChange={e => setForm(f => ({ ...f, duracao_min: e.target.value }))} min="15" max="240" step="5"
+                    style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 </div>
               </div>
+
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Duração (min)</label>
-                <input type="number" value={form.duracao_min} onChange={(e) => setForm(f => ({ ...f, duracao_min: e.target.value }))} min="15" max="240" step="5" style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Status</label>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {STATUS_OPTS.map(o => (
+                    <button key={o.val} type="button" onClick={() => setForm(f => ({ ...f, status: o.val }))}
+                      style={{ padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${form.status === o.val ? o.dot : 'var(--bdr)'}`, background: form.status === o.val ? o.dot + '20' : 'none', color: form.status === o.val ? o.dot : 'var(--t3)', transition: '.15s' }}>
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
               </div>
+
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Observações</label>
-                <textarea rows={2} value={form.notas} onChange={(e) => setForm(f => ({ ...f, notas: e.target.value }))} placeholder="Notas da sessão..." style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Observações</label>
+                <textarea rows={2} value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} placeholder="Notas opcionais..."
+                  style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} />
               </div>
+
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: 12, border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
-                <button type="submit" disabled={saving} className="btn-p" style={{ flex: 2 }}>{saving ? 'Salvando...' : selected ? 'Salvar' : 'Agendar'}</button>
+                {editing && (
+                  <button type="button" onClick={handleDelete}
+                    style={{ padding: '12px 16px', borderRadius: 11, border: '1px solid var(--db)', background: 'none', color: 'var(--d)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    Excluir
+                  </button>
+                )}
+                <button type="button" onClick={() => setShowModal(false)}
+                  style={{ flex: 1, padding: 12, border: '1px solid var(--bdr)', borderRadius: 11, background: 'none', color: 'var(--t2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Cancelar
+                </button>
+                <button type="submit" disabled={saving} className="btn-p" style={{ flex: 2 }}>
+                  {saving ? 'Salvando...' : editing ? 'Salvar' : 'Agendar'}
+                </button>
               </div>
             </form>
           </div>

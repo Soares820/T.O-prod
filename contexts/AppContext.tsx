@@ -42,6 +42,7 @@ type Action =
   | { type: 'UPDATE_CHILD'; payload: Paciente }
   | { type: 'ADD_SESSION'; payload: Sessao }
   | { type: 'UPDATE_SESSION'; payload: Sessao }
+  | { type: 'DELETE_SESSION'; payload: number }
   | { type: 'ADD_CONTRACT'; payload: Contrato }
   | { type: 'ADD_PAYMENT'; payload: Pagamento }
   | { type: 'UPDATE_PAYMENT'; payload: Pagamento }
@@ -67,6 +68,8 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, data: { ...state.data, sessions: [action.payload, ...state.data.sessions] } };
     case 'UPDATE_SESSION':
       return { ...state, data: { ...state.data, sessions: state.data.sessions.map((s) => s.id === action.payload.id ? action.payload : s) } };
+    case 'DELETE_SESSION':
+      return { ...state, data: { ...state.data, sessions: state.data.sessions.filter((s) => s.id !== action.payload) } };
     case 'ADD_CONTRACT':
       return { ...state, data: { ...state.data, contracts: [...state.data.contracts, action.payload] } };
     case 'ADD_PAYMENT':
