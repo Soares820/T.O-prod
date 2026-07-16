@@ -760,6 +760,7 @@ select.inp{cursor:pointer;appearance:none;background-image:url("data:image/svg+x
 .dt-red{background:linear-gradient(140deg,#B91C1C 0%,#DC2626 100%)}
 .dt-indigo{background:linear-gradient(140deg,#3730A3 0%,#4F46E5 100%)}
 .dt-cyan{background:linear-gradient(140deg,#0369A1 0%,#0284C7 100%)}
+.dt-dark{background:linear-gradient(140deg,#1E2535 0%,#2A3347 100%)}
 .dt-pink{background:linear-gradient(140deg,#9D174D 0%,#BE185D 100%)}
 
 /* Stats bar below tiles */

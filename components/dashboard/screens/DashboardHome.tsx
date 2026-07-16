@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Screen } from '@/lib/types';
 
 interface Props {
@@ -21,132 +20,257 @@ export default function DashboardHome({ onNav }: Props) {
     const todaySessions = data.sessions.filter((s) => s.data === today).length;
     const todayDone = data.sessions.filter((s) => s.data === today && s.status === 'realizado').length;
 
-    const monthPayments = data.payments.filter((p) => p.mes_ref === thisMonth && p.status === 'recebido');
+    const monthPayments = data.payments.filter(
+      (p) => p.mes_ref === thisMonth && p.status === 'recebido'
+    );
     const monthRevenue = monthPayments.reduce((sum, p) => sum + (p.valor_recebido || 0), 0);
 
     const pending = data.payments.filter((p) => p.status === 'pendente').length;
 
-    const totalSessions = data.sessions.filter((s) => s.status === 'realizado' || s.status === 'cancelado' || s.status === 'falta').length;
+    const totalSessions = data.sessions.filter(
+      (s) => s.status === 'realizado' || s.status === 'cancelado' || s.status === 'falta'
+    ).length;
     const realized = data.sessions.filter((s) => s.status === 'realizado').length;
     const presenceRate = totalSessions > 0 ? Math.round((realized / totalSessions) * 100) : 0;
 
-    return { active, todaySessions, todayDone, monthRevenue, pending, presenceRate };
+    const teamCount = data.team.length;
+
+    return { active, todaySessions, todayDone, monthRevenue, pending, presenceRate, teamCount };
   }, [data]);
 
-  const upcomingSessions = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    return data.sessions
-      .filter((s) => s.data >= today && s.status === 'agendado')
-      .slice(0, 5);
-  }, [data.sessions]);
+  const today = new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
 
-  const recentSessions = useMemo(() => {
-    return data.sessions.slice(0, 5);
-  }, [data.sessions]);
-
-  const childName = (id: number) =>
-    data.children.find((c) => c.id === id)?.name ?? '—';
-
-  const STATUS_MAP: Record<string, { label: string; color: string }> = {
-    agendado: { label: 'Agendado', color: 'var(--p)' },
-    realizado: { label: 'Realizado', color: '#10b981' },
-    cancelado: { label: 'Cancelado', color: 'var(--d)' },
-    falta: { label: 'Falta', color: 'var(--w)' },
-  };
+  const tiles: Array<{ key: Screen; label: string; sub: string; color: string; icon: React.ReactNode }> = [
+    {
+      key: 'pacientes',
+      label: 'Pacientes',
+      sub: 'Cadastros e histórico clínico',
+      color: 'dt-blue',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
+        </svg>
+      ),
+    },
+    {
+      key: 'bi',
+      label: 'BI Clínico',
+      sub: 'Relatórios e indicadores',
+      color: 'dt-orange',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      ),
+    },
+    {
+      key: 'agenda',
+      label: 'Agenda',
+      sub: 'Sessões e atendimentos',
+      color: 'dt-green',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      ),
+    },
+    {
+      key: 'agenda',
+      label: 'Sessões',
+      sub: 'Histórico e evoluções',
+      color: 'dt-teal',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      ),
+    },
+    {
+      key: 'portal',
+      label: 'Comunicação',
+      sub: 'Chat com famílias',
+      color: 'dt-purple',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+        </svg>
+      ),
+    },
+    {
+      key: 'reavix',
+      label: 'Central de Crise',
+      sub: 'Monitoramento em tempo real',
+      color: 'dt-red',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      ),
+    },
+    {
+      key: 'pei',
+      label: 'Atividades',
+      sub: 'PEI e registro de execução',
+      color: 'dt-indigo' as string,
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 11 12 14 22 4" />
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+      ),
+    },
+    {
+      key: 'avaliacoes',
+      label: 'Avaliações',
+      sub: 'PEDI, SPM, ABLLS, VBMAPP',
+      color: 'dt-cyan' as string,
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+      ),
+    },
+    {
+      key: 'financeiro',
+      label: 'Financeiro',
+      sub: 'Receita, contratos e faturamento',
+      color: 'dt-green',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+        </svg>
+      ),
+    },
+    {
+      key: 'equipe',
+      label: 'Funcionários',
+      sub: `${stats.teamCount} profissionais cadastrados`,
+      color: 'dt-dark' as string,
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
+        </svg>
+      ),
+    },
+    {
+      key: 'reavix',
+      label: 'Reavix AI',
+      sub: 'Assistente clínica inteligente',
+      color: 'dt-purple',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      ),
+    },
+  ];
 
   return (
-    <div className="view show" id="v-dashboard-clinic">
-      <div className="page-body">
-
-        {/* Header */}
-        <div className="page-hero">
-          <div className="ph-pre"><span></span>Gestão clínica</div>
-          <h1 className="ph-title">Olá, {user?.name?.split(' ')[0] ?? 'Terapeuta'} 👋</h1>
-          <div className="ph-sub">Visão geral da clínica · {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
-        </div>
-
-        {/* KPIs */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 14, marginBottom: 28 }}>
-          {[
-            { label: 'Pacientes ativos', value: stats.active, icon: '👨‍👩‍👦', color: 'var(--p)', action: () => onNav('pacientes') },
-            { label: 'Sessões hoje', value: `${stats.todayDone}/${stats.todaySessions}`, icon: '📅', color: 'var(--v)', action: () => onNav('agenda') },
-            { label: 'Receita do mês', value: formatCurrency(stats.monthRevenue), icon: '💰', color: '#10b981', action: () => onNav('financeiro') },
-            { label: 'Taxa de presença', value: `${stats.presenceRate}%`, icon: '✅', color: stats.presenceRate >= 80 ? '#10b981' : 'var(--w)', action: () => onNav('bi') },
-            { label: 'Cobranças pendentes', value: stats.pending, icon: '⏳', color: stats.pending > 0 ? 'var(--w)' : '#10b981', action: () => onNav('financeiro') },
-          ].map((kpi) => (
-            <div
-              key={kpi.label}
-              onClick={kpi.action}
-              style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '20px 18px', cursor: 'pointer', transition: '.2s' }}
-            >
-              <div style={{ fontSize: 24, marginBottom: 10 }}>{kpi.icon}</div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: kpi.color, lineHeight: 1 }}>{kpi.value}</div>
-              <div style={{ fontSize: 12, color: 'var(--t2)', marginTop: 4, fontWeight: 600 }}>{kpi.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Quick actions */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
-          <button className="btn-p" onClick={() => onNav('pacientes')}>+ Novo paciente</button>
-          <button className="btn-s" onClick={() => onNav('agenda')}>📅 Ver agenda</button>
-          <button className="btn-s" onClick={() => onNav('reavix')}>🤖 Reavix AI</button>
-          <button className="btn-s" onClick={() => onNav('financeiro')}>💰 Financeiro</button>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          {/* Upcoming sessions */}
-          <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '20px 18px' }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 14, color: 'var(--t1)' }}>Próximas sessões</div>
-            {upcomingSessions.length === 0 ? (
-              <div style={{ color: 'var(--t3)', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>Nenhuma sessão agendada</div>
-            ) : upcomingSessions.map((s) => (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--bdr)' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--t1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {s.paciente_nome || childName(s.child_id)}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--t3)' }}>{formatDate(s.data)} · {s.hora} · {s.tipo}</div>
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--p)', background: 'var(--ps)', padding: '3px 8px', borderRadius: 20 }}>
-                  {STATUS_MAP[s.status]?.label}
-                </span>
-              </div>
-            ))}
-            <button
-              onClick={() => onNav('agenda')}
-              style={{ marginTop: 14, width: '100%', padding: '8px', background: 'none', border: '1px solid var(--bdr)', borderRadius: 8, color: 'var(--t2)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              Ver agenda completa →
-            </button>
+    <div className="dash-content">
+      {/* Top area */}
+      <div className="dash-top">
+        <div>
+          <div className="dash-greet-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" />
+            </svg>
+            {stats.todaySessions > 0 ? `${stats.todaySessions} sessões agendadas hoje` : `${stats.teamCount} profissionais online`}
           </div>
+          <h1 className="dash-greet-h">
+            Olá, {user?.name?.split(' ')[0] ?? 'Terapeuta'}! 👋
+          </h1>
+          <p className="dash-greet-sub">
+            Central de atendimento ativa.{' '}
+            <strong>{stats.todaySessions} sessões hoje</strong>
+            {stats.pending > 0 && <> · <strong>{stats.pending} cobranças</strong> pendentes</>}
+            {' '}em monitoramento.
+          </p>
+        </div>
+        <div className="dash-date-chip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <div>
+            <span>Hoje</span>
+            <strong>{today}</strong>
+          </div>
+        </div>
+      </div>
 
-          {/* Recent activity */}
-          <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '20px 18px' }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 14, color: 'var(--t1)' }}>Atividade recente</div>
-            {recentSessions.length === 0 ? (
-              <div style={{ color: 'var(--t3)', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>Nenhuma sessão registrada ainda</div>
-            ) : recentSessions.map((s) => {
-              const st = STATUS_MAP[s.status];
-              return (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--bdr)' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: st?.color, flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--t1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {s.paciente_nome || childName(s.child_id)}
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--t3)' }}>{formatDate(s.data)} · {s.tipo}</div>
-                  </div>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: st?.color }}>{st?.label}</span>
-                </div>
-              );
-            })}
-            <button
-              onClick={() => onNav('agenda')}
-              style={{ marginTop: 14, width: '100%', padding: '8px', background: 'none', border: '1px solid var(--bdr)', borderRadius: 8, color: 'var(--t2)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              Ver histórico →
-            </button>
+      {/* Colorful tiles grid */}
+      <div className="dash-tiles">
+        {tiles.map((tile) => (
+          <button
+            key={`${tile.key}-${tile.label}`}
+            className={`dash-tile ${tile.color}`}
+            onClick={() => onNav(tile.key)}
+          >
+            <div className="dt-ico">{tile.icon}</div>
+            <div className="dt-body">
+              <div className="dt-lbl">{tile.label}</div>
+              <div className="dt-sub">{tile.sub}</div>
+            </div>
+            <svg className="dt-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" />
+            </svg>
+          </button>
+        ))}
+      </div>
+
+      {/* Stats bar */}
+      <div className="dash-stats">
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(37,99,235,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{stats.active}</div>
+            <div className="dash-stat-lbl">Pacientes Ativos</div>
+          </div>
+        </div>
+
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(5,150,105,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{stats.presenceRate}%</div>
+            <div className="dash-stat-lbl">Taxa de Presença</div>
+          </div>
+        </div>
+
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(217,119,6,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{stats.todayDone}/{stats.todaySessions}</div>
+            <div className="dash-stat-lbl">Sessões Hoje</div>
+          </div>
+        </div>
+
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(220,38,38,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{stats.pending}</div>
+            <div className="dash-stat-lbl">Cobranças Abertas</div>
           </div>
         </div>
       </div>
