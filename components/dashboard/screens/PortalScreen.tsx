@@ -2,18 +2,21 @@
 
 import { useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import type { Screen } from '@/lib/types';
 
-export default function PortalScreen() {
+interface Props {
+  onNav?: (s: Screen) => void;
+}
+
+export default function PortalScreen({ onNav }: Props) {
   const { state } = useApp();
   const { data, user } = state;
 
-  const isFamiliar = user?.role === 'familia';
   const myChild = data.children[0] ?? null;
 
   const childSessions = useMemo(() => {
     if (!myChild) return [];
-    return data.sessions.filter((s) => s.child_id === myChild.id).slice(0, 10);
+    return data.sessions.filter((s) => s.child_id === myChild.id);
   }, [data.sessions, myChild]);
 
   const childGoals = useMemo(() => {
@@ -21,133 +24,203 @@ export default function PortalScreen() {
     return data.goals.filter((g) => g.child_id === myChild.id);
   }, [data.goals, myChild]);
 
-  const childPayments = useMemo(() => {
-    if (!myChild) return [];
-    return data.payments.filter((p) => p.child_id === myChild.id).slice(0, 6);
-  }, [data.payments, myChild]);
+  const progressPct = useMemo(() => {
+    const done = childGoals.filter((g) => g.status === 'atingido').length;
+    return childGoals.length > 0 ? Math.round((done / childGoals.length) * 100) : 0;
+  }, [childGoals]);
 
-  const presenceRate = useMemo(() => {
-    const done = childSessions.filter((s) => s.status === 'realizado').length;
-    const total = childSessions.filter((s) => s.status !== 'agendado').length;
-    return total > 0 ? Math.round((done / total) * 100) : 0;
+  const marcosCount = useMemo(() =>
+    childGoals.filter((g) => g.status === 'atingido').length,
+  [childGoals]);
+
+  const nextSession = useMemo(() => {
+    const future = childSessions
+      .filter((s) => s.status === 'agendado')
+      .sort((a, b) => a.data.localeCompare(b.data));
+    return future[0] ?? null;
   }, [childSessions]);
 
-  const STATUS_COLORS: Record<string, string> = {
-    agendado: 'var(--p)',
-    realizado: '#10b981',
-    cancelado: '#ef4444',
-    falta: '#f59e0b',
-  };
+  const today = new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
 
-  const STATUS_LABELS: Record<string, string> = {
-    agendado: 'Agendado',
-    realizado: 'Realizado',
-    cancelado: 'Cancelado',
-    falta: 'Falta',
-  };
+  const tiles = [
+    {
+      key: 'bi' as Screen,
+      label: 'Evolução',
+      sub: 'BI e gráficos de progresso',
+      color: 'dt-blue',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      ),
+    },
+    {
+      key: 'agenda' as Screen,
+      label: 'Atividades',
+      sub: 'Tarefas e exercícios diários',
+      color: 'dt-orange',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 11 12 14 22 4" />
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+      ),
+    },
+    {
+      key: 'pei' as Screen,
+      label: 'Marcos',
+      sub: 'Conquistas e metas atingidas',
+      color: 'dt-green',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      ),
+    },
+    {
+      key: 'reavix' as Screen,
+      label: 'Mensagens',
+      sub: 'Chat com a equipe clínica',
+      color: 'dt-teal',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+        </svg>
+      ),
+    },
+    {
+      key: 'agenda' as Screen,
+      label: 'Sessões',
+      sub: 'Histórico de atendimentos',
+      color: 'dt-purple',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      ),
+    },
+    {
+      key: 'reavix' as Screen,
+      label: 'Suporte & Crise',
+      sub: 'Central de apoio e emergências',
+      color: 'dt-red',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+        </svg>
+      ),
+    },
+  ];
 
-  if (!myChild) {
-    return (
-      <div className="view show" id="v-portal">
-        <div className="page-body" style={{ textAlign: 'center', paddingTop: 80 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🏠</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>Portal da Família</div>
-          <div style={{ fontSize: 13, color: 'var(--t3)' }}>Nenhum paciente cadastrado ainda.</div>
-        </div>
-      </div>
-    );
-  }
+  const isClinicView = user?.role !== 'familia';
 
   return (
-    <div className="view show" id="v-portal">
-      <div className="page-body">
-        <div className="page-hero">
-          <div className="ph-pre"><span></span>Portal Família</div>
-          <h1 className="ph-title">Olá, família! 👨‍👩‍👦</h1>
-          <div className="ph-sub">{isFamiliar ? 'Seu espaço de acompanhamento' : `Preview do portal — ${myChild.name}`}</div>
+    <div className="dash-content">
+      {isClinicView && (
+        <div style={{ background: 'rgba(245,158,11,.15)', border: '1px solid rgba(245,158,11,.35)', borderRadius: 10, padding: '10px 18px', fontSize: 12, color: '#FBBF24', fontWeight: 600, marginTop: -20, marginBottom: -20, alignSelf: 'flex-start' }}>
+          👁️ Preview — Assim as famílias verão o Portal
         </div>
+      )}
 
-        {!isFamiliar && (
-          <div style={{ background: 'rgba(245,158,11,.1)', border: '1px solid rgba(245,158,11,.3)', borderRadius: 10, padding: '10px 16px', marginBottom: 20, fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
-            👁️ Preview — Assim as famílias verão o portal
-          </div>
-        )}
-
-        {/* Child card */}
-        <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '20px 22px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{ width: 60, height: 60, borderRadius: 18, background: 'linear-gradient(135deg,var(--p),var(--v))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 22, flexShrink: 0 }}>
-            {myChild.name.charAt(0)}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--t1)' }}>{myChild.name}</div>
-            {myChild.diagnosis && <div style={{ fontSize: 13, color: 'var(--t2)', marginTop: 2 }}>{myChild.diagnosis}</div>}
-          </div>
-          <div style={{ display: 'flex', gap: 20 }}>
-            {[
-              { v: childSessions.length, l: 'SESSÕES' },
-              { v: `${presenceRate}%`, l: 'PRESENÇA', c: '#10b981' },
-              { v: childGoals.length, l: 'METAS' },
-            ].map(({ v, l, c }) => (
-              <div key={l} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 900, color: c ?? 'var(--p)' }}>{v}</div>
-                <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600 }}>{l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          {/* Sessions */}
-          <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '18px' }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)', marginBottom: 14 }}>📅 Sessões recentes</div>
-            {childSessions.length === 0 ? (
-              <div style={{ fontSize: 12, color: 'var(--t3)', padding: '10px 0' }}>Nenhuma sessão registrada</div>
-            ) : childSessions.map((s) => (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--bdr)' }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: STATUS_COLORS[s.status] ?? 'var(--t3)', flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t1)' }}>{formatDate(s.data)}</div>
-                  <div style={{ fontSize: 11, color: 'var(--t3)' }}>{s.hora} · {s.tipo} · {s.duracao_min}min</div>
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: STATUS_COLORS[s.status] ?? 'var(--t3)' }}>
-                  {STATUS_LABELS[s.status] ?? s.status}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Goals */}
-          <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '18px' }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)', marginBottom: 14 }}>🎯 Metas do PEI</div>
-            {childGoals.length === 0 ? (
-              <div style={{ fontSize: 12, color: 'var(--t3)', padding: '10px 0' }}>Nenhuma meta cadastrada</div>
-            ) : childGoals.map((g) => (
-              <div key={g.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--bdr)' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t1)', marginBottom: 2 }}>{g.descricao}</div>
-                <div style={{ fontSize: 11, color: g.status === 'atingido' ? '#10b981' : 'var(--t3)' }}>
-                  {g.area} · {g.status === 'atingido' ? '✓ Atingido' : g.status}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {childPayments.length > 0 && (
-          <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '18px', marginTop: 20 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)', marginBottom: 14 }}>💳 Histórico financeiro</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {childPayments.map((p) => (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ flex: 1, fontSize: 13, color: 'var(--t2)' }}>{p.mes_ref}</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)' }}>{formatCurrency(p.valor_previsto ?? 0)}</div>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: p.status === 'recebido' ? '#10b981' : '#f59e0b', background: p.status === 'recebido' ? 'rgba(16,185,129,.1)' : 'rgba(245,158,11,.1)', padding: '3px 10px', borderRadius: 20 }}>
-                    {p.status}
-                  </span>
-                </div>
-              ))}
+      {/* Top greeting area */}
+      <div className="dash-top">
+        <div>
+          {nextSession && (
+            <div className="dash-greet-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+              Sessão hoje às {nextSession.hora}
             </div>
+          )}
+          <h1 className="dash-greet-h">Olá, Família! 👋</h1>
+          <p className="dash-greet-sub">
+            Bem-vinda à T.O Plataforma.{' '}
+            {myChild ? <><strong>{myChild.name}</strong> tem evoluído muito — acompanhe o progresso {myChild.sex === 'F' ? 'dela' : 'dele'} por aqui.</> : 'Acompanhe o progresso do seu filho por aqui.'}
+          </p>
+        </div>
+        <div className="dash-date-chip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <div>
+            <span>Hoje</span>
+            <strong>{today}</strong>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Colorful tiles */}
+      <div className="dash-tiles">
+        {tiles.map((tile) => (
+          <button
+            key={tile.label}
+            className={`dash-tile ${tile.color}`}
+            onClick={() => onNav?.(tile.key)}
+          >
+            <div className="dt-ico">{tile.icon}</div>
+            <div className="dt-body">
+              <div className="dt-lbl">{tile.label}</div>
+              <div className="dt-sub">{tile.sub}</div>
+            </div>
+            <svg className="dt-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" />
+            </svg>
+          </button>
+        ))}
+      </div>
+
+      {/* Stats bar */}
+      <div className="dash-stats">
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(37,99,235,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{progressPct}%</div>
+            <div className="dash-stat-lbl">Progresso Geral</div>
+          </div>
+        </div>
+
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(5,150,105,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{marcosCount}</div>
+            <div className="dash-stat-lbl">Marcos Atingidos</div>
+          </div>
+        </div>
+
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(217,119,6,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{nextSession ? nextSession.hora : '—'}</div>
+            <div className="dash-stat-lbl">Próxima Sessão</div>
+          </div>
+        </div>
+
+        <div className="dash-stat">
+          <div className="dash-stat-ico" style={{ background: 'rgba(124,58,237,.25)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+            </svg>
+          </div>
+          <div className="dash-stat-info">
+            <div className="dash-stat-val">{childSessions.length}</div>
+            <div className="dash-stat-lbl">Total Sessões</div>
+          </div>
+        </div>
       </div>
     </div>
   );
