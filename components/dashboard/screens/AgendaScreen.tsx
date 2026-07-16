@@ -176,6 +176,18 @@ export default function AgendaScreen() {
               </button>
             </div>
 
+            {(calMonth !== new Date().getMonth() || calYear !== new Date().getFullYear()) && (
+              <div style={{ textAlign: 'center', marginBottom: 10, marginTop: -4 }}>
+                <button className="agenda-cal-today-btn" onClick={() => {
+                  setCalYear(new Date().getFullYear());
+                  setCalMonth(new Date().getMonth());
+                  setSelectedDate(todayStr);
+                }}>
+                  Hoje
+                </button>
+              </div>
+            )}
+
             <div className="agenda-cal-wd">
               {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => (
                 <div key={d} className="agenda-cal-wdlbl">{d}</div>
@@ -189,52 +201,48 @@ export default function AgendaScreen() {
                 const hasEvents  = (sessionsByDate[date]?.length ?? 0) > 0;
                 let cls = 'agenda-day';
                 if (otherMonth) cls += ' other-month';
-                if (isToday && !isSelected) cls += ' today';
+                if (isToday) cls += ' today';
                 if (isSelected) cls += ' selected';
                 if (hasEvents) cls += ' has-events';
                 return (
                   <div key={date} className={cls} onClick={() => setSelectedDate(date)}>
-                    {new Date(date + 'T12:00:00').getDate()}
+                    <span className="agenda-day-num">{new Date(date + 'T12:00:00').getDate()}</span>
                     <div className="agenda-day-dot" />
                   </div>
                 );
               })}
             </div>
 
-            {/* Weekly summary below calendar */}
-            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--bdr)' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>Esta semana</div>
-              {(() => {
-                const today = new Date();
-                const day = today.getDay();
-                const monday = new Date(today);
-                monday.setDate(today.getDate() - day + (day === 0 ? -6 : 1));
-                const weekDates = Array.from({ length: 7 }, (_, i) => {
-                  const d = new Date(monday);
-                  d.setDate(monday.getDate() + i);
-                  return d.toISOString().slice(0, 10);
-                });
-                const total = weekDates.reduce((sum, d) => sum + (sessionsByDate[d]?.length ?? 0), 0);
-                const done = weekDates.reduce((sum, d) =>
-                  sum + (sessionsByDate[d]?.filter(s => s.status === 'realizado').length ?? 0), 0);
-                return (
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div>
-                      <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--p)', lineHeight: 1 }}>{total}</div>
-                      <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600 }}>Agendadas</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 22, fontWeight: 900, color: '#10b981', lineHeight: 1 }}>{done}</div>
-                      <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600 }}>Realizadas</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--w)', lineHeight: 1 }}>{total - done}</div>
-                      <div style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 600 }}>Pendentes</div>
-                    </div>
+            {/* Weekly summary */}
+            {(() => {
+              const today = new Date();
+              const day = today.getDay();
+              const monday = new Date(today);
+              monday.setDate(today.getDate() - day + (day === 0 ? -6 : 1));
+              const weekDates = Array.from({ length: 7 }, (_, i) => {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                return d.toISOString().slice(0, 10);
+              });
+              const total = weekDates.reduce((sum, d) => sum + (sessionsByDate[d]?.length ?? 0), 0);
+              const done  = weekDates.reduce((sum, d) => sum + (sessionsByDate[d]?.filter(s => s.status === 'realizado').length ?? 0), 0);
+              return (
+                <div className="agenda-week-stats">
+                  <div className="agenda-wstat">
+                    <div className="agenda-wstat-val" style={{ color: 'var(--p)' }}>{total}</div>
+                    <div className="agenda-wstat-lbl">Semana</div>
                   </div>
-                );
-              })()}
-            </div>
+                  <div className="agenda-wstat">
+                    <div className="agenda-wstat-val" style={{ color: '#10b981' }}>{done}</div>
+                    <div className="agenda-wstat-lbl">Realizadas</div>
+                  </div>
+                  <div className="agenda-wstat">
+                    <div className="agenda-wstat-val" style={{ color: 'var(--w)' }}>{total - done}</div>
+                    <div className="agenda-wstat-lbl">Pendentes</div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* RIGHT: Session list for selected day */}
@@ -250,16 +258,16 @@ export default function AgendaScreen() {
             </div>
 
             {daySessions.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 0' }}>
-                <div style={{ fontSize: 32, marginBottom: 10 }}>📅</div>
+              <div style={{ textAlign: 'center', padding: '36px 20px' }}>
+                <div style={{ fontSize: 36, marginBottom: 12, filter: 'grayscale(.3)' }}>📅</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--t2)', marginBottom: 6 }}>Sem sessões</div>
-                <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 16 }}>Nenhuma sessão para este dia</div>
-                <button className="btn-s" onClick={() => openNew(selectedDate)} style={{ fontSize: 12 }}>+ Agendar sessão</button>
+                <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 18 }}>Nenhuma sessão para este dia</div>
+                <button className="btn-s" onClick={() => openNew(selectedDate)} style={{ fontSize: 12, padding: '8px 16px' }}>+ Agendar sessão</button>
               </div>
             ) : (
-              <div>
+              <div className="agenda-sess-list">
                 {daySessions.map(s => (
-                  <div key={s.id} className="agenda-sess" onClick={() => openEdit(s)} style={{ cursor: 'pointer' }}>
+                  <div key={s.id} className="agenda-sess" onClick={() => openEdit(s)}>
                     <div className="agenda-sess-time">{s.hora}</div>
                     <div className="agenda-sess-dot" style={{ background: statusDot(s.status) }} />
                     <div className="agenda-sess-body">
