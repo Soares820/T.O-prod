@@ -21,7 +21,7 @@ export default function DashboardHome({ onNav }: Props) {
     const todayDone = data.sessions.filter((s) => s.data === today && s.status === 'realizado').length;
 
     const monthPayments = data.payments.filter(
-      (p) => p.mes_ref === thisMonth && p.status === 'recebido'
+      (p) => p.mes === thisMonth && p.status === 'recebido'
     );
     const monthRevenue = monthPayments.reduce((sum, p) => sum + (p.valor_recebido || 0), 0);
 

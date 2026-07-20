@@ -114,11 +114,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const [pac, sess, cont, pag, met, aval, func, usuarios] = await Promise.all([
         supabase.from('pacientes').select('*').eq('clinic_id', clinicId).order('name'),
-        supabase.from('sessoes').select('*').eq('clinic_id', clinicId).order('data', { ascending: false }),
-        supabase.from('contratos').select('*').eq('clinic_id', clinicId).order('id'),
-        supabase.from('pagamentos').select('*').eq('clinic_id', clinicId).order('mes_ref', { ascending: false }),
-        supabase.from('metas').select('*').eq('clinic_id', clinicId).order('id'),
-        supabase.from('avaliacoes').select('*').eq('clinic_id', clinicId).order('data', { ascending: false }),
+        supabase.from('sessoes').select('*').eq('clinic_id', clinicId).order('created_at', { ascending: false }),
+        supabase.from('contratos').select('*').eq('clinic_id', clinicId).order('created_at', { ascending: false }),
+        supabase.from('pagamentos').select('*').eq('clinic_id', clinicId).order('mes', { ascending: false }),
+        supabase.from('metas').select('*').eq('clinic_id', clinicId).order('created_at', { ascending: false }),
+        supabase.from('avaliacoes').select('*').eq('clinic_id', clinicId).order('created_at', { ascending: false }),
         supabase.from('funcionarios').select('*').eq('clinic_id', clinicId).order('nome'),
         supabase.from('users').select('*').eq('clinic_id', clinicId).order('nome'),
       ]);

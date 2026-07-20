@@ -22,10 +22,10 @@ export default function FinanceiroScreen() {
 
   // Contract state
   const [showContractModal, setShowContractModal] = useState(false);
-  const [contractForm, setContractForm] = useState({ child_id: '', tipo: 'particular', convenio: '', valor_sessao: '', sessoes_semana: '5', duracao_min: '50', dia_vencimento: '5', status: 'ativo' });
+  const [contractForm, setContractForm] = useState({ child_id: '', tipo: 'particular', convenio: '', valor_sessao: '', sessoes_semanais: '5', duracao_min: '50', dia_vencimento: '5', status: 'ativo' });
   const [savingContract, setSavingContract] = useState(false);
 
-  const monthPayments = useMemo(() => data.payments.filter((p) => !monthFilter || p.mes_ref === monthFilter), [data.payments, monthFilter]);
+  const monthPayments = useMemo(() => data.payments.filter((p) => !monthFilter || p.mes === monthFilter), [data.payments, monthFilter]);
 
   const stats = useMemo(() => {
     const recebido = monthPayments.filter((p) => p.status === 'recebido' || p.status === 'parcial').reduce((s, p) => s + (p.valor_recebido ?? 0), 0);
@@ -56,33 +56,40 @@ export default function FinanceiroScreen() {
 
   function openEditPay(p: Pagamento) {
     setSelectedPay(p);
-    setPayForm({ child_id: String(p.child_id), mes: p.mes_ref, valor_previsto: String(p.valor_previsto ?? ''), valor_recebido: String(p.valor_recebido ?? 0), status: p.status });
+    setPayForm({ child_id: String(p.child_id), mes: p.mes, valor_previsto: String(p.valor_previsto ?? ''), valor_recebido: String(p.valor_recebido ?? 0), status: p.status });
     setShowPayModal(true);
   }
+
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function handleSavePay(e: React.FormEvent) {
     e.preventDefault();
     if (!payForm.child_id) return;
     setSavingPay(true);
+    setSaveError(null);
     try {
       const { supabase } = await import('@/lib/supabase');
       const payload = {
         clinic_id: state.user?.clinicId,
         child_id: Number(payForm.child_id),
-        mes_ref: payForm.mes,
+        mes: payForm.mes,
         valor_previsto: Number(payForm.valor_previsto),
         valor_recebido: Number(payForm.valor_recebido),
         status: payForm.status,
         data_pag: payForm.status === 'recebido' ? new Date().toISOString().slice(0, 10) : null,
       };
       if (selectedPay) {
-        const { data: upd } = await supabase.from('pagamentos').update(payload).eq('id', selectedPay.id).select().single();
+        const { data: upd, error } = await supabase.from('pagamentos').update(payload).eq('id', selectedPay.id).select().single();
+        if (error) { setSaveError(error.message); return; }
         if (upd) dispatch({ type: 'UPDATE_PAYMENT', payload: upd });
       } else {
-        const { data: created } = await supabase.from('pagamentos').insert(payload).select().single();
+        const { data: created, error } = await supabase.from('pagamentos').insert(payload).select().single();
+        if (error) { setSaveError(error.message); return; }
         if (created) dispatch({ type: 'ADD_PAYMENT', payload: created });
       }
       setShowPayModal(false);
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : 'Erro ao salvar');
     } finally {
       setSavingPay(false);
     }
@@ -98,6 +105,7 @@ export default function FinanceiroScreen() {
     e.preventDefault();
     if (!contractForm.child_id) return;
     setSavingContract(true);
+    setSaveError(null);
     try {
       const { supabase } = await import('@/lib/supabase');
       const payload: Partial<Contrato> = {
@@ -106,14 +114,17 @@ export default function FinanceiroScreen() {
         tipo: contractForm.tipo,
         convenio: contractForm.tipo === 'convenio' ? contractForm.convenio || null : null,
         valor_sessao: Number(contractForm.valor_sessao) || null,
-        sessoes_semana: Number(contractForm.sessoes_semana) || null,
+        sessoes_semanais: Number(contractForm.sessoes_semanais) || null,
         duracao_min: Number(contractForm.duracao_min) || null,
         dia_vencimento: Number(contractForm.dia_vencimento) || null,
         status: contractForm.status as Contrato['status'],
       };
-      const { data: created } = await supabase.from('contratos').insert(payload).select().single();
+      const { data: created, error } = await supabase.from('contratos').insert(payload).select().single();
+      if (error) { setSaveError(error.message); return; }
       if (created) dispatch({ type: 'ADD_CONTRACT', payload: created });
       setShowContractModal(false);
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : 'Erro ao criar contrato');
     } finally {
       setSavingContract(false);
     }
@@ -183,7 +194,7 @@ export default function FinanceiroScreen() {
                   <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 12 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)' }}>{childName(p.child_id)}</div>
-                      <div style={{ fontSize: 12, color: 'var(--t3)' }}>{p.mes_ref} · Previsto: {formatCurrency(p.valor_previsto)}</div>
+                      <div style={{ fontSize: 12, color: 'var(--t3)' }}>{p.mes} · Previsto: {formatCurrency(p.valor_previsto)}</div>
                     </div>
                     <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--t1)' }}>{formatCurrency(p.valor_recebido)}</div>
                     <span style={{ fontSize: 11, fontWeight: 700, color: st.color, background: st.bg, padding: '4px 10px', borderRadius: 20, whiteSpace: 'nowrap' }}>
@@ -213,7 +224,7 @@ export default function FinanceiroScreen() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)' }}>{childName(c.child_id)}</div>
                     <div style={{ fontSize: 12, color: 'var(--t3)' }}>
-                      {c.sessoes_semana}x/semana · Vto dia {c.dia_vencimento} · {c.tipo ?? 'particular'}
+                      {c.sessoes_semanais}x/semana · Vto dia {c.dia_vencimento} · {c.tipo ?? 'particular'}
                     </div>
                   </div>
                   <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--t1)' }}>
@@ -270,6 +281,11 @@ export default function FinanceiroScreen() {
                   <input type="number" value={payForm.valor_recebido} onChange={(e) => setPayForm(f => ({ ...f, valor_recebido: e.target.value }))} min="0" step="0.01" style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 </div>
               </div>
+              {saveError && (
+                <div style={{ background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#ef4444', wordBreak: 'break-word' }}>
+                  <strong>Erro:</strong> {saveError}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                 <button type="button" onClick={() => setShowPayModal(false)} style={{ flex: 1, padding: 12, border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
                 <button type="submit" disabled={savingPay} className="btn-p" style={{ flex: 2 }}>{savingPay ? 'Salvando...' : selectedPay ? 'Salvar' : 'Registrar'}</button>
@@ -317,7 +333,7 @@ export default function FinanceiroScreen() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Sessões/semana</label>
-                  <input type="number" value={contractForm.sessoes_semana} onChange={(e) => setContractForm(f => ({ ...f, sessoes_semana: e.target.value }))} min="1" max="30" style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  <input type="number" value={contractForm.sessoes_semanais} onChange={(e) => setContractForm(f => ({ ...f, sessoes_semanais: e.target.value }))} min="1" max="30" style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 </div>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Duração (min)</label>
@@ -328,6 +344,11 @@ export default function FinanceiroScreen() {
                   <input type="number" value={contractForm.dia_vencimento} onChange={(e) => setContractForm(f => ({ ...f, dia_vencimento: e.target.value }))} min="1" max="31" style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 </div>
               </div>
+              {saveError && (
+                <div style={{ background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#ef4444', wordBreak: 'break-word' }}>
+                  <strong>Erro:</strong> {saveError}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                 <button type="button" onClick={() => setShowContractModal(false)} style={{ flex: 1, padding: 12, border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
                 <button type="submit" disabled={savingContract} className="btn-p" style={{ flex: 2 }}>{savingContract ? 'Salvando...' : 'Criar contrato'}</button>

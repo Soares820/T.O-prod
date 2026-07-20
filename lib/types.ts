@@ -65,7 +65,7 @@ export interface Contrato {
   tipo?: string | null;        // particular | convenio
   convenio?: string | null;
   valor_sessao?: number | null;
-  sessoes_semana?: number | null;
+  sessoes_semanais?: number | null;
   duracao_min?: number | null;
   dia_vencimento?: number | null;
   status: 'ativo' | 'encerrado' | 'pausado';
@@ -76,7 +76,7 @@ export interface Pagamento {
   id: number;
   clinic_id: string;
   child_id: number;
-  mes_ref: string;           // YYYY-MM
+  mes: string;               // YYYY-MM
   valor_previsto: number;
   valor_recebido: number;
   status: 'pendente' | 'recebido' | 'parcial' | 'inadimplente';

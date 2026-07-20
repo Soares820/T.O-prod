@@ -13,7 +13,7 @@ export default function BiScreen() {
   const revenueByMonth = useMemo(() => {
     return months.map((m) => ({
       label: MONTH_NAMES[parseInt(m.slice(5, 7)) - 1].slice(0, 3),
-      value: data.payments.filter((p) => p.mes_ref === m && (p.status === 'recebido' || p.status === 'parcial')).reduce((s, p) => s + (p.valor_recebido ?? 0), 0),
+      value: data.payments.filter((p) => p.mes === m && (p.status === 'recebido' || p.status === 'parcial')).reduce((s, p) => s + (p.valor_recebido ?? 0), 0),
     }));
   }, [months, data.payments]);
 
