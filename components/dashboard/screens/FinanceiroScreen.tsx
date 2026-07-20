@@ -80,11 +80,11 @@ export default function FinanceiroScreen() {
       };
       if (selectedPay) {
         const { data: upd, error } = await supabase.from('pagamentos').update(payload).eq('id', selectedPay.id).select().single();
-        if (error) { setSaveError(error.message); return; }
+        if (error) { console.error('pagamentos UPDATE:', error); setSaveError([error.message, error.details].filter(Boolean).join(' | ')); return; }
         if (upd) dispatch({ type: 'UPDATE_PAYMENT', payload: upd });
       } else {
         const { data: created, error } = await supabase.from('pagamentos').insert(payload).select().single();
-        if (error) { setSaveError(error.message); return; }
+        if (error) { console.error('pagamentos INSERT:', error); setSaveError([error.message, error.details].filter(Boolean).join(' | ')); return; }
         if (created) dispatch({ type: 'ADD_PAYMENT', payload: created });
       }
       setShowPayModal(false);
@@ -120,11 +120,17 @@ export default function FinanceiroScreen() {
         status: contractForm.status as Contrato['status'],
       };
       const { data: created, error } = await supabase.from('contratos').insert(payload).select().single();
-      if (error) { setSaveError(error.message); return; }
+      if (error) {
+        const msg = [error.message, error.details, error.hint].filter(Boolean).join(' | ');
+        console.error('contratos INSERT error:', error);
+        setSaveError(msg || JSON.stringify(error));
+        return;
+      }
       if (created) dispatch({ type: 'ADD_CONTRACT', payload: created });
       setShowContractModal(false);
     } catch (err: unknown) {
-      setSaveError(err instanceof Error ? err.message : 'Erro ao criar contrato');
+      console.error('handleSaveContract exception:', err);
+      setSaveError(err instanceof Error ? err.message : 'Erro inesperado');
     } finally {
       setSavingContract(false);
     }
