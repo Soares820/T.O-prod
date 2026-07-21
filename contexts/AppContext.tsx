@@ -123,7 +123,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         supabase.from('users').select('*').eq('clinic_id', clinicId).order('nome'),
       ]);
 
-      const pick = (r: PromiseSettledResult<{ data: unknown[] | null }>) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pick = (r: PromiseSettledResult<{ data: any[] | null }>): any[] =>
         r.status === 'fulfilled' ? (r.value.data ?? []) : [];
 
       dispatch({
