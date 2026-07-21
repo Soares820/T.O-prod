@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import './blog.css';
 
 interface BlogPost {
   id: number;
@@ -59,18 +60,6 @@ export default function BlogPage() {
 
   return (
     <>
-      <style>{`
-        :root{--bg:#0a0f1e;--card:#111827;--card-hover:#161e30;--border:#1e2a3a;--text:#e2e8f0;--muted:#64748b;--accent:#3b82f6;--accent2:#60a5fa;--tag:#1e3a5f;--tag-text:#93c5fd;}
-        @media(prefers-color-scheme:light){:root{--bg:#f1f5f9;--card:#ffffff;--card-hover:#f8fafc;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--accent2:#1d4ed8;--tag:#dbeafe;--tag-text:#1e40af;}}
-        :root[data-theme="light"]{--bg:#f1f5f9;--card:#ffffff;--card-hover:#f8fafc;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--accent2:#1d4ed8;--tag:#dbeafe;--tag-text:#1e40af;}
-        :root[data-theme="dark"]{--bg:#0a0f1e;--card:#111827;--card-hover:#161e30;--border:#1e2a3a;--text:#e2e8f0;--muted:#64748b;--accent:#3b82f6;--accent2:#60a5fa;--tag:#1e3a5f;--tag-text:#93c5fd;}
-        *{box-sizing:border-box;margin:0;padding:0}
-        html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;line-height:1.6}
-        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-      `}</style>
-
       {/* NAV */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'var(--bg)', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(12px)', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
