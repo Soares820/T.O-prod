@@ -46,7 +46,7 @@ export default function DashboardHome({ onNav }: Props) {
     {
       key: 'pacientes',
       label: 'Pacientes',
-      sub: 'Cadastros e histórico clínico',
+      sub: 'Fichas e histórico clínico',
       color: 'dt-blue',
       icon: (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -56,20 +56,9 @@ export default function DashboardHome({ onNav }: Props) {
       ),
     },
     {
-      key: 'bi',
-      label: 'BI Clínico',
-      sub: 'Relatórios e indicadores',
-      color: 'dt-orange',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-        </svg>
-      ),
-    },
-    {
       key: 'agenda',
       label: 'Agenda',
-      sub: 'Sessões e atendimentos',
+      sub: 'Calendário e sessões',
       color: 'dt-green',
       icon: (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -78,43 +67,9 @@ export default function DashboardHome({ onNav }: Props) {
       ),
     },
     {
-      key: 'agenda',
-      label: 'Sessões',
-      sub: 'Histórico e evoluções',
-      color: 'dt-teal',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-        </svg>
-      ),
-    },
-    {
-      key: 'portal',
-      label: 'Comunicação',
-      sub: 'Chat com famílias',
-      color: 'dt-purple',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-        </svg>
-      ),
-    },
-    {
-      key: 'reavix',
-      label: 'Central de Crise',
-      sub: 'Monitoramento em tempo real',
-      color: 'dt-red',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-          <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-        </svg>
-      ),
-    },
-    {
       key: 'pei',
       label: 'Atividades',
-      sub: 'PEI e registro de execução',
+      sub: 'Programas e execução DTT',
       color: 'dt-indigo' as string,
       icon: (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -137,7 +92,7 @@ export default function DashboardHome({ onNav }: Props) {
     {
       key: 'financeiro',
       label: 'Financeiro',
-      sub: 'Receita, contratos e faturamento',
+      sub: 'Contratos, pagamentos e receita',
       color: 'dt-green',
       icon: (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -147,9 +102,20 @@ export default function DashboardHome({ onNav }: Props) {
       ),
     },
     {
+      key: 'bi',
+      label: 'Evolução Clínica',
+      sub: 'Indicadores e progresso',
+      color: 'dt-orange',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      ),
+    },
+    {
       key: 'equipe',
-      label: 'Funcionários',
-      sub: `${stats.teamCount} profissionais cadastrados`,
+      label: 'Equipe',
+      sub: 'Profissionais e acessos',
       color: 'dt-dark' as string,
       icon: (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -159,10 +125,21 @@ export default function DashboardHome({ onNav }: Props) {
       ),
     },
     {
-      key: 'reavix',
-      label: 'Reavix AI',
-      sub: 'Assistente clínica inteligente',
+      key: 'portal',
+      label: 'Portal da Família',
+      sub: 'Acompanhamento e comunicação',
       color: 'dt-purple',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
+    },
+    {
+      key: 'reavix',
+      label: 'Assistente Clínico',
+      sub: 'Suporte especializado ABA/TEA',
+      color: 'dt-teal' as string,
       icon: (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -184,13 +161,13 @@ export default function DashboardHome({ onNav }: Props) {
             {stats.todaySessions > 0 ? `${stats.todaySessions} sessões agendadas hoje` : `${stats.teamCount} profissionais online`}
           </div>
           <h1 className="dash-greet-h">
-            Olá, {user?.name?.split(' ')[0] ?? 'Terapeuta'}! 👋
+            Bom dia, {user?.name?.split(' ')[0] ?? 'Terapeuta'}.
           </h1>
           <p className="dash-greet-sub">
-            Central de atendimento ativa.{' '}
-            <strong>{stats.todaySessions} sessões hoje</strong>
-            {stats.pending > 0 && <> · <strong>{stats.pending} cobranças</strong> pendentes</>}
-            {' '}em monitoramento.
+            {stats.todaySessions > 0
+              ? <><strong>{stats.todayDone}/{stats.todaySessions} sessões</strong> concluídas hoje{stats.pending > 0 ? <> · <strong>{stats.pending} cobranças</strong> em aberto</> : null}</>
+              : <>Plataforma ativa. Gerencie atendimentos, evolução clínica e financeiro em um só lugar.</>
+            }
           </p>
         </div>
         <div className="dash-date-chip">

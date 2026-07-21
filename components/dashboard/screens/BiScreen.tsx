@@ -2,9 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { formatCurrency, getLastNMonths, MONTH_NAMES } from '@/lib/utils';
-
-type BiTab = 'financeiro' | 'evolucao';
+import { getLastNMonths, MONTH_NAMES } from '@/lib/utils';
 
 // ─── Mini bar chart ──────────────────────────────────────
 function Bar({ pct, color, label, sub }: { pct: number; color: string; label: string; sub?: string }) {
@@ -36,137 +34,6 @@ function Card({ title, children, style }: { title: string; children: React.React
     <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '20px 18px', ...style }}>
       <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--t1)', marginBottom: 18, letterSpacing: '-.2px' }}>{title}</div>
       {children}
-    </div>
-  );
-}
-
-// ═══ BI FINANCEIRO ══════════════════════════════════════
-function BiFinanceiro() {
-  const { state } = useApp();
-  const { data } = state;
-  const months = useMemo(() => getLastNMonths(6), []);
-
-  const revenueByMonth = useMemo(() => months.map((m) => ({
-    label: MONTH_NAMES[parseInt(m.slice(5, 7)) - 1].slice(0, 3),
-    recebido: data.payments.filter((p) => p.mes === m && (p.status === 'recebido' || p.status === 'parcial')).reduce((s, p) => s + (p.valor_recebido ?? 0), 0),
-    previsto: data.payments.filter((p) => p.mes === m).reduce((s, p) => s + (p.valor_previsto ?? 0), 0),
-  })), [months, data.payments]);
-
-  const maxRevenue = Math.max(...revenueByMonth.map((m) => m.previsto), 1);
-
-  const totalRecebido = revenueByMonth.reduce((s, m) => s + m.recebido, 0);
-  const totalPrevisto = revenueByMonth.reduce((s, m) => s + m.previsto, 0);
-  const totalPendente = data.payments.filter((p) => p.status === 'pendente').reduce((s, p) => s + (p.valor_previsto ?? 0), 0);
-  const inadimplentes = data.payments.filter((p) => p.status === 'inadimplente').length;
-  const taxaRecebimento = totalPrevisto > 0 ? Math.round((totalRecebido / totalPrevisto) * 100) : 0;
-
-  const revenueByChild = useMemo(() => {
-    const map: Record<number, { name: string; recebido: number }> = {};
-    data.payments.forEach((p) => {
-      const child = data.children.find((c) => c.id === p.child_id);
-      if (!map[p.child_id]) map[p.child_id] = { name: child?.name ?? `Paciente ${p.child_id}`, recebido: 0 };
-      if (p.status === 'recebido' || p.status === 'parcial') map[p.child_id].recebido += p.valor_recebido ?? 0;
-    });
-    return Object.values(map).sort((a, b) => b.recebido - a.recebido).slice(0, 6);
-  }, [data.payments, data.children]);
-
-  const maxChildRevenue = Math.max(...revenueByChild.map((c) => c.recebido), 1);
-
-  const statusCounts = useMemo(() => {
-    const counts = { recebido: 0, pendente: 0, inadimplente: 0, parcial: 0 };
-    data.payments.forEach((p) => { if (p.status in counts) counts[p.status as keyof typeof counts]++; });
-    return counts;
-  }, [data.payments]);
-
-  const totalPags = Object.values(statusCounts).reduce((s, v) => s + v, 0) || 1;
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(155px,1fr))', gap: 12 }}>
-        <KpiCard value={formatCurrency(totalRecebido)} label="Recebido (6 meses)" color="#10b981" />
-        <KpiCard value={formatCurrency(totalPrevisto)} label="Previsto (6 meses)" color="var(--p)" />
-        <KpiCard value={formatCurrency(totalPendente)} label="Em aberto" color="#f59e0b" />
-        <KpiCard value={`${taxaRecebimento}%`} label="Taxa de recebimento" color={taxaRecebimento >= 80 ? '#10b981' : '#f59e0b'} />
-        <KpiCard value={inadimplentes} label="Inadimplentes" color="#ef4444" />
-        <KpiCard value={data.children.filter((c) => c.status === 'ativo').length} label="Pacientes ativos" color="var(--v)" />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        {/* Bar chart: receita mensal */}
-        <Card title="Receita mensal (6 meses)">
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 130 }}>
-            {revenueByMonth.map((m) => (
-              <div key={m.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }}>
-                <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 600 }}>
-                  {m.recebido > 0 ? `R$${Math.round(m.recebido / 1000)}k` : ''}
-                </div>
-                <div style={{ width: '100%', position: 'relative', borderRadius: '4px 4px 0 0', height: `${Math.max((m.previsto / maxRevenue) * 100, 4)}%` }}>
-                  <div style={{ position: 'absolute', inset: 0, background: 'var(--sf2)', borderRadius: '4px 4px 0 0' }} />
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${(m.previsto > 0 ? m.recebido / m.previsto : 0) * 100}%`, background: '#10b981', borderRadius: '4px 4px 0 0' }} />
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600 }}>{m.label}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
-            {[['var(--sf2)', 'Previsto'], ['#10b981', 'Recebido']].map(([c, l]) => (
-              <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--t3)' }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />{l}
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Status de pagamentos */}
-        <Card title="Status de cobranças">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {[
-              { key: 'recebido', label: 'Recebido', color: '#10b981' },
-              { key: 'pendente', label: 'Pendente', color: '#f59e0b' },
-              { key: 'parcial', label: 'Parcial', color: '#8b5cf6' },
-              { key: 'inadimplente', label: 'Inadimplente', color: '#ef4444' },
-            ].map(({ key, label, color }) => {
-              const count = statusCounts[key as keyof typeof statusCounts];
-              return (
-                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 90, fontSize: 12, fontWeight: 600, color: 'var(--t2)', flexShrink: 0 }}>{label}</div>
-                  <div style={{ flex: 1, height: 10, background: 'var(--sf2)', borderRadius: 5, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${(count / totalPags) * 100}%`, background: color, borderRadius: 5 }} />
-                  </div>
-                  <div style={{ width: 28, fontSize: 12, fontWeight: 700, color: 'var(--t1)', textAlign: 'right', flexShrink: 0 }}>{count}</div>
-                  <div style={{ width: 34, fontSize: 11, color: 'var(--t3)', textAlign: 'right', flexShrink: 0 }}>{Math.round((count / totalPags) * 100)}%</div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--bdr)' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Ticket médio</div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--p)' }}>
-              {data.payments.length > 0 ? formatCurrency(totalPrevisto / data.payments.length) : '—'}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>por cobrança cadastrada</div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Receita por paciente */}
-      {revenueByChild.length > 0 && (
-        <Card title="Receita por paciente (acumulado)">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {revenueByChild.map((c) => (
-              <Bar
-                key={c.name}
-                label={c.name}
-                pct={(c.recebido / maxChildRevenue) * 100}
-                color="var(--p)"
-                sub={formatCurrency(c.recebido).replace('R$ ', 'R$').replace(',00', '')}
-              />
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }
@@ -235,13 +102,8 @@ function BiEvolucao() {
 
   const AREA_COLORS = ['var(--p)', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'];
 
-  // Progresso de metas ao longo dos últimos 6 meses (simulado via created_at)
-  const goalProgressByMonth = useMemo(() => months.map((m) => {
-    const atingidasAteMes = childGoals.filter((g) => g.status === 'atingido' && g.created_at && g.created_at.startsWith(m)).length;
-    return { label: MONTH_NAMES[parseInt(m.slice(5, 7)) - 1].slice(0, 3), count: atingidasAteMes };
-  }), [months, childGoals]);
-
   const activeChildren = data.children.filter((c) => c.status === 'ativo');
+  const displayChildren = activeChildren.length > 0 ? activeChildren : data.children;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -249,22 +111,7 @@ function BiEvolucao() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--t2)', flexShrink: 0 }}>Paciente:</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {activeChildren.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setSelectedChildId(c.id)}
-              style={{
-                padding: '7px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                border: `1.5px solid ${selectedChildId === c.id ? 'var(--p)' : 'var(--bdr)'}`,
-                background: selectedChildId === c.id ? 'var(--ps)' : 'none',
-                color: selectedChildId === c.id ? 'var(--p)' : 'var(--t2)',
-                transition: 'all .15s',
-              }}
-            >
-              {c.name.split(' ')[0]}
-            </button>
-          ))}
-          {activeChildren.length === 0 && data.children.map((c) => (
+          {displayChildren.map((c) => (
             <button
               key={c.id}
               onClick={() => setSelectedChildId(c.id)}
@@ -301,7 +148,6 @@ function BiEvolucao() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             {/* Progresso de metas */}
             <Card title="Progresso de metas">
-              {/* Donut-style progress ring */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 20 }}>
                 <div style={{ position: 'relative', width: 88, height: 88, flexShrink: 0 }}>
                   <svg width="88" height="88" viewBox="0 0 88 88">
@@ -339,7 +185,6 @@ function BiEvolucao() {
                 </div>
               </div>
 
-              {/* Metas por área */}
               {goalsByArea.length > 0 && (
                 <>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Por área</div>
@@ -386,7 +231,6 @@ function BiEvolucao() {
                 ))}
               </div>
 
-              {/* Taxa de presença visual */}
               <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--bdr)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--t2)' }}>Taxa de presença</span>
@@ -431,35 +275,15 @@ function BiEvolucao() {
 
 // ═══ MAIN BI SCREEN ════════════════════════════════════
 export default function BiScreen() {
-  const [tab, setTab] = useState<BiTab>('financeiro');
-
   return (
     <div className="view show" id="v-bi">
       <div className="page-body">
         <div className="page-hero">
           <div className="ph-pre"><span></span>Analytics</div>
-          <h1 className="ph-title">BI Clínico</h1>
-          <div className="ph-sub">Indicadores financeiros e evolução dos pacientes</div>
+          <h1 className="ph-title">Evolução Clínica</h1>
+          <div className="ph-sub">Acompanhe o progresso de cada paciente por área e atividade</div>
         </div>
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 24, borderBottom: '1px solid var(--bdr)' }}>
-          {([
-            { key: 'financeiro', label: '💰 BI Financeiro' },
-            { key: 'evolucao',   label: '📈 BI Evolução' },
-          ] as { key: BiTab; label: string }[]).map(({ key, label }) => (
-            <button key={key} onClick={() => setTab(key)} style={{
-              padding: '9px 20px', border: 'none', borderBottom: `2.5px solid ${tab === key ? 'var(--p)' : 'transparent'}`,
-              background: 'none', color: tab === key ? 'var(--p)' : 'var(--t2)',
-              fontWeight: tab === key ? 800 : 500, fontSize: 14, cursor: 'pointer',
-              fontFamily: 'inherit', marginBottom: -1, transition: 'color .15s',
-            }}>
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {tab === 'financeiro' ? <BiFinanceiro /> : <BiEvolucao />}
+        <BiEvolucao />
       </div>
     </div>
   );

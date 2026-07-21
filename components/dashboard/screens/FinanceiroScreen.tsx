@@ -2,10 +2,152 @@
 
 import { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { formatCurrency, MONTH_NAMES } from '@/lib/utils';
+import { formatCurrency, MONTH_NAMES, getLastNMonths } from '@/lib/utils';
 import type { Pagamento, Contrato } from '@/lib/types';
 
-type TabType = 'pagamentos' | 'contratos';
+type TabType = 'pagamentos' | 'contratos' | 'relatorios';
+
+// ─── Financial BI (inline) ───────────────────────────────
+function BiFinanceiro() {
+  const { state } = useApp();
+  const { data } = state;
+  const months = useMemo(() => getLastNMonths(6), []);
+
+  const revenueByMonth = useMemo(() => months.map((m) => ({
+    label: MONTH_NAMES[parseInt(m.slice(5, 7)) - 1].slice(0, 3),
+    recebido: data.payments.filter((p) => p.mes === m && (p.status === 'recebido' || p.status === 'parcial')).reduce((s, p) => s + (p.valor_recebido ?? 0), 0),
+    previsto: data.payments.filter((p) => p.mes === m).reduce((s, p) => s + (p.valor_previsto ?? 0), 0),
+  })), [months, data.payments]);
+
+  const maxRevenue = Math.max(...revenueByMonth.map((m) => m.previsto), 1);
+  const totalRecebido = revenueByMonth.reduce((s, m) => s + m.recebido, 0);
+  const totalPrevisto = revenueByMonth.reduce((s, m) => s + m.previsto, 0);
+  const totalPendente = data.payments.filter((p) => p.status === 'pendente').reduce((s, p) => s + (p.valor_previsto ?? 0), 0);
+  const inadimplentes = data.payments.filter((p) => p.status === 'inadimplente').length;
+  const taxaRecebimento = totalPrevisto > 0 ? Math.round((totalRecebido / totalPrevisto) * 100) : 0;
+
+  const revenueByChild = useMemo(() => {
+    const map: Record<number, { name: string; recebido: number }> = {};
+    data.payments.forEach((p) => {
+      const child = data.children.find((c) => c.id === p.child_id);
+      if (!map[p.child_id]) map[p.child_id] = { name: child?.name ?? `Paciente ${p.child_id}`, recebido: 0 };
+      if (p.status === 'recebido' || p.status === 'parcial') map[p.child_id].recebido += p.valor_recebido ?? 0;
+    });
+    return Object.values(map).sort((a, b) => b.recebido - a.recebido).slice(0, 8);
+  }, [data.payments, data.children]);
+
+  const maxChildRevenue = Math.max(...revenueByChild.map((c) => c.recebido), 1);
+
+  const statusCounts = useMemo(() => {
+    const counts = { recebido: 0, pendente: 0, inadimplente: 0, parcial: 0 };
+    data.payments.forEach((p) => { if (p.status in counts) counts[p.status as keyof typeof counts]++; });
+    return counts;
+  }, [data.payments]);
+
+  const totalPags = Object.values(statusCounts).reduce((s, v) => s + v, 0) || 1;
+
+  function KpiCard({ value, label, color, sub }: { value: string | number; label: string; color: string; sub?: string }) {
+    return (
+      <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '18px 16px' }}>
+        <div style={{ fontSize: 22, fontWeight: 900, color, lineHeight: 1 }}>{value}</div>
+        {sub && <div style={{ fontSize: 11, color, opacity: .6, marginTop: 2, fontWeight: 600 }}>{sub}</div>}
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--t3)', marginTop: 6 }}>{label}</div>
+      </div>
+    );
+  }
+
+  function SCard({ title, children, style }: { title: string; children: React.ReactNode; style?: React.CSSProperties }) {
+    return (
+      <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 'var(--r)', padding: '20px 18px', ...style }}>
+        <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--t1)', marginBottom: 18, letterSpacing: '-.2px' }}>{title}</div>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(155px,1fr))', gap: 12 }}>
+        <KpiCard value={formatCurrency(totalRecebido)} label="Recebido (6 meses)" color="#10b981" />
+        <KpiCard value={formatCurrency(totalPrevisto)} label="Previsto (6 meses)" color="var(--p)" />
+        <KpiCard value={formatCurrency(totalPendente)} label="Em aberto" color="#f59e0b" />
+        <KpiCard value={`${taxaRecebimento}%`} label="Taxa de recebimento" color={taxaRecebimento >= 80 ? '#10b981' : '#f59e0b'} />
+        <KpiCard value={inadimplentes} label="Inadimplentes" color="#ef4444" />
+        <KpiCard value={data.children.filter((c) => c.status === 'ativo').length} label="Pacientes ativos" color="var(--v)" />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <SCard title="Receita mensal (6 meses)">
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 130 }}>
+            {revenueByMonth.map((m) => (
+              <div key={m.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }}>
+                <div style={{ fontSize: 9, color: 'var(--t3)', fontWeight: 600 }}>{m.recebido > 0 ? `R$${Math.round(m.recebido / 1000)}k` : ''}</div>
+                <div style={{ width: '100%', position: 'relative', borderRadius: '4px 4px 0 0', height: `${Math.max((m.previsto / maxRevenue) * 100, 4)}%` }}>
+                  <div style={{ position: 'absolute', inset: 0, background: 'var(--sf2)', borderRadius: '4px 4px 0 0' }} />
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${(m.previsto > 0 ? m.recebido / m.previsto : 0) * 100}%`, background: '#10b981', borderRadius: '4px 4px 0 0' }} />
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600 }}>{m.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
+            {[['var(--sf2)', 'Previsto'], ['#10b981', 'Recebido']].map(([c, l]) => (
+              <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--t3)' }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />{l}
+              </div>
+            ))}
+          </div>
+        </SCard>
+
+        <SCard title="Status de cobranças">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { key: 'recebido', label: 'Recebido', color: '#10b981' },
+              { key: 'pendente', label: 'Pendente', color: '#f59e0b' },
+              { key: 'parcial', label: 'Parcial', color: '#8b5cf6' },
+              { key: 'inadimplente', label: 'Inadimplente', color: '#ef4444' },
+            ].map(({ key, label, color }) => {
+              const count = statusCounts[key as keyof typeof statusCounts];
+              return (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 90, fontSize: 12, fontWeight: 600, color: 'var(--t2)', flexShrink: 0 }}>{label}</div>
+                  <div style={{ flex: 1, height: 10, background: 'var(--sf2)', borderRadius: 5, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${(count / totalPags) * 100}%`, background: color, borderRadius: 5 }} />
+                  </div>
+                  <div style={{ width: 28, fontSize: 12, fontWeight: 700, color: 'var(--t1)', textAlign: 'right', flexShrink: 0 }}>{count}</div>
+                  <div style={{ width: 34, fontSize: 11, color: 'var(--t3)', textAlign: 'right', flexShrink: 0 }}>{Math.round((count / totalPags) * 100)}%</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--bdr)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Ticket médio</div>
+            <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--p)' }}>
+              {data.payments.length > 0 ? formatCurrency(totalPrevisto / data.payments.length) : '—'}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>por cobrança cadastrada</div>
+          </div>
+        </SCard>
+      </div>
+
+      {revenueByChild.length > 0 && (
+        <SCard title="Receita por paciente (acumulado)">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {revenueByChild.map((c) => (
+              <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 130, fontSize: 12, fontWeight: 600, color: 'var(--t2)', flexShrink: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</div>
+                <div style={{ flex: 1, height: 10, background: 'var(--sf2)', borderRadius: 5, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.max((c.recebido / maxChildRevenue) * 100, c.recebido > 0 ? 2 : 0)}%`, background: 'var(--p)', borderRadius: 5, transition: 'width .4s ease' }} />
+                </div>
+                <div style={{ width: 72, fontSize: 12, fontWeight: 700, color: 'var(--t1)', textAlign: 'right', flexShrink: 0 }}>{formatCurrency(c.recebido)}</div>
+              </div>
+            ))}
+          </div>
+        </SCard>
+      )}
+    </div>
+  );
+}
 
 export default function FinanceiroScreen() {
   const { state, dispatch } = useApp();
@@ -176,9 +318,13 @@ export default function FinanceiroScreen() {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 18, borderBottom: '1px solid var(--bdr)' }}>
-          {(['pagamentos', 'contratos'] as TabType[]).map((t) => (
-            <button key={t} onClick={() => setTab(t)} style={{ padding: '8px 18px', border: 'none', borderBottom: `2px solid ${tab === t ? 'var(--p)' : 'transparent'}`, background: 'none', color: tab === t ? 'var(--p)' : 'var(--t2)', fontWeight: tab === t ? 700 : 500, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize', marginBottom: -1 }}>
-              {t}
+          {([
+            { key: 'pagamentos', label: 'Pagamentos' },
+            { key: 'contratos',  label: 'Contratos' },
+            { key: 'relatorios', label: '📊 Relatórios' },
+          ] as { key: TabType; label: string }[]).map(({ key, label }) => (
+            <button key={key} onClick={() => setTab(key)} style={{ padding: '8px 18px', border: 'none', borderBottom: `2px solid ${tab === key ? 'var(--p)' : 'transparent'}`, background: 'none', color: tab === key ? 'var(--p)' : 'var(--t2)', fontWeight: tab === key ? 700 : 500, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: -1 }}>
+              {label}
             </button>
           ))}
         </div>
@@ -216,6 +362,8 @@ export default function FinanceiroScreen() {
             </div>
           </>
         )}
+
+        {tab === 'relatorios' && <BiFinanceiro />}
 
         {tab === 'contratos' && (
           <>

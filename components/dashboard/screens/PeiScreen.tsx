@@ -1,249 +1,361 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import type { Meta } from '@/lib/types';
 
-const AREAS = ['Comunicação', 'Cognitivo', 'Social', 'Motor', 'Autocuidado', 'Comportamento', 'Acadêmico'];
-const GOAL_STATUS = [
-  { val: 'ativo', label: 'Em andamento', color: 'var(--p)' },
-  { val: 'atingido', label: 'Atingido', color: '#10b981' },
-  { val: 'pausado', label: 'Pausado', color: '#f59e0b' },
+// ─── Types ────────────────────────────────────────────────
+interface Atividade {
+  id: string;
+  nome: string;
+  descricao: string;
+  categoria: Categoria;
+  tipo: 'predefinida' | 'personalizada';
+}
+
+interface DttTrial { resultado: 'acerto' | 'parcial' | 'erro'; }
+
+type Categoria = 'Comunicação' | 'Cognitivo' | 'Social' | 'Motor' | 'Sensorial' | 'Autonomia';
+
+const CATEGORIA_COLORS: Record<Categoria, string> = {
+  'Comunicação': '#3B82F6',
+  'Cognitivo':   '#8B5CF6',
+  'Social':      '#10B981',
+  'Motor':       '#F59E0B',
+  'Sensorial':   '#EF4444',
+  'Autonomia':   '#EC4899',
+};
+
+// ─── Pre-defined activities ───────────────────────────────
+const PREDEFINED: Atividade[] = [
+  { id: 'p1', nome: 'Nomear cores primárias', descricao: 'Apresentar objetos coloridos e solicitar nomeação de cores básicas (vermelho, azul, amarelo, verde).', categoria: 'Cognitivo', tipo: 'predefinida' },
+  { id: 'p2', nome: 'Seguir instrução simples (1 passo)', descricao: 'Instrução verbal de um passo: "pega", "senta", "bate palma". Registrar cada resposta.', categoria: 'Comunicação', tipo: 'predefinida' },
+  { id: 'p3', nome: 'Contato visual intencional', descricao: 'Estimular a criança a fazer contato visual antes de receber o reforçador desejado.', categoria: 'Social', tipo: 'predefinida' },
+  { id: 'p4', nome: 'Encaixar formas geométricas', descricao: 'Encaixar peças em tabuleiro de formas — círculo, triângulo, quadrado. Registrar cada tentativa.', categoria: 'Motor', tipo: 'predefinida' },
+  { id: 'p5', nome: 'Rotina sensorial — escovação', descricao: 'Aplicar escovação sensorial nos membros superiores com pressão suave e rítmica.', categoria: 'Sensorial', tipo: 'predefinida' },
+  { id: 'p6', nome: 'Vestir e tirar roupa', descricao: 'Praticar sequência de vestimenta (camisa, calça, sapato) com apoio visual e verbal mínimo.', categoria: 'Autonomia', tipo: 'predefinida' },
+  { id: 'p7', nome: 'Brincar em turnos (reciprocidade)', descricao: 'Atividade de turnos com bola ou brinquedo — aguardar a vez e ceder o objeto.', categoria: 'Social', tipo: 'predefinida' },
+  { id: 'p8', nome: 'Comunicação por imagem (PECS)', descricao: 'Selecionar figura para comunicar desejo ou necessidade ao terapeuta.', categoria: 'Comunicação', tipo: 'predefinida' },
+  { id: 'p9', nome: 'Imitação motora grossa', descricao: 'Imitar movimentos corporais amplos do terapeuta: levantar braços, bater palmas, pular.', categoria: 'Motor', tipo: 'predefinida' },
+  { id: 'p10', nome: 'Nomear objetos funcionais', descricao: 'Identificar e nomear 20 objetos do cotidiano apresentados em figuras ou objetos reais.', categoria: 'Cognitivo', tipo: 'predefinida' },
+  { id: 'p11', nome: 'Rotina de higiene pessoal', descricao: 'Sequência de lavagem das mãos e escovação de dentes com suporte visual passo a passo.', categoria: 'Autonomia', tipo: 'predefinida' },
+  { id: 'p12', nome: 'Solicitar ajuda verbalmente', descricao: 'Treino para pedir "ajuda" ou "mais" em situações estruturadas com reforço diferencial.', categoria: 'Comunicação', tipo: 'predefinida' },
+  { id: 'p13', nome: 'Integração sensorial — balanço', descricao: 'Atividades de balanço e vestibular para regulação sensorial. Observar resposta e tolerância.', categoria: 'Sensorial', tipo: 'predefinida' },
+  { id: 'p14', nome: 'Jogo simbólico simples', descricao: 'Brincar de faz de conta com objetos funcionais: xícara, colher, boneca. Modelar e aguardar imitação.', categoria: 'Social', tipo: 'predefinida' },
+  { id: 'p15', nome: 'Coordenação olho-mão', descricao: 'Atividades de encaixe, empilhar, traçar. Registrar precisão e número de tentativas até acerto.', categoria: 'Motor', tipo: 'predefinida' },
+  { id: 'p16', nome: 'Reconhecimento de emoções', descricao: 'Identificar expressões faciais (feliz, triste, com raiva) em figuras ou espelho.', categoria: 'Cognitivo', tipo: 'predefinida' },
 ];
 
-export default function PeiScreen() {
-  const { state, dispatch } = useApp();
-  const { data } = state;
+const CATEGORIAS: Categoria[] = ['Comunicação', 'Cognitivo', 'Social', 'Motor', 'Sensorial', 'Autonomia'];
 
-  const [selectedChildId, setSelectedChildId] = useState<number | null>(data.children[0]?.id ?? null);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<Meta | null>(null);
-  const [areaFilter, setAreaFilter] = useState<string>('Todos');
-  const [form, setForm] = useState({ descricao: '', criterio: '', area: 'Comunicação', status: 'ativo' });
-  const [saving, setSaving] = useState(false);
-  const [showAI, setShowAI] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiGoals, setAiGoals] = useState<string[]>([]);
+// ─── DTT Modal ────────────────────────────────────────────
+function DttModal({ atividade, onClose }: { atividade: Atividade; onClose: () => void }) {
+  const [trials, setTrials] = useState<DttTrial[]>([]);
+  const [obs, setObs] = useState('');
+  const [finalizado, setFinalizado] = useState(false);
 
-  const selectedChild = useMemo(() => data.children.find((c) => c.id === selectedChildId) ?? null, [data.children, selectedChildId]);
+  const acertos  = trials.filter((t) => t.resultado === 'acerto').length;
+  const parciais = trials.filter((t) => t.resultado === 'parcial').length;
+  const erros    = trials.filter((t) => t.resultado === 'erro').length;
+  const total    = trials.length;
+  const pct      = total > 0 ? Math.round((acertos / total) * 100) : 0;
 
-  const goals = useMemo(() => {
-    if (!selectedChildId) return [];
-    return data.goals.filter((g) => g.child_id === selectedChildId);
-  }, [data.goals, selectedChildId]);
+  const addTrial = useCallback((resultado: DttTrial['resultado']) => {
+    setTrials((prev) => [...prev, { resultado }]);
+  }, []);
 
-  const filteredGoals = useMemo(() => {
-    return goals.filter((g) => areaFilter === 'Todos' || g.area === areaFilter);
-  }, [goals, areaFilter]);
+  const cor = CATEGORIA_COLORS[atividade.categoria];
 
-  const goalsByArea = useMemo(() => {
-    const map: Record<string, Meta[]> = {};
-    filteredGoals.forEach((g) => {
-      const key = g.area ?? 'Geral';
-      if (!map[key]) map[key] = [];
-      map[key].push(g);
-    });
-    return map;
-  }, [filteredGoals]);
-
-  function openNew() {
-    setSelectedGoal(null);
-    setForm({ descricao: '', criterio: '', area: 'Comunicação', status: 'ativo' });
-    setShowModal(true);
-  }
-
-  function openEdit(g: Meta) {
-    setSelectedGoal(g);
-    setForm({ descricao: g.descricao, criterio: g.criterio ?? '', area: g.area ?? 'Comunicação', status: g.status });
-    setShowModal(true);
-  }
-
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
-    if (!form.descricao || !selectedChildId) return;
-    setSaving(true);
-    try {
-      const { supabase } = await import('@/lib/supabase');
-      const payload = { clinic_id: state.user?.clinicId, child_id: selectedChildId, descricao: form.descricao, criterio: form.criterio || null, area: form.area, status: form.status };
-      if (selectedGoal) {
-        const { data: upd } = await supabase.from('metas').update(payload).eq('id', selectedGoal.id).select().single();
-        if (upd) dispatch({ type: 'UPDATE_GOAL', payload: upd });
-      } else {
-        const { data: created } = await supabase.from('metas').insert(payload).select().single();
-        if (created) dispatch({ type: 'ADD_GOAL', payload: created });
-      }
-      setShowModal(false);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function generateAIGoals() {
-    if (!selectedChild) return;
-    setAiLoading(true);
-    setAiGoals([]);
-    try {
-      const res = await fetch('/api/reavix', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: `Gere 5 objetivos terapêuticos para o PEI de uma criança com ${selectedChild.diagnosis ?? 'TEA'}. Formate como lista simples com uma meta por linha, sem numeração, sem marcadores.`,
-          history: [],
-        }),
-      });
-      const json = await res.json();
-      const lines = (json.response ?? '').split('\n').filter((l: string) => l.trim().length > 10).slice(0, 5);
-      setAiGoals(lines);
-    } finally {
-      setAiLoading(false);
-    }
-  }
-
-  const statusInfo = (s: string) => GOAL_STATUS.find((x) => x.val === s) ?? { label: s, color: 'var(--t3)' };
-
-  return (
-    <div className="view show" id="v-pei">
-      <div className="page-body">
-        <div className="page-hero">
-          <div className="ph-pre"><span></span>PEI</div>
-          <h1 className="ph-title">PEI <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--t3)' }}>Plano de Ensino Individualizado</span></h1>
-          <div className="ph-sub">Metas e objetivos terapêuticos por paciente</div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-          <select value={selectedChildId ?? ''} onChange={(e) => setSelectedChildId(Number(e.target.value))} style={{ padding: '10px 14px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
-            {data.children.length === 0 && <option value="">Nenhum paciente</option>}
-            {data.children.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {['Todos', ...AREAS].map((a) => (
-              <button key={a} onClick={() => setAreaFilter(a)} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid', borderColor: areaFilter === a ? 'var(--p)' : 'var(--bdr)', background: areaFilter === a ? 'var(--ps)' : 'none', color: areaFilter === a ? 'var(--p)' : 'var(--t2)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{a}</button>
+  if (finalizado) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+        <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 24, padding: 36, width: '100%', maxWidth: 380, textAlign: 'center', boxShadow: 'var(--sh-xl)' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--t1)', marginBottom: 8 }}>Sessão finalizada!</div>
+          <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 24 }}>{atividade.nome}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 24 }}>
+            {[['Acertos', acertos, '#10b981'], ['Parciais', parciais, '#f59e0b'], ['Erros', erros, '#ef4444']].map(([l, v, c]) => (
+              <div key={String(l)} style={{ background: `${c}18`, borderRadius: 12, padding: '14px 8px' }}>
+                <div style={{ fontSize: 24, fontWeight: 900, color: String(c), lineHeight: 1 }}>{String(v)}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--t3)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>{String(l)}</div>
+              </div>
             ))}
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            <button onClick={() => { setShowAI(true); generateAIGoals(); }} style={{ padding: '10px 16px', border: '1px solid var(--p)', borderRadius: 10, background: 'var(--ps)', color: 'var(--p)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>🤖 Gerar com AI</button>
-            <button onClick={openNew} className="btn-p">+ Nova meta</button>
+          <div style={{ fontSize: 28, fontWeight: 900, color: pct >= 70 ? '#10b981' : '#f59e0b', marginBottom: 4 }}>{pct}%</div>
+          <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 24 }}>{total} tentativas no total</div>
+          <button onClick={onClose} className="btn-p" style={{ width: '100%', padding: 14, fontSize: 15 }}>Concluir</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.65)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={onClose}>
+      <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 24, padding: 28, width: '100%', maxWidth: 360, boxShadow: 'var(--sh-xl)', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'var(--sf2)', border: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 18, width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit', fontWeight: 700, lineHeight: 1 }}>×</button>
+
+        {/* Category badge */}
+        <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700, color: '#fff', background: cor, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+          {atividade.categoria}
+        </div>
+
+        <h2 style={{ fontSize: 20, fontWeight: 900, color: 'var(--t1)', marginBottom: 20, lineHeight: 1.2 }}>{atividade.nome}</h2>
+
+        {/* Trial counter */}
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ fontSize: 64, fontWeight: 900, color: cor, lineHeight: 1 }}>{total + 1}</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.1em', marginTop: 4 }}>Tentativa atual</div>
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
+          <button onClick={() => addTrial('acerto')} style={{ padding: '18px 8px', borderRadius: 14, border: 'none', background: '#10b981', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'opacity .1s' }}>
+            <span style={{ fontSize: 22 }}>✓</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>Acerto</span>
+          </button>
+          <button onClick={() => addTrial('parcial')} style={{ padding: '18px 8px', borderRadius: 14, border: 'none', background: '#f59e0b', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'opacity .1s' }}>
+            <span style={{ fontSize: 22 }}>◑</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>Parcial</span>
+          </button>
+          <button onClick={() => addTrial('erro')} style={{ padding: '18px 8px', borderRadius: 14, border: 'none', background: '#ef4444', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'opacity .1s' }}>
+            <span style={{ fontSize: 22 }}>✕</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>Erro</span>
+          </button>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--t3)', marginBottom: 5 }}>
+            <span>{pct}% de acertos</span>
+            <span>{total} tentativas</span>
+          </div>
+          <div style={{ height: 6, background: 'var(--sf2)', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, background: pct >= 70 ? '#10b981' : '#f59e0b', borderRadius: 3, transition: 'width .2s ease' }} />
           </div>
         </div>
 
-        {/* Status summary */}
-        {goals.length > 0 && (
-          <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-            {GOAL_STATUS.map((s) => {
-              const count = goals.filter((g) => g.status === s.val).length;
-              return (
-                <div key={s.val} style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: s.color }}>{count}</div>
-                  <div style={{ fontSize: 10, color: 'var(--t3)', fontWeight: 600 }}>{s.label}</div>
-                </div>
-              );
-            })}
-          </div>
+        {/* Counters */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
+          {[['ACERTOS', acertos, '#10b981'], ['PARCIAIS', parciais, '#f59e0b'], ['ERROS', erros, '#ef4444']].map(([l, v, c]) => (
+            <div key={String(l)} style={{ background: `${c}15`, borderRadius: 12, padding: '12px 6px', textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: String(c), lineHeight: 1 }}>{String(v)}</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--t3)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>{String(l)}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Undo last trial */}
+        {total > 0 && (
+          <button onClick={() => setTrials((t) => t.slice(0, -1))} style={{ width: '100%', padding: '8px', marginBottom: 10, border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t3)', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
+            ↩ Desfazer última tentativa
+          </button>
         )}
 
-        {filteredGoals.length === 0 ? (
+        {/* Observations */}
+        <textarea value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Observações desta sessão (opcional)..." rows={2}
+          style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 12, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 13, fontFamily: 'inherit', resize: 'none', boxSizing: 'border-box', marginBottom: 12 }} />
+
+        <button onClick={() => setFinalizado(true)} className="btn-p" style={{ width: '100%', padding: 14, fontSize: 15, fontWeight: 800 }}>
+          ✓ Finalizar Sessão
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Activity card ────────────────────────────────────────
+function AtividadeCard({ atividade, onExecutar, onEdit }: { atividade: Atividade; onExecutar: () => void; onEdit?: () => void }) {
+  const cor = CATEGORIA_COLORS[atividade.categoria];
+  return (
+    <div style={{ background: 'var(--sf)', border: `1px solid var(--bdr)`, borderTop: `3px solid ${cor}`, borderRadius: 16, padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, color: '#fff', background: cor, whiteSpace: 'nowrap' }}>
+          {atividade.categoria}
+        </div>
+        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--t3)', background: 'var(--sf2)', padding: '3px 8px', borderRadius: 20, whiteSpace: 'nowrap', flexShrink: 0 }}>
+          {atividade.tipo === 'predefinida' ? 'Pré-definida' : 'Personalizada'}
+        </div>
+      </div>
+      <div>
+        <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--t1)', marginBottom: 6, lineHeight: 1.3 }}>{atividade.nome}</div>
+        <div style={{ fontSize: 12, color: 'var(--t3)', lineHeight: 1.5 }}>{atividade.descricao}</div>
+      </div>
+      <div style={{ marginTop: 'auto', display: 'flex', gap: 8 }}>
+        {onEdit && (
+          <button onClick={onEdit} style={{ padding: '8px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t2)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+            Editar
+          </button>
+        )}
+        <button onClick={onExecutar} style={{ flex: 1, padding: '9px 0', background: cor, border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Executar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Screen ──────────────────────────────────────────
+export default function PeiScreen() {
+  const { state } = useApp();
+
+  const [catFilter, setCatFilter] = useState<Categoria | 'Todas'>('Todas');
+  const [search, setSearch] = useState('');
+  const [executing, setExecuting] = useState<Atividade | null>(null);
+  const [showNewModal, setShowNewModal] = useState(false);
+  const [customActivities, setCustomActivities] = useState<Atividade[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try { return JSON.parse(localStorage.getItem('to_custom_atividades') ?? '[]'); } catch { return []; }
+  });
+  const [editingCustom, setEditingCustom] = useState<Atividade | null>(null);
+  const [newForm, setNewForm] = useState({ nome: '', descricao: '', categoria: 'Comunicação' as Categoria });
+
+  const allAtividades = useMemo(() => [...PREDEFINED, ...customActivities], [customActivities]);
+
+  const filtered = useMemo(() => {
+    let list = allAtividades;
+    if (catFilter !== 'Todas') list = list.filter((a) => a.categoria === catFilter);
+    if (search.trim()) {
+      const s = search.toLowerCase();
+      list = list.filter((a) => a.nome.toLowerCase().includes(s) || a.descricao.toLowerCase().includes(s));
+    }
+    return list;
+  }, [allAtividades, catFilter, search]);
+
+  function saveCustom(ativ: Atividade) {
+    setCustomActivities((prev) => {
+      const idx = prev.findIndex((a) => a.id === ativ.id);
+      const next = idx >= 0 ? prev.map((a) => a.id === ativ.id ? ativ : a) : [...prev, ativ];
+      localStorage.setItem('to_custom_atividades', JSON.stringify(next));
+      return next;
+    });
+  }
+
+  function handleSaveNew(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newForm.nome.trim()) return;
+    const ativ: Atividade = {
+      id: editingCustom?.id ?? `c_${Date.now()}`,
+      nome: newForm.nome.trim(),
+      descricao: newForm.descricao.trim(),
+      categoria: newForm.categoria,
+      tipo: 'personalizada',
+    };
+    saveCustom(ativ);
+    setShowNewModal(false);
+    setEditingCustom(null);
+    setNewForm({ nome: '', descricao: '', categoria: 'Comunicação' });
+  }
+
+  function openEdit(a: Atividade) {
+    setEditingCustom(a);
+    setNewForm({ nome: a.nome, descricao: a.descricao, categoria: a.categoria });
+    setShowNewModal(true);
+  }
+
+  const activePatientsCount = state.data.children.filter((c) => c.status === 'ativo').length;
+
+  return (
+    <div className="view show" id="v-atividades">
+      <div className="page-body">
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+          <div>
+            <h1 style={{ fontSize: 32, fontWeight: 900, color: 'var(--t1)', margin: 0, letterSpacing: '-.5px' }}>Atividades</h1>
+            <div style={{ fontSize: 13, color: 'var(--t3)', marginTop: 4 }}>Selecione uma atividade para executar e registrar as tentativas em tempo real</div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <div style={{ position: 'relative' }}>
+              <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar atividade..."
+                style={{ paddingLeft: 36, paddingRight: 14, height: 38, border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 13, fontFamily: 'inherit', width: 200, outline: 'none' }} />
+            </div>
+            <button className="btn-p" onClick={() => { setEditingCustom(null); setNewForm({ nome: '', descricao: '', categoria: 'Comunicação' }); setShowNewModal(true); }}>
+              + Nova Atividade
+            </button>
+          </div>
+        </div>
+
+        {/* Category filters */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+          {(['Todas', ...CATEGORIAS] as (Categoria | 'Todas')[]).map((cat) => {
+            const active = catFilter === cat;
+            const cor = cat === 'Todas' ? 'var(--p)' : CATEGORIA_COLORS[cat as Categoria];
+            return (
+              <button key={cat} onClick={() => setCatFilter(cat)} style={{
+                padding: '7px 18px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+                border: `1.5px solid ${active ? cor : 'var(--bdr)'}`,
+                background: active ? (cat === 'Todas' ? 'var(--ps)' : cor + '20') : 'none',
+                color: active ? (cat === 'Todas' ? 'var(--p)' : cor) : 'var(--t2)',
+              }}>
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Count */}
+        <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 16, fontWeight: 600 }}>
+          {filtered.length} atividade{filtered.length !== 1 ? 's' : ''} {catFilter !== 'Todas' ? `em ${catFilter}` : ''}
+          {activePatientsCount > 0 && <span> · {activePatientsCount} paciente{activePatientsCount !== 1 ? 's' : ''} ativo{activePatientsCount !== 1 ? 's' : ''}</span>}
+        </div>
+
+        {/* Activity grid */}
+        {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--t3)' }}>
             <div style={{ fontSize: 40, marginBottom: 16 }}>🎯</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>Nenhuma meta cadastrada</div>
-            <div style={{ fontSize: 13, marginBottom: 24 }}>Crie as primeiras metas do PEI para este paciente</div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-              <button onClick={() => { setShowAI(true); generateAIGoals(); }} style={{ padding: '10px 18px', border: '1px solid var(--p)', borderRadius: 10, background: 'var(--ps)', color: 'var(--p)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>🤖 Sugerir metas com AI</button>
-              <button className="btn-p" onClick={openNew}>+ Nova meta</button>
-            </div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>Nenhuma atividade encontrada</div>
+            <button className="btn-p" onClick={() => { setEditingCustom(null); setNewForm({ nome: '', descricao: '', categoria: catFilter === 'Todas' ? 'Comunicação' : catFilter as Categoria }); setShowNewModal(true); }} style={{ marginTop: 8 }}>
+              + Criar nova atividade
+            </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {Object.entries(goalsByArea).map(([area, areaGoals]) => (
-              <div key={area}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--t2)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 4, height: 16, borderRadius: 2, background: 'var(--p)' }} />
-                  {area} <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--t3)' }}>({areaGoals.length})</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {areaGoals.map((g) => {
-                    const st = statusInfo(g.status);
-                    return (
-                      <div key={g.id} onClick={() => openEdit(g)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 16px', background: 'var(--sf)', border: '1px solid var(--bdr)', borderLeft: `4px solid ${st.color}`, borderRadius: 12, cursor: 'pointer' }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--t1)', marginBottom: g.criterio ? 4 : 0 }}>{g.descricao}</div>
-                          {g.criterio && <div style={{ fontSize: 12, color: 'var(--t3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Critério: {g.criterio}</div>}
-                        </div>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: st.color, background: st.color + '22', padding: '4px 10px', borderRadius: 20, whiteSpace: 'nowrap' }}>{st.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
+            {filtered.map((ativ) => (
+              <AtividadeCard
+                key={ativ.id}
+                atividade={ativ}
+                onExecutar={() => setExecuting(ativ)}
+                onEdit={ativ.tipo === 'personalizada' ? () => openEdit(ativ) : undefined}
+              />
             ))}
           </div>
         )}
       </div>
 
-      {/* Goal Modal */}
-      {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowModal(false)}>
-          <div style={{ background: 'var(--bg)', borderRadius: 20, padding: 28, width: '100%', maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ fontWeight: 800, fontSize: 18, color: 'var(--t1)', margin: 0 }}>{selectedGoal ? 'Editar meta' : 'Nova meta'}</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: 20 }}>×</button>
+      {/* DTT Execution Modal */}
+      {executing && <DttModal atividade={executing} onClose={() => setExecuting(null)} />}
+
+      {/* New/Edit Activity Modal */}
+      {showNewModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowNewModal(false)}>
+          <div style={{ background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 22, padding: 28, width: '100%', maxWidth: 460, boxShadow: 'var(--sh-xl)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+              <h2 style={{ fontWeight: 900, fontSize: 20, color: 'var(--t1)', margin: 0 }}>{editingCustom ? 'Editar atividade' : 'Nova atividade'}</h2>
+              <button onClick={() => setShowNewModal(false)} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: 22, lineHeight: 1 }}>×</button>
             </div>
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <form onSubmit={handleSaveNew} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Descrição do objetivo *</label>
-                <textarea rows={2} value={form.descricao} onChange={(e) => setForm(f => ({ ...f, descricao: e.target.value }))} required placeholder="Ex: Nomear 20 objetos funcionais do cotidiano" style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Nome da atividade *</label>
+                <input value={newForm.nome} onChange={(e) => setNewForm((f) => ({ ...f, nome: e.target.value }))} required placeholder="Ex: Nomear animais domésticos"
+                  style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
               </div>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Critério de domínio</label>
-                <input value={form.criterio} onChange={(e) => setForm(f => ({ ...f, criterio: e.target.value }))} placeholder="Ex: 80% de acertos em 3 sessões consecutivas" style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Categoria</label>
+                <select value={newForm.categoria} onChange={(e) => setNewForm((f) => ({ ...f, categoria: e.target.value as Categoria }))}
+                  style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
+                  {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Área</label>
-                  <select value={form.area} onChange={(e) => setForm(f => ({ ...f, area: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
-                    {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 5 }}>Status</label>
-                  <select value={form.status} onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'var(--sf)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit' }}>
-                    {GOAL_STATUS.map((s) => <option key={s.val} value={s.val}>{s.label}</option>)}
-                  </select>
-                </div>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.08em' }}>Descrição / Procedimento</label>
+                <textarea rows={3} value={newForm.descricao} onChange={(e) => setNewForm((f) => ({ ...f, descricao: e.target.value }))} placeholder="Descreva o procedimento da atividade..."
+                  style={{ width: '100%', padding: '11px 13px', border: '1px solid var(--bdr)', borderRadius: 11, background: 'var(--sf2)', color: 'var(--t1)', fontSize: 14, fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} />
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: 12, border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
-                <button type="submit" disabled={saving} className="btn-p" style={{ flex: 2 }}>{saving ? 'Salvando...' : selectedGoal ? 'Salvar' : 'Criar meta'}</button>
+                <button type="button" onClick={() => setShowNewModal(false)} style={{ flex: 1, padding: 12, border: '1px solid var(--bdr)', borderRadius: 11, background: 'none', color: 'var(--t2)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
+                <button type="submit" className="btn-p" style={{ flex: 2 }}>{editingCustom ? 'Salvar alterações' : 'Criar atividade'}</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* AI Suggestions Modal */}
-      {showAI && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => setShowAI(false)}>
-          <div style={{ background: 'var(--bg)', borderRadius: 20, padding: 28, width: '100%', maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ fontWeight: 800, fontSize: 18, color: 'var(--t1)', margin: 0 }}>🤖 Sugestões de metas — AI</h2>
-              <button onClick={() => setShowAI(false)} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: 20 }}>×</button>
-            </div>
-            {aiLoading ? (
-              <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--t3)' }}>Gerando sugestões personalizadas...</div>
-            ) : aiGoals.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {aiGoals.map((goal, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 14px', background: 'var(--sf)', border: '1px solid var(--bdr)', borderRadius: 10 }}>
-                    <div style={{ flex: 1, fontSize: 13, color: 'var(--t1)', lineHeight: 1.5 }}>{goal}</div>
-                    <button onClick={() => { setForm(f => ({ ...f, descricao: goal.replace(/^[-•*]\s*/, '') })); setSelectedGoal(null); setShowAI(false); setShowModal(true); }} style={{ padding: '6px 12px', background: 'var(--p)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
-                      Usar
-                    </button>
-                  </div>
-                ))}
-                <button onClick={generateAIGoals} style={{ marginTop: 8, padding: '10px', border: '1px solid var(--bdr)', borderRadius: 10, background: 'none', color: 'var(--t2)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>↻ Gerar novas sugestões</button>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--t3)' }}>Nenhuma sugestão gerada</div>
-            )}
           </div>
         </div>
       )}

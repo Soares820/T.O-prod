@@ -21,13 +21,13 @@ import AvaliacoesScreen from '@/components/dashboard/screens/AvaliacoesScreen';
 const SCREEN_META: Record<Screen, { title: string; sub: string }> = {
   dashboard: { title: 'Início', sub: 'Bem-vindo(a) à plataforma T.O' },
   pacientes: { title: 'Pacientes', sub: 'Cadastro e fichas individuais' },
-  pei: { title: 'PEI', sub: 'Plano de Ensino Individual' },
+  pei: { title: 'Atividades', sub: 'Programas e execução DTT' },
   avaliacoes: { title: 'Avaliações', sub: 'PEDI, SPM, ABLLS, VBMAPP' },
   agenda: { title: 'Agenda', sub: 'Sessões e calendário' },
   financeiro: { title: 'Financeiro', sub: 'Contratos e pagamentos' },
-  bi: { title: 'BI Clínica', sub: 'Relatórios e indicadores' },
+  bi: { title: 'Evolução Clínica', sub: 'Indicadores e progresso clínico' },
   equipe: { title: 'Equipe', sub: 'Terapeutas e funcionários' },
-  reavix: { title: 'Reavix AI', sub: 'Suporte clínico inteligente' },
+  reavix: { title: 'Assistente Clínico', sub: 'Suporte especializado ABA/TEA' },
   portal: { title: 'Portal Família', sub: 'Acompanhamento das famílias' },
   conta: { title: 'Minha Conta', sub: 'Configurações e plano' },
 };
