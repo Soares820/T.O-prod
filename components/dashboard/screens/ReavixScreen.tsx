@@ -60,7 +60,7 @@ export default function ReavixScreen() {
 
       setMessages((prev) => [...prev, { role: 'assistant', content: reply, ts: Date.now() }]);
     } catch {
-      setMessages((prev) => [...prev, { role: 'assistant', content: '⚠️ Erro ao conectar com a IA. Tente novamente.', ts: Date.now() }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Erro ao conectar. Tente novamente.', ts: Date.now() }]);
     } finally {
       setLoading(false);
     }

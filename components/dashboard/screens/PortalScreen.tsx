@@ -101,17 +101,6 @@ export default function PortalScreen({ onNav }: Props) {
         </svg>
       ),
     },
-    {
-      key: 'reavix' as Screen,
-      label: 'Suporte & Crise',
-      sub: 'Central de apoio e emergências',
-      color: 'dt-red',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-        </svg>
-      ),
-    },
   ];
 
   const isClinicView = user?.role !== 'familia';
@@ -120,7 +109,7 @@ export default function PortalScreen({ onNav }: Props) {
     <div className="dash-content">
       {isClinicView && (
         <div style={{ background: 'rgba(245,158,11,.15)', border: '1px solid rgba(245,158,11,.35)', borderRadius: 10, padding: '10px 18px', fontSize: 12, color: '#FBBF24', fontWeight: 600, marginTop: -20, marginBottom: -20, alignSelf: 'flex-start' }}>
-          👁️ Preview — Assim as famílias verão o Portal
+          Preview — Assim as famílias verão o Portal
         </div>
       )}
 
@@ -135,7 +124,7 @@ export default function PortalScreen({ onNav }: Props) {
               Sessão hoje às {nextSession.hora}
             </div>
           )}
-          <h1 className="dash-greet-h">Olá, Família! 👋</h1>
+          <h1 className="dash-greet-h">Olá, Família!</h1>
           <p className="dash-greet-sub">
             Bem-vinda à T.O Plataforma.{' '}
             {myChild ? <><strong>{myChild.name}</strong> tem evoluído muito — acompanhe o progresso {myChild.sex === 'F' ? 'dela' : 'dele'} por aqui.</> : 'Acompanhe o progresso do seu filho por aqui.'}
