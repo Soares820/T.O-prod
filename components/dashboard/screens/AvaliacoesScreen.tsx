@@ -150,7 +150,7 @@ export default function AvaliacoesScreen() {
 
         {childEvals.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--t3)' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>📋</div>
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--bdr)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 16 }}><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>Nenhuma avaliação registrada</div>
             <div style={{ fontSize: 13, marginBottom: 24 }}>Registre a primeira avaliação clínica deste paciente</div>
             <button className="btn-p" onClick={openNew}>+ Nova avaliação</button>
