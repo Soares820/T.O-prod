@@ -112,7 +112,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadUserData = useCallback(async (clinicId: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const [pac, sess, cont, pag, met, aval, func, usuarios] = await Promise.all([
+      const [pac, sess, cont, pag, met, aval, func, usuarios] = await Promise.allSettled([
         supabase.from('pacientes').select('*').eq('clinic_id', clinicId).order('name'),
         supabase.from('sessoes').select('*').eq('clinic_id', clinicId).order('created_at', { ascending: false }),
         supabase.from('contratos').select('*').eq('clinic_id', clinicId).order('created_at', { ascending: false }),
@@ -123,17 +123,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
         supabase.from('users').select('*').eq('clinic_id', clinicId).order('nome'),
       ]);
 
+      const pick = (r: PromiseSettledResult<{ data: unknown[] | null }>) =>
+        r.status === 'fulfilled' ? (r.value.data ?? []) : [];
+
       dispatch({
         type: 'SET_DATA',
         payload: {
-          children: pac.data ?? [],
-          sessions: sess.data ?? [],
-          contracts: cont.data ?? [],
-          payments: pag.data ?? [],
-          goals: met.data ?? [],
-          evaluations: aval.data ?? [],
-          team: func.data ?? [],
-          profiles: usuarios.data ?? [],
+          children:    pick(pac as PromiseSettledResult<{ data: unknown[] | null }>),
+          sessions:    pick(sess as PromiseSettledResult<{ data: unknown[] | null }>),
+          contracts:   pick(cont as PromiseSettledResult<{ data: unknown[] | null }>),
+          payments:    pick(pag as PromiseSettledResult<{ data: unknown[] | null }>),
+          goals:       pick(met as PromiseSettledResult<{ data: unknown[] | null }>),
+          evaluations: pick(aval as PromiseSettledResult<{ data: unknown[] | null }>),
+          team:        pick(func as PromiseSettledResult<{ data: unknown[] | null }>),
+          profiles:    pick(usuarios as PromiseSettledResult<{ data: unknown[] | null }>),
         },
       });
     } catch (e) {
