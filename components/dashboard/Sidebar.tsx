@@ -89,9 +89,6 @@ export default function Sidebar({ active, onNav, dark, onToggleTheme }: SidebarP
               >
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-lbl">{item.label}</span>
-                {'badge' in item && item.badge && (
-                  <span className="nav-badge">{item.badge}</span>
-                )}
               </button>
             ))}
           </div>
